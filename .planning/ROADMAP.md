@@ -25,7 +25,10 @@
 3. Two Supabase projects exist (prod, staging) with separate environment variables; a push to `main` triggers a successful Vercel deployment.
 4. Google Ads Standard Access developer token request is submitted; Meta Business Manager and System User configuration is confirmed for each initial tenant.
 5. Vercel project region matches Supabase AWS region in `vercel.json`.
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [x] 00-01-PLAN.md — N8N health check, Supabase project + staging schema, Vercel project + env vars, Next.js scaffold, Google Ads token application
 
 ---
 
@@ -92,7 +95,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 0. Infrastructure | 0/? | Not started | — |
+| 0. Infrastructure | 0/1 | Not started | — |
 | 1. Foundation | 0/? | Not started | — |
 | 2. Data Pipeline | 0/? | Not started | — |
 | 3. Dashboard UI | 0/? | Not started | — |
