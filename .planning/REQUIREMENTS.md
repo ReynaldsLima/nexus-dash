@@ -83,13 +83,33 @@ These are table stakes or expected features not included in v1 due to complexity
 
 ## Traceability
 
-*To be populated by roadmap agent.*
+*Populated by roadmap agent — 2026-05-10. 26/26 requirements mapped.*
 
-| REQ-ID | Phase | Plan |
-|--------|-------|------|
-| AUTH-01 — AUTH-06 | — | — |
-| SYNC-01 — SYNC-06 | — | — |
-| DASH-01 — DASH-04 | — | — |
-| CAMP-01 — CAMP-04 | — | — |
-| AI-01 — AI-04 | — | — |
-| SET-01 — SET-02 | — | — |
+| REQ-ID | Phase | Status | Plan |
+|--------|-------|--------|------|
+| AUTH-01 | 1 — Foundation | Pending | TBD |
+| AUTH-02 | 1 — Foundation | Pending | TBD |
+| AUTH-03 | 1 — Foundation | Pending | TBD |
+| AUTH-04 | 1 — Foundation | Pending | TBD |
+| AUTH-05 | 1 — Foundation | Pending | TBD |
+| AUTH-06 | 1 — Foundation | Pending | TBD |
+| SYNC-01 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-02 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-03 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-04 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-05 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-06 | 2 — Data Pipeline | Pending | TBD |
+| DASH-01 | 3 — Dashboard UI | Pending | TBD |
+| DASH-02 | 3 — Dashboard UI | Pending | TBD |
+| DASH-03 | 3 — Dashboard UI | Pending | TBD |
+| DASH-04 | 3 — Dashboard UI | Pending | TBD |
+| CAMP-01 | 3 — Dashboard UI | Pending | TBD |
+| CAMP-02 | 3 — Dashboard UI | Pending | TBD |
+| CAMP-03 | 3 — Dashboard UI | Pending | TBD |
+| CAMP-04 | 3 — Dashboard UI | Pending | TBD |
+| SET-01 | 3 — Dashboard UI | Pending | TBD |
+| SET-02 | 3 — Dashboard UI | Pending | TBD |
+| AI-01 | 4 — AI Insights | Pending | TBD |
+| AI-02 | 4 — AI Insights | Pending | TBD |
+| AI-03 | 4 — AI Insights | Pending | TBD |
+| AI-04 | 4 — AI Insights | Pending | TBD |
