@@ -25,3 +25,14 @@ Thumbs.db
 
 # Test coverage output
 coverage/
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+
+# Supabase temp
+supabase/.temp/
+
+# Non-project files
+*.xlsx
+estrategia-*.html
+n8n_flows_importaveis.json
