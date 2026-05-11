@@ -49,7 +49,7 @@ Plans:
 - [x] 01-01-PLAN.md — Wave 0 test infra (Vitest + middleware/rls/tenants scaffolds)
 - [x] 01-02-PLAN.md — DB layer (tenants schema, helpers, RLS, Access Token Hook) + BLOCKING schema push + super_admin bootstrap
 - [x] 01-03-PLAN.md — Next.js plumbing (deps, shadcn init, Supabase clients, middleware, auth Server Actions)
-- [ ] 01-04-PLAN.md — Login UI + scaffolded tenant routes + tenant Server Actions
+- [x] 01-04-PLAN.md — Login UI + scaffolded tenant routes + tenant Server Actions
 - [ ] 01-05-PLAN.md — Super Admin tenant management UI + tenant switcher + BLOCKING manual UAT
 
 ---
