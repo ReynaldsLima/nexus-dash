@@ -64,12 +64,12 @@ Exceptions:
 | Role | Size | Weight | Line Height | Tailwind Class |
 |------|------|--------|-------------|----------------|
 | Body | 14px | 400 (regular) | 1.5 | `text-sm font-normal leading-relaxed` |
-| Label | 14px | 500 (medium) | 1.4 | `text-sm font-medium leading-snug` |
+| Label | 14px | 600 (semibold) | 1.4 | `text-sm font-semibold leading-snug` |
 | Heading | 20px | 600 (semibold) | 1.2 | `text-xl font-semibold leading-tight` |
-| Display | 28px | 700 (bold) | 1.15 | `text-2xl font-bold leading-none` |
+| Display | 28px | 600 (semibold) | 1.15 | `text-2xl font-semibold leading-none` |
 
 Notes:
-- 4 sizes declared: 14, 14 (label variant), 20, 28. Two weights in use: 400 + 600 (semibold is the primary pairing; 700/bold is reserved for display only, e.g. the login page title).
+- 4 sizes declared: 14 (body), 14 (label variant), 20, 28. Exactly 2 weights in use: 400 (regular) and 600 (semibold). The 28px display size provides sufficient visual hierarchy without needing a heavier weight.
 - Error messages and helper text: 12px / `text-xs font-normal text-destructive` — this is form-level only, not a full typography tier.
 - Monospace (Geist Mono) used exclusively for: generated temporary passwords in user-creation modal output, never for body copy.
 
@@ -116,6 +116,7 @@ Phase 1 has two distinct layout shells:
 - Full-height centered card: `min-h-screen flex items-center justify-center bg-background`
 - Login card: `w-full max-w-sm` — 384px wide
 - No sidebar, no header, no nav
+- **Primary visual anchor:** "Entrar" CTA button — largest interactive element in the centered card, full-width accent-colored button at the bottom of the form.
 
 ### 2. Authenticated layout (/tenants/*, /[tenant-slug]/*)
 - Top header bar: `h-14` (56px), full-width, `bg-card border-b border-border`
@@ -124,6 +125,7 @@ Phase 1 has two distinct layout shells:
 - No sidebar in Phase 1 — sidebar scaffolded but empty; Phase 3 populates it
 - Page content: `max-w-5xl mx-auto px-6 py-8` (1024px max-width, 24px horizontal padding, 32px top/bottom)
 - Page title: `text-xl font-semibold` directly in page, not in header
+- **Primary visual anchor (tenants overview):** Tenant table — full-width within the content area, fills the available content column and is the dominant element on the page.
 
 ### 3. Scaffolded shell (/[tenant-slug]/dashboard)
 - Shows header + empty state card — no campaign data
@@ -331,5 +333,6 @@ Phase 1 supports desktop-first (Super Admin internal tool). Mobile is graceful d
 
 *Phase: 01-foundation*
 *UI-SPEC created: 2026-05-10*
+*UI-SPEC revised: 2026-05-10 — checker revision: consolidated typography to 2 weights (400+600); added focal point declarations*
 *Pre-populated from: CONTEXT.md (16 decisions), RESEARCH.md (standard stack + component list), globals.css (font + base colors)*
 *User input required: 0 — all design contract questions answered by upstream artifacts*
