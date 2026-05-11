@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { LogoutButton } from '@/components/auth/logout-button'
+import { TenantSwitcher, type TenantOption } from '@/components/tenants/tenant-switcher'
 import { createClient } from '@/lib/supabase/server'
 
 interface TenantLayoutProps {
@@ -25,6 +26,16 @@ function decodeClaims(token: string | undefined): AppMetadata | null {
   }
 }
 
+async function loadTenantsForSwitcher(): Promise<TenantOption[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('tenants')
+    .select('id, name, slug, active')
+    .order('name', { ascending: true })
+  if (error || !data) return []
+  return data
+}
+
 export default async function TenantLayout({ children, params }: TenantLayoutProps) {
   const { 'tenant-slug': urlSlug } = await params
 
@@ -41,20 +52,18 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
     redirect('/')
   }
 
+  const tenants = role === 'super_admin' ? await loadTenantsForSwitcher() : []
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="h-14 w-full bg-card border-b border-border flex items-center justify-between px-6">
-        <Link href="/" className="text-sm font-semibold">
-          NEXUS-DASH
-        </Link>
-        <div className="flex items-center gap-2" data-slot="tenant-controls">
-          {/* Tenant switcher slot — populated in Plan 05 for super_admin */}
+        <Link href="/" className="text-sm font-semibold">NEXUS-DASH</Link>
+        <div className="flex items-center gap-2">
+          <TenantSwitcher role={role} tenants={tenants} activeSlug={urlSlug} />
           <LogoutButton />
         </div>
       </header>
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
-        {children}
-      </main>
+      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">{children}</main>
     </div>
   )
 }
