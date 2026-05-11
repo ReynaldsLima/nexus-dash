@@ -43,7 +43,14 @@ Plans:
 3. Super Admin can create, edit, and deactivate a tenant from the platform and can switch between tenants without logging out.
 4. A direct database query from Tenant A's authenticated session against Tenant B's rows returns zero results — cross-tenant reads fail at the RLS layer, not only at the application layer.
 5. JWT access tokens contain `tenant_id` and `role` claims (injected by the Custom Access Token Hook) and no database lookup is required per request to determine tenant context.
-**Plans:** TBD
+**Plans:** 5 plans — 01-01 through 01-05
+
+Plans:
+- [ ] 01-01-PLAN.md — Wave 0 test infra (Vitest + middleware/rls/tenants scaffolds)
+- [ ] 01-02-PLAN.md — DB layer (tenants schema, helpers, RLS, Access Token Hook) + BLOCKING schema push + super_admin bootstrap
+- [ ] 01-03-PLAN.md — Next.js plumbing (deps, shadcn init, Supabase clients, middleware, auth Server Actions)
+- [ ] 01-04-PLAN.md — Login UI + scaffolded tenant routes + tenant Server Actions
+- [ ] 01-05-PLAN.md — Super Admin tenant management UI + tenant switcher + BLOCKING manual UAT
 
 ---
 
@@ -96,7 +103,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 0. Infrastructure | 0/1 | Not started | — |
-| 1. Foundation | 0/? | Not started | — |
+| 1. Foundation | 0/5 | Planned | — |
 | 2. Data Pipeline | 0/? | Not started | — |
 | 3. Dashboard UI | 0/? | Not started | — |
 | 4. AI Insights | 0/? | Not started | — |
