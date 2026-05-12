@@ -83,7 +83,11 @@ export async function proxy(request: NextRequest) {
   }
 
   return supabaseResponse
-  } catch {
+  } catch (e) {
+    console.error('[proxy] error', request.nextUrl.pathname, e instanceof Error ? e.message : String(e))
+    if (PUBLIC_PATHS.has(request.nextUrl.pathname)) {
+      return NextResponse.next({ request })
+    }
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
