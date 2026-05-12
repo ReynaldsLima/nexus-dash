@@ -12,7 +12,7 @@ function decodeJwtClaims(token: string | undefined): AppMetadata | null {
   try {
     const payload = token.split('.')[1]
     if (!payload) return null
-    const json = Buffer.from(payload, 'base64').toString('utf8')
+    const json = atob(payload)
     return (JSON.parse(json)?.app_metadata ?? null) as AppMetadata | null
   } catch {
     return null
@@ -22,6 +22,7 @@ function decodeJwtClaims(token: string | undefined): AppMetadata | null {
 const PUBLIC_PATHS = new Set(['/login'])
 
 export async function proxy(request: NextRequest) {
+  try {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -82,6 +83,11 @@ export async function proxy(request: NextRequest) {
   }
 
   return supabaseResponse
+  } catch {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
 }
 
 export const config = {
