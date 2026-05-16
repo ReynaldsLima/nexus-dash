@@ -37,7 +37,7 @@ decisions:
 metrics:
   duration_seconds: 900
   completed_date: "2026-05-16"
-  tasks_completed: 3
+  tasks_completed: 4
   tasks_total: 4
   files_created: 3
   files_modified: 2
@@ -56,7 +56,7 @@ metrics:
 | 1 | Criar lib/sync-status.ts (data fetcher + 4 testes TDD) | `6d7d799` | `lib/sync-status.ts`, `tests/unit/sync-status.test.ts` |
 | 2 | Criar components/tenants/sync-status-section.tsx | `2990de6` | `components/tenants/sync-status-section.tsx` |
 | 3 | Integrar SyncStatusSection em app/tenants/page.tsx | `47fb731` | `app/tenants/page.tsx`, `types/database.types.ts` |
-| 4 | Human verification — testar /tenants com dados reais | PENDING | — |
+| 4 | Human verification — testar /tenants com dados reais | APROVADO | `app/tenants/page.tsx`, `components/tenants/sync-status-section.tsx` |
 
 ---
 
@@ -112,34 +112,16 @@ Build exit code: 0. Todos os 6 routes compilados sem erro TypeScript.
 
 ---
 
-## Human Verification (Task 4) — PENDING
+## Human Verification (Task 4) — APROVADO
 
-**Status:** Aguardando verificação manual do Super Admin.
+**Status:** Aprovado pelo Super Admin em 2026-05-16.
 
-**Para verificar:** Inserir sync_jobs de teste no Supabase SQL Editor e navegar para `/tenants`.
-
-```sql
--- Inserir dados de teste
-INSERT INTO public.sync_jobs (tenant_id, channel, status, started_at, completed_at, records_synced, date_from, date_to)
-SELECT id, 'google_ads', 'success', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour 50 minutes', 142, CURRENT_DATE - 2, CURRENT_DATE
-  FROM public.tenants LIMIT 1;
-
-INSERT INTO public.sync_jobs (tenant_id, channel, status, started_at, completed_at, records_synced, date_from, date_to, error_message)
-SELECT id, 'meta_ads', 'failed', NOW() - INTERVAL '6 hours', NOW() - INTERVAL '5 hours 55 minutes', 0, CURRENT_DATE - 2, CURRENT_DATE, 'Invalid OAuth access token: System User token has been invalidated'
-  FROM public.tenants LIMIT 1;
-
--- Linha mais recente para google_ads (testa dedupe)
-INSERT INTO public.sync_jobs (tenant_id, channel, status, started_at, completed_at, records_synced, date_from, date_to)
-SELECT id, 'google_ads', 'success', NOW() - INTERVAL '10 minutes', NOW() - INTERVAL '5 minutes', 155, CURRENT_DATE - 2, CURRENT_DATE
-  FROM public.tenants LIMIT 1;
-```
-
-**Cleanup após verificação:**
-```sql
-DELETE FROM public.sync_jobs WHERE date_from = CURRENT_DATE - 2;
-```
-
-**URL:** https://nexusdash-chi.vercel.app/tenants (ou localhost:3000/tenants)
+**Resultado da verificação:**
+- Seção "Status de Sync" aparece corretamente abaixo da tabela de tenants
+- Dedupe funciona: google_ads exibe records_synced=155 (mais recente), não 142 (anterior)
+- Badge de falha (vermelho) visível na linha meta_ads
+- Tabela de tenants original não foi quebrada
+- URL verificada: https://nexusdash-chi.vercel.app/tenants
 
 ---
 
@@ -211,5 +193,5 @@ lib/sync-status.ts exports: async function loadLastSyncByTenantChannel()
 components/tenants/sync-status-section.tsx exports: async function SyncStatusSection()
 app/tenants/page.tsx contains: import { SyncStatusSection }
 app/tenants/page.tsx contains: <SyncStatusSection />
-Task 4: PENDING — checkpoint:human-verify
+Task 4: APROVADO — checkpoint:human-verify confirmado pelo Super Admin (dedupe 155 correto, badge falha visível)
 ```
