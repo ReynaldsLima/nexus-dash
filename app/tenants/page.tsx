@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { CreateTenantForm } from '@/components/tenants/create-tenant-form'
 import { TenantsTable, type TenantRow } from '@/components/tenants/tenants-table'
+import { SyncStatusSection } from '@/components/tenants/sync-status-section'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/server'
 
@@ -44,6 +45,15 @@ export default async function TenantsPage() {
         </div>
       }>
         <TenantsTable tenants={tenants} />
+      </Suspense>
+
+      <Suspense fallback={
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      }>
+        <SyncStatusSection />
       </Suspense>
     </section>
   )
