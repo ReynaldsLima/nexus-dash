@@ -21,7 +21,7 @@ function decodeJwtClaims(token: string | undefined): AppMetadata | null {
 
 const PUBLIC_PATHS = new Set(['/login'])
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   try {
   let supabaseResponse = NextResponse.next({ request })
 
