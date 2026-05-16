@@ -6,7 +6,7 @@
 |---|-------|------|--------------|--------|
 | 0 | Infrastructure | VPS, N8N, Supabase projects, and Vercel wired together before any code runs | — (ops prerequisites) | Not started |
 | 1 | Foundation | 5/5 | Complete   | 2026-05-16 |
-| 2 | Data Pipeline | 5/5 | Complete   | 2026-05-16 |
+| 2 | Data Pipeline | 5/5 | Complete    | 2026-05-16 |
 | 3 | Dashboard UI | Super Admin can view, filter, and drill into campaign performance across all tenants and channels | DASH-01 – DASH-04, CAMP-01 – CAMP-04, SET-01 – SET-02 | Not started |
 | 4 | AI Insights | Super Admin can generate and review AI-powered campaign recommendations on-demand and on schedule | AI-01 – AI-04 | Not started |
 
