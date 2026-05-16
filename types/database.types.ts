@@ -14,6 +14,215 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_accounts: {
+        Row: {
+          account_id: string
+          active: boolean
+          channel: string
+          created_at: string
+          id: string
+          refresh_token: string | null
+          tenant_id: string
+          token_expires_at: string | null
+          vault_secret_id: string
+        }
+        Insert: {
+          account_id: string
+          active?: boolean
+          channel: string
+          created_at?: string
+          id?: string
+          refresh_token?: string | null
+          tenant_id: string
+          token_expires_at?: string | null
+          vault_secret_id: string
+        }
+        Update: {
+          account_id?: string
+          active?: boolean
+          channel?: string
+          created_at?: string
+          id?: string
+          refresh_token?: string | null
+          tenant_id?: string
+          token_expires_at?: string | null
+          vault_secret_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_metrics: {
+        Row: {
+          ad_group_id: string | null
+          attribution_window: string
+          campaign_id: string
+          campaign_name: string
+          channel: string
+          clicks: number
+          conversion_value: number
+          conversions: number
+          created_at: string
+          date: string
+          id: string
+          impressions: number
+          spend: number
+          status: string | null
+          synced_at: string
+          tenant_id: string
+        }
+        Insert: {
+          ad_group_id?: string | null
+          attribution_window?: string
+          campaign_id: string
+          campaign_name: string
+          channel: string
+          clicks?: number
+          conversion_value?: number
+          conversions?: number
+          created_at?: string
+          date: string
+          id?: string
+          impressions?: number
+          spend?: number
+          status?: string | null
+          synced_at?: string
+          tenant_id: string
+        }
+        Update: {
+          ad_group_id?: string | null
+          attribution_window?: string
+          campaign_id?: string
+          campaign_name?: string
+          channel?: string
+          clicks?: number
+          conversion_value?: number
+          conversions?: number
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number
+          spend?: number
+          status?: string | null
+          synced_at?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_metrics_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_rollups: {
+        Row: {
+          campaign_count: number
+          channel: string
+          date: string
+          id: string
+          tenant_id: string
+          total_clicks: number
+          total_conv_value: number
+          total_conversions: number
+          total_impressions: number
+          total_spend: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_count?: number
+          channel: string
+          date: string
+          id?: string
+          tenant_id: string
+          total_clicks?: number
+          total_conv_value?: number
+          total_conversions?: number
+          total_impressions?: number
+          total_spend?: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_count?: number
+          channel?: string
+          date?: string
+          id?: string
+          tenant_id?: string
+          total_clicks?: number
+          total_conv_value?: number
+          total_conversions?: number
+          total_impressions?: number
+          total_spend?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_rollups_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_jobs: {
+        Row: {
+          channel: string
+          completed_at: string | null
+          created_at: string
+          date_from: string | null
+          date_to: string | null
+          error_message: string | null
+          id: string
+          records_synced: number
+          started_at: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          channel: string
+          completed_at?: string | null
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          error_message?: string | null
+          id?: string
+          records_synced?: number
+          started_at?: string
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          channel?: string
+          completed_at?: string | null
+          created_at?: string
+          date_from?: string | null
+          date_to?: string | null
+          error_message?: string | null
+          id?: string
+          records_synced?: number
+          started_at?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_users: {
         Row: {
           created_at: string
@@ -79,6 +288,11 @@ export type Database = {
       get_tenant_id: { Args: never; Returns: string }
       get_tenant_slug: { Args: never; Returns: string }
       get_user_role: { Args: never; Returns: string }
+      read_vault_secret: { Args: { p_secret_name: string }; Returns: string }
+      refresh_daily_rollups: {
+        Args: { p_date_from: string; p_date_to: string; p_tenant_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -211,3 +425,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+<claude-code-hint v="1" type="plugin" value="supabase@claude-plugins-official" />
