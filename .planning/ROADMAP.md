@@ -6,7 +6,7 @@
 |---|-------|------|--------------|--------|
 | 0 | Infrastructure | VPS, N8N, Supabase projects, and Vercel wired together before any code runs | — (ops prerequisites) | Not started |
 | 1 | Foundation | 5/5 | Complete   | 2026-05-16 |
-| 2 | Data Pipeline | 3/5 | In Progress|  |
+| 2 | Data Pipeline | 4/5 | In Progress|  |
 | 3 | Dashboard UI | Super Admin can view, filter, and drill into campaign performance across all tenants and channels | DASH-01 – DASH-04, CAMP-01 – CAMP-04, SET-01 – SET-02 | Not started |
 | 4 | AI Insights | Super Admin can generate and review AI-powered campaign recommendations on-demand and on schedule | AI-01 – AI-04 | Not started |
 
@@ -65,13 +65,13 @@ Plans:
 3. Sync jobs (success and failure) are recorded in the `sync_jobs` table; a Super Admin can inspect errors without querying raw logs.
 4. Last sync timestamp per tenant per channel is visible in the UI so users can judge data freshness at a glance.
 5. Google Ads API version and Meta Ads API version are each defined in a single constant per workflow — changing one constant updates all calls in that workflow.
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [x] 02-01-PLAN.md — Wave 0 test scaffolds (campaign_metrics, daily_rollups, sync_jobs RLS, vault RPC)
 - [x] 02-02-PLAN.md — DB layer (4 tabelas + 2 funções Postgres) + [BLOCKING] supabase db push + types regeneration + Wave 0 tests filled
 - [x] 02-03-PLAN.md — N8N workflow JSON: Google Ads Sync (SYNC-01, SYNC-06 — BLOCKER: Developer Token aprovação pendente)
-- [ ] 02-04-PLAN.md — N8N workflow JSON: Meta Ads Sync (SYNC-02, SYNC-06)
+- [x] 02-04-PLAN.md — N8N workflow JSON: Meta Ads Sync (SYNC-02, SYNC-06)
 - [ ] 02-05-PLAN.md — UI SYNC-03: SyncStatusSection na página /tenants
 
 ---

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-data-pipeline-03-PLAN.md
-last_updated: "2026-05-16T22:53:13.851Z"
+stopped_at: Completed 02-data-pipeline-04-PLAN.md
+last_updated: "2026-05-16T22:57:59.051Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -30,9 +30,10 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 - Phases complete: 1/5
 
 ```
-[██████████] 100%
+[█████████░] 91%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
+Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
 ```
 
 ---
@@ -63,6 +64,7 @@ Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant man
 | Phase 01 P03 | 30 | 3 tasks | 26 files |
 | Phase 01 P05 | 10 | 2 tasks | 10 files |
 | Phase 02-data-pipeline P03 | 30 | 2 tasks | 1 files |
+| Phase 02-data-pipeline P04 | 45 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -75,6 +77,8 @@ Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant man
 - `daily_rollups` table must be created in Phase 2 and populated before Phase 3 dashboard queries run
 - `attribution_window` column in `campaign_metrics` from Phase 2 day one — no migration later
 - API versions (Google Ads, Meta Ads): single constant per workflow, never hardcoded inline
+- Meta Ads attribution_window: '7d_click' fixed — '7d_view' removed by Meta in Jan/2026 (Pitfall 3)
+- Meta Ads N8N import deferred: JSON validated automatically; import when System User token provisioned per tenant in Supabase Vault
 - `super_admin` role stored in `auth.users.app_metadata` (not in `tenant_users`)
 - Deployment: main → Vercel prod automatic; no PR review gates in v1
 - Staging schema in same Supabase project as prod (not separate project) — shared auth.users, test users use `test-` email prefix
@@ -118,7 +122,7 @@ Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant man
 
 **Last updated:** 2026-05-16
 **Last action:** Fase 1 UAT aprovado (6/6 scripts) — app live em nexusdash-chi.vercel.app
-**Stopped at:** Completed 02-data-pipeline-03-PLAN.md
+**Stopped at:** Completed 02-data-pipeline-04-PLAN.md
 **Next action:** Resolver blockers abaixo, depois `/gsd-plan-phase 2`
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md

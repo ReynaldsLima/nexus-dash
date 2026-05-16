@@ -14,7 +14,7 @@
 ### Data Sync (N8N Integration)
 
 - [x] **SYNC-01**: N8N automatically syncs Google Ads campaign metrics on schedule (every 3-4 hours)
-- [ ] **SYNC-02**: N8N automatically syncs Meta Ads campaign metrics on schedule (every 6 hours)
+- [x] **SYNC-02**: N8N automatically syncs Meta Ads campaign metrics on schedule (every 6 hours)
 - [ ] **SYNC-03**: Last sync timestamp is visible in the UI per tenant and per channel
 - [x] **SYNC-04**: Sync status and errors are logged to a `sync_jobs` table and surfaced to Super Admin
 - [x] **SYNC-05**: Attribution window is stored per metric row from day one (`attribution_window` column)
@@ -94,7 +94,7 @@ These are table stakes or expected features not included in v1 due to complexity
 | AUTH-05 | 1 — Foundation | Complete | TBD |
 | AUTH-06 | 1 — Foundation | Pending | TBD |
 | SYNC-01 | 2 — Data Pipeline | Complete | TBD |
-| SYNC-02 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-02 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-03 | 2 — Data Pipeline | Pending | TBD |
 | SYNC-04 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-05 | 2 — Data Pipeline | Complete | TBD |
