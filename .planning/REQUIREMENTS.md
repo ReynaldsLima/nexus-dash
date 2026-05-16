@@ -13,12 +13,12 @@
 
 ### Data Sync (N8N Integration)
 
-- [ ] **SYNC-01**: N8N automatically syncs Google Ads campaign metrics on schedule (every 3-4 hours)
+- [x] **SYNC-01**: N8N automatically syncs Google Ads campaign metrics on schedule (every 3-4 hours)
 - [ ] **SYNC-02**: N8N automatically syncs Meta Ads campaign metrics on schedule (every 6 hours)
 - [ ] **SYNC-03**: Last sync timestamp is visible in the UI per tenant and per channel
-- [ ] **SYNC-04**: Sync status and errors are logged to a `sync_jobs` table and surfaced to Super Admin
-- [ ] **SYNC-05**: Attribution window is stored per metric row from day one (`attribution_window` column)
-- [ ] **SYNC-06**: API version for Google Ads and Meta Ads is abstracted via a single constant per workflow (not hardcoded)
+- [x] **SYNC-04**: Sync status and errors are logged to a `sync_jobs` table and surfaced to Super Admin
+- [x] **SYNC-05**: Attribution window is stored per metric row from day one (`attribution_window` column)
+- [x] **SYNC-06**: API version for Google Ads and Meta Ads is abstracted via a single constant per workflow (not hardcoded)
 
 ### Dashboard — Overview
 
@@ -93,12 +93,12 @@ These are table stakes or expected features not included in v1 due to complexity
 | AUTH-04 | 1 — Foundation | Complete | TBD |
 | AUTH-05 | 1 — Foundation | Complete | TBD |
 | AUTH-06 | 1 — Foundation | Pending | TBD |
-| SYNC-01 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-01 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-02 | 2 — Data Pipeline | Pending | TBD |
 | SYNC-03 | 2 — Data Pipeline | Pending | TBD |
-| SYNC-04 | 2 — Data Pipeline | Pending | TBD |
-| SYNC-05 | 2 — Data Pipeline | Pending | TBD |
-| SYNC-06 | 2 — Data Pipeline | Pending | TBD |
+| SYNC-04 | 2 — Data Pipeline | Complete | TBD |
+| SYNC-05 | 2 — Data Pipeline | Complete | TBD |
+| SYNC-06 | 2 — Data Pipeline | Complete | TBD |
 | DASH-01 | 3 — Dashboard UI | Pending | TBD |
 | DASH-02 | 3 — Dashboard UI | Pending | TBD |
 | DASH-03 | 3 — Dashboard UI | Pending | TBD |
