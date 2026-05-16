@@ -12,15 +12,16 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Autenticação com isolamento total por tenant (Supabase Auth + RLS) — Validated in Phase 1: Foundation
+- [x] Três roles: Super Admin (plataforma), Tenant Admin, Viewer — Validated in Phase 1: Foundation
+- [x] Super Admin cria tenants manualmente, sem self-service no v1 — Validated in Phase 1: Foundation
+- [x] Sincronização automática de métricas Google Ads via N8N (agendado) — Validated in Phase 2: Data Pipeline (workflow pronto; ativação aguarda Developer Token)
+- [x] Sincronização automática de métricas Meta Ads via N8N (agendado) — Validated in Phase 2: Data Pipeline (workflow pronto; ativação aguarda System User tokens)
+- [x] Schema de dados de campanha (campaign_metrics, ad_accounts, sync_jobs, daily_rollups) com RLS — Validated in Phase 2: Data Pipeline
+- [x] Último sync timestamp por tenant/channel visível ao Super Admin — Validated in Phase 2: Data Pipeline (SyncStatusSection em /tenants)
 
 ### Active
 
-- [ ] Autenticação com isolamento total por tenant (Supabase Auth + RLS)
-- [ ] Três roles: Super Admin (plataforma), Tenant Admin, Viewer
-- [ ] Super Admin cria tenants manualmente, sem self-service no v1
-- [ ] Sincronização automática de métricas Google Ads via N8N (agendado)
-- [ ] Sincronização automática de métricas Meta Ads via N8N (agendado)
 - [ ] Janela de histórico retroativo configurável por tenant ao conectar conta
 - [ ] Dashboard Overview com KPIs consolidados (ROAS, CPA, CTR, Spend) de todos os canais
 - [ ] Drill-down por canal e campanha a partir do Overview
@@ -82,4 +83,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-05-10 after initialization*
+*Last updated: 2026-05-16 after Phase 2: Data Pipeline*
