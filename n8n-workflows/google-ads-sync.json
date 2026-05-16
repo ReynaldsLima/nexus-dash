@@ -1,0 +1,691 @@
+{
+  "name": "Google Ads Sync",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "nexus-dash-google-ads-sync-v1"
+  },
+  "active": false,
+  "versionId": "1",
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "nodes": [
+    {
+      "id": "node_schedule_trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */3 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node_set_constants",
+      "name": "Set Constants",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "const_api_version",
+              "name": "GOOGLE_ADS_API_VERSION",
+              "value": "v21",
+              "type": "string"
+            },
+            {
+              "id": "const_backfill_days",
+              "name": "BACKFILL_DAYS",
+              "value": 90,
+              "type": "number"
+            },
+            {
+              "id": "const_incremental_days",
+              "name": "INCREMENTAL_DAYS",
+              "value": 2,
+              "type": "number"
+            },
+            {
+              "id": "const_supabase_url",
+              "name": "SUPABASE_URL",
+              "value": "https://rvkkvjitfddtbdpkupok.supabase.co",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node_list_accounts",
+      "name": "List active Google Ads accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/ad_accounts?channel=eq.google_ads&active=eq.true&select=id,tenant_id,account_id,vault_secret_id,tenants(slug)",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_loop_tenants",
+      "name": "Loop tenants",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [900, 300],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "node_check_first_sync",
+      "name": "Check first sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/sync_jobs?tenant_id=eq.{{ $json.tenant_id }}&channel=eq.google_ads&status=eq.success&select=id&limit=1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_compute_date_range",
+      "name": "Compute date range",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300],
+      "parameters": {
+        "jsCode": "const today = new Date();\nconst prevJobs = $('Check first sync').item.json;\nconst isFirstSync = !Array.isArray(prevJobs) || prevJobs.length === 0;\nconst days = isFirstSync ? $('Set Constants').first().json.BACKFILL_DAYS : $('Set Constants').first().json.INCREMENTAL_DAYS;\nconst from = new Date(today);\nfrom.setDate(today.getDate() - days);\nreturn [{ json: {\n  tenant_id: $('Loop tenants').item.json.tenant_id,\n  account_id: $('Loop tenants').item.json.account_id,\n  vault_secret_id: $('Loop tenants').item.json.vault_secret_id,\n  tenant_slug: $('Loop tenants').item.json.tenants?.slug,\n  date_from: from.toISOString().split('T')[0],\n  date_to: today.toISOString().split('T')[0],\n  is_first_sync: isFirstSync\n}}];"
+      }
+    },
+    {
+      "id": "node_open_sync_job",
+      "name": "Open sync_job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/sync_jobs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"tenant_id\": \"{{ $json.tenant_id }}\",\n  \"channel\": \"google_ads\",\n  \"status\": \"running\",\n  \"date_from\": \"{{ $json.date_from }}\",\n  \"date_to\": \"{{ $json.date_to }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_read_vault_secret",
+      "name": "Read vault secret",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/rpc/read_vault_secret",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"p_secret_name\": \"tenant_{{ $('Compute date range').item.json.tenant_slug }}_google_refresh_token\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_exchange_token",
+      "name": "Exchange refresh for access token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth2.googleapis.com/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "name": "client_id",
+              "value": "={{ $credentials.googleOAuthCredentials.clientId }}"
+            },
+            {
+              "name": "client_secret",
+              "value": "={{ $credentials.googleOAuthCredentials.clientSecret }}"
+            },
+            {
+              "name": "refresh_token",
+              "value": "={{ $('Read vault secret').item.json }}"
+            }
+          ]
+        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "oAuth2Api",
+        "credentials": {
+          "oAuth2Api": {
+            "id": "google_oauth_credentials",
+            "name": "Google OAuth Credentials"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "google_oauth_credentials",
+          "name": "Google OAuth Credentials"
+        }
+      }
+    },
+    {
+      "id": "node_search_stream",
+      "name": "Google Ads SearchStream",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2220, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://googleads.googleapis.com/{{ $('Set Constants').item.json.GOOGLE_ADS_API_VERSION }}/customers/{{ $('Compute date range').item.json.account_id }}/googleAds:searchStream",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Exchange refresh for access token').item.json.access_token }}"
+            },
+            {
+              "name": "developer-token",
+              "value": "={{ $credentials.googleAdsDevToken.token }}"
+            },
+            {
+              "name": "login-customer-id",
+              "value": "={{ $credentials.googleAdsDevToken.managerId }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"query\": \"SELECT campaign.id, campaign.name, campaign.status, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value, segments.date, ad_group.id FROM campaign WHERE segments.date BETWEEN '{{ $('Compute date range').item.json.date_from }}' AND '{{ $('Compute date range').item.json.date_to }}' AND campaign.status != 'REMOVED' ORDER BY segments.date ASC\"\n}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "google_ads_dev_token",
+            "name": "Google Ads Dev Token"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "google_ads_dev_token",
+          "name": "Google Ads Dev Token"
+        }
+      }
+    },
+    {
+      "id": "node_map_results",
+      "name": "Map Google Ads results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 300],
+      "parameters": {
+        "jsCode": "const tenantId = $('Compute date range').item.json.tenant_id;\nconst rows = [];\nfor (const chunk of $input.all()) {\n  const results = chunk.json.results || [];\n  for (const result of results) {\n    const campaign = result.campaign || {};\n    const metrics = result.metrics || {};\n    const segments = result.segments || {};\n    rows.push({\n      tenant_id: tenantId,\n      campaign_id: campaign.id,\n      campaign_name: campaign.name,\n      channel: 'google_ads',\n      date: segments.date,\n      impressions: parseInt(metrics.impressions || '0'),\n      clicks: parseInt(metrics.clicks || '0'),\n      spend: parseInt(metrics.costMicros || '0') / 1_000_000,\n      conversions: parseFloat(metrics.conversions || '0'),\n      conversion_value: parseFloat(metrics.conversionsValue || '0'),\n      status: campaign.status,\n      ad_group_id: result.adGroup?.id || null,\n      attribution_window: '7d_click',\n      synced_at: new Date().toISOString()\n    });\n  }\n}\nreturn rows.map(row => ({ json: row }));"
+      }
+    },
+    {
+      "id": "node_upsert_metrics",
+      "name": "Upsert campaign_metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2660, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/campaign_metrics?on_conflict=tenant_id,campaign_id,channel,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ $('Map Google Ads results').all().map(i => i.json) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_refresh_rollups",
+      "name": "Refresh daily_rollups",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2880, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/rpc/refresh_daily_rollups",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"p_tenant_id\": \"{{ $('Compute date range').item.json.tenant_id }}\",\n  \"p_date_from\": \"{{ $('Compute date range').item.json.date_from }}\",\n  \"p_date_to\": \"{{ $('Compute date range').item.json.date_to }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_close_sync_success",
+      "name": "Close sync_job (success)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3100, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/sync_jobs?id=eq.{{ $('Open sync_job').item.json[0].id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"status\": \"success\",\n  \"completed_at\": \"{{ $now.toISO() }}\",\n  \"records_synced\": {{ $('Map Google Ads results').all().length }}\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_error_handler",
+      "name": "Handle tenant error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2440, 540],
+      "parameters": {
+        "jsCode": "// Sanitize error message to prevent token leakage (Threat T-2-03-06)\nconst rawError = $input.item.json.error?.message || $input.item.json.message || 'Unknown error';\nconst sanitized = rawError.replace(/Bearer [A-Za-z0-9._\\-]+/g, 'Bearer ***');\nreturn [{ json: {\n  sync_job_id: $('Open sync_job').item.json?.[0]?.id,\n  error_message: sanitized\n}}];"
+      }
+    },
+    {
+      "id": "node_close_sync_failed",
+      "name": "Close sync_job (failed)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2660, 540],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/sync_jobs?id=eq.{{ $('Handle tenant error').item.json.sync_job_id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"status\": \"failed\",\n  \"completed_at\": \"{{ $now.toISO() }}\",\n  \"error_message\": \"{{ $('Handle tenant error').item.json.error_message }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Constants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Constants": {
+      "main": [
+        [
+          {
+            "node": "List active Google Ads accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List active Google Ads accounts": {
+      "main": [
+        [
+          {
+            "node": "Loop tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop tenants": {
+      "main": [
+        [
+          {
+            "node": "Check first sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check first sync": {
+      "main": [
+        [
+          {
+            "node": "Compute date range",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute date range": {
+      "main": [
+        [
+          {
+            "node": "Open sync_job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open sync_job": {
+      "main": [
+        [
+          {
+            "node": "Read vault secret",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read vault secret": {
+      "main": [
+        [
+          {
+            "node": "Exchange refresh for access token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exchange refresh for access token": {
+      "main": [
+        [
+          {
+            "node": "Google Ads SearchStream",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Ads SearchStream": {
+      "main": [
+        [
+          {
+            "node": "Map Google Ads results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Google Ads results": {
+      "main": [
+        [
+          {
+            "node": "Upsert campaign_metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert campaign_metrics": {
+      "main": [
+        [
+          {
+            "node": "Refresh daily_rollups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh daily_rollups": {
+      "main": [
+        [
+          {
+            "node": "Close sync_job (success)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Close sync_job (success)": {
+      "main": [
+        [
+          {
+            "node": "Loop tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle tenant error": {
+      "main": [
+        [
+          {
+            "node": "Close sync_job (failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Close sync_job (failed)": {
+      "main": [
+        [
+          {
+            "node": "Loop tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
