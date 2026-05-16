@@ -5,7 +5,7 @@
 | # | Phase | Goal | Requirements | Status |
 |---|-------|------|--------------|--------|
 | 0 | Infrastructure | VPS, N8N, Supabase projects, and Vercel wired together before any code runs | — (ops prerequisites) | Not started |
-| 1 | Foundation | 3/5 | In Progress|  |
+| 1 | Foundation | 5/5 | Complete   | 2026-05-16 |
 | 2 | Data Pipeline | Campaign metrics flow automatically from Google Ads and Meta Ads into the database on schedule | SYNC-01 – SYNC-06 | Not started |
 | 3 | Dashboard UI | Super Admin can view, filter, and drill into campaign performance across all tenants and channels | DASH-01 – DASH-04, CAMP-01 – CAMP-04, SET-01 – SET-02 | Not started |
 | 4 | AI Insights | Super Admin can generate and review AI-powered campaign recommendations on-demand and on schedule | AI-01 – AI-04 | Not started |
@@ -43,14 +43,14 @@ Plans:
 3. Super Admin can create, edit, and deactivate a tenant from the platform and can switch between tenants without logging out.
 4. A direct database query from Tenant A's authenticated session against Tenant B's rows returns zero results — cross-tenant reads fail at the RLS layer, not only at the application layer.
 5. JWT access tokens contain `tenant_id` and `role` claims (injected by the Custom Access Token Hook) and no database lookup is required per request to determine tenant context.
-**Plans:** 3/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — Wave 0 test infra (Vitest + middleware/rls/tenants scaffolds)
 - [x] 01-02-PLAN.md — DB layer (tenants schema, helpers, RLS, Access Token Hook) + BLOCKING schema push + super_admin bootstrap
 - [x] 01-03-PLAN.md — Next.js plumbing (deps, shadcn init, Supabase clients, middleware, auth Server Actions)
 - [x] 01-04-PLAN.md — Login UI + scaffolded tenant routes + tenant Server Actions
-- [ ] 01-05-PLAN.md — Super Admin tenant management UI + tenant switcher + BLOCKING manual UAT
+- [x] 01-05-PLAN.md — Super Admin tenant management UI + tenant switcher + BLOCKING manual UAT
 
 ---
 

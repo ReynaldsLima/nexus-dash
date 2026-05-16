@@ -6,9 +6,9 @@
 
 - [ ] **AUTH-01**: User can log in with email + password and stay logged in across sessions
 - [ ] **AUTH-02**: User can log out from any page and session is invalidated
-- [ ] **AUTH-03**: Super Admin can create, edit, and deactivate tenants from the platform
-- [ ] **AUTH-04**: Super Admin can switch between tenants without logging out
-- [ ] **AUTH-05**: Three roles exist — `super_admin` (platform-level), `tenant_admin`, `viewer` — with appropriate access gates per role
+- [x] **AUTH-03**: Super Admin can create, edit, and deactivate tenants from the platform
+- [x] **AUTH-04**: Super Admin can switch between tenants without logging out
+- [x] **AUTH-05**: Three roles exist — `super_admin` (platform-level), `tenant_admin`, `viewer` — with appropriate access gates per role
 - [ ] **AUTH-06**: Row Level Security enforces tenant isolation — cross-tenant data reads at the database level must fail
 
 ### Data Sync (N8N Integration)
@@ -89,9 +89,9 @@ These are table stakes or expected features not included in v1 due to complexity
 |--------|-------|--------|------|
 | AUTH-01 | 1 — Foundation | Pending | TBD |
 | AUTH-02 | 1 — Foundation | Pending | TBD |
-| AUTH-03 | 1 — Foundation | Pending | TBD |
-| AUTH-04 | 1 — Foundation | Pending | TBD |
-| AUTH-05 | 1 — Foundation | Pending | TBD |
+| AUTH-03 | 1 — Foundation | Complete | TBD |
+| AUTH-04 | 1 — Foundation | Complete | TBD |
+| AUTH-05 | 1 — Foundation | Complete | TBD |
 | AUTH-06 | 1 — Foundation | Pending | TBD |
 | SYNC-01 | 2 — Data Pipeline | Pending | TBD |
 | SYNC-02 | 2 — Data Pipeline | Pending | TBD |
