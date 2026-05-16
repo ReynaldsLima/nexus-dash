@@ -65,7 +65,14 @@ Plans:
 3. Sync jobs (success and failure) are recorded in the `sync_jobs` table; a Super Admin can inspect errors without querying raw logs.
 4. Last sync timestamp per tenant per channel is visible in the UI so users can judge data freshness at a glance.
 5. Google Ads API version and Meta Ads API version are each defined in a single constant per workflow — changing one constant updates all calls in that workflow.
-**Plans:** TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Wave 0 test scaffolds (campaign_metrics, daily_rollups, sync_jobs RLS, vault RPC)
+- [ ] 02-02-PLAN.md — DB layer (4 tabelas + 2 funções Postgres) + [BLOCKING] supabase db push + types regeneration + Wave 0 tests filled
+- [ ] 02-03-PLAN.md — N8N workflow JSON: Google Ads Sync (SYNC-01, SYNC-06 — BLOCKER: Developer Token aprovação pendente)
+- [ ] 02-04-PLAN.md — N8N workflow JSON: Meta Ads Sync (SYNC-02, SYNC-06)
+- [ ] 02-05-PLAN.md — UI SYNC-03: SyncStatusSection na página /tenants
 
 ---
 
@@ -104,7 +111,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 0. Infrastructure | 0/1 | Not started | — |
 | 1. Foundation | 0/5 | Planned | — |
-| 2. Data Pipeline | 0/? | Not started | — |
+| 2. Data Pipeline | 0/5 | Planned | — |
 | 3. Dashboard UI | 0/? | Not started | — |
 | 4. AI Insights | 0/? | Not started | — |
 

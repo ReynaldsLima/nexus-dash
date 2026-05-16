@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-stopped_at: Phase 1 UAT aprovado — aguardando desbloqueio de pré-requisitos da Fase 2
-last_updated: "2026-05-16T17:10:00.000Z"
+status: unknown
+stopped_at: Fase 1 concluída — aguardando desbloqueio dos pré-requisitos da Fase 2
+last_updated: "2026-05-16T17:59:08.101Z"
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
+  total_plans: 11
   completed_plans: 6
-  percent: 40
+  percent: 55
 ---
 
 # Project State
