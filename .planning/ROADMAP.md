@@ -87,7 +87,14 @@ Plans:
 3. A channel breakdown section shows Google Ads vs. Meta Ads in absolute values and percentage contribution; clicking a channel or campaign opens a drill-down view with detailed time-series metrics.
 4. The Campaigns page lists all campaigns with Name, Channel, Status, Spend, ROAS, CPA, CTR, Clicks, Conversions and can be filtered by channel and respects the global date range.
 5. A Tenant Admin can connect a Google Ads account via OAuth2 and a Meta Ads account via System User token from the Settings page, and the connection status is reflected immediately.
-**Plans:** TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Wave 0: lógica pura (formatters, date-range store, KPI/delta/split, campaign aggregation) + 4 test scaffolds
+- [ ] 03-02-PLAN.md — Wave 1: TanStack Query + shadcn popover/calendar/sheet + Providers + DateRangePicker global (DASH-04)
+- [ ] 03-03-PLAN.md — Wave 2: dashboard real data — 7 KPI cards + deltas + trend chart + channel split (DASH-01/02/03)
+- [ ] 03-04-PLAN.md — Wave 2: campanhas real data + filtro + date range + drill-down Sheet (CAMP-01/02/03/04)
+- [ ] 03-05-PLAN.md — Wave 2: Settings — Vault write RPC + Route Handler + Meta Ads form + Google deferido + sidebar link (SET-01/02)
 
 ---
 
