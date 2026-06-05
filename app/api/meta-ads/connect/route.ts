@@ -68,7 +68,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 })
   }
 
-  const { accountId, token, tenantId } = parsed.data
+  // ── 3b. Tenant ownership: derive tenantId server-side for non-super_admin ─
+  // A tenant_admin must only write to their own tenant. Rather than trusting the
+  // body tenantId, resolve the caller's tenant from the JWT app_metadata and use
+  // that exclusively. super_admin may target any tenant via the body value.
+  let tenantId: string
+  if (role === 'super_admin') {
+    tenantId = parsed.data.tenantId
+  } else {
+    // getUser() result already has server-verified app_metadata
+    const callerTenantId = user.app_metadata?.tenant_id as string | undefined
+    if (!callerTenantId) {
+      return NextResponse.json({ error: 'Não foi possível verificar o tenant do usuário' }, { status: 403 })
+    }
+    tenantId = callerTenantId
+  }
+
+  const { accountId, token } = parsed.data
 
   // ── 4. Validate token against Meta Graph API ──────────────────────────────
   // URL is HARDCODED (Threat T-03-02: no SSRF — user input never in the host).
