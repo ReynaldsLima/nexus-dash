@@ -87,14 +87,15 @@ Plans:
 3. A channel breakdown section shows Google Ads vs. Meta Ads in absolute values and percentage contribution; clicking a channel or campaign opens a drill-down view with detailed time-series metrics.
 4. The Campaigns page lists all campaigns with Name, Channel, Status, Spend, ROAS, CPA, CTR, Clicks, Conversions and can be filtered by channel and respects the global date range.
 5. A Tenant Admin can connect a Google Ads account via OAuth2 and a Meta Ads account via System User token from the Settings page, and the connection status is reflected immediately.
-**Plans:** 5 plans
+**Plans:** 6 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Wave 0: lógica pura (formatters, date-range store, KPI/delta/split, campaign aggregation) + 4 test scaffolds
-- [ ] 03-02-PLAN.md — Wave 1: TanStack Query + shadcn popover/calendar/sheet + Providers + DateRangePicker global (DASH-04)
-- [ ] 03-03-PLAN.md — Wave 2: dashboard real data — 7 KPI cards + deltas + trend chart + channel split (DASH-01/02/03)
-- [ ] 03-04-PLAN.md — Wave 2: campanhas real data + filtro + date range + drill-down Sheet (CAMP-01/02/03/04)
-- [ ] 03-05-PLAN.md — Wave 2: Settings — Vault write RPC + Route Handler + Meta Ads form + Google deferido + sidebar link (SET-01/02)
+- [x] 03-01-PLAN.md — Wave 0: lógica pura (formatters, date-range store, KPI/delta/split, campaign aggregation) + 4 test scaffolds
+- [x] 03-02-PLAN.md — Wave 1: TanStack Query + shadcn popover/calendar/sheet + Providers + DateRangePicker global (DASH-04)
+- [x] 03-03-PLAN.md — Wave 2: dashboard real data — 7 KPI cards + deltas + trend chart + channel split (DASH-01/02/03)
+- [x] 03-04-PLAN.md — Wave 2: campanhas real data + filtro + date range + drill-down Sheet (CAMP-01/02/03/04)
+- [x] 03-05-PLAN.md — Wave 2: Settings — Vault write RPC + Route Handler + Meta Ads form + Google deferido + sidebar link (SET-01/02)
+- [ ] 03-06-PLAN.md — Wave 3 (gap closure GAP-03-01): ChannelSheet + PieChart onClick — channel drill-down (DASH-03-ext)
 
 ---
 
@@ -119,7 +120,7 @@ Plans:
 | 0. Infrastructure | 0/1 | Not started | — |
 | 1. Foundation | 0/5 | Planned | — |
 | 2. Data Pipeline | 0/5 | Planned | — |
-| 3. Dashboard UI | 0/? | Not started | — |
+| 3. Dashboard UI | 5/6 | Gap closure in progress | — |
 | 4. AI Insights | 0/? | Not started | — |
 
 ---
@@ -143,6 +144,7 @@ Plans:
 | DASH-01 | 3 | KPI cards with period-over-period deltas |
 | DASH-02 | 3 | Trend charts per KPI |
 | DASH-03 | 3 | Channel breakdown |
+| DASH-03-ext | 3 | Channel PieChart click drill-down (GAP-03-01, Plan 06) |
 | DASH-04 | 3 | Global date range picker |
 | CAMP-01 | 3 | Campaigns list table |
 | CAMP-02 | 3 | Filter by channel |
@@ -155,4 +157,4 @@ Plans:
 | SET-01 | 3 | Google Ads OAuth2 connection |
 | SET-02 | 3 | Meta Ads System User token connection |
 
-**Mapped: 26/26 — 100% coverage. No orphaned requirements.**
+**Mapped: 26/26 core + 1 gap extension — 100% coverage. No orphaned requirements.**
