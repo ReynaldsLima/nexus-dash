@@ -95,7 +95,7 @@ Plans:
 - [x] 03-03-PLAN.md — Wave 2: dashboard real data — 7 KPI cards + deltas + trend chart + channel split (DASH-01/02/03)
 - [x] 03-04-PLAN.md — Wave 2: campanhas real data + filtro + date range + drill-down Sheet (CAMP-01/02/03/04)
 - [x] 03-05-PLAN.md — Wave 2: Settings — Vault write RPC + Route Handler + Meta Ads form + Google deferido + sidebar link (SET-01/02)
-- [ ] 03-06-PLAN.md — Wave 3 (gap closure GAP-03-01): ChannelSheet + PieChart onClick — channel drill-down (DASH-03-ext)
+- [x] 03-06-PLAN.md — Wave 3 (gap closure GAP-03-01): ChannelSheet + PieChart onClick — channel drill-down (DASH-03-ext)
 
 ---
 

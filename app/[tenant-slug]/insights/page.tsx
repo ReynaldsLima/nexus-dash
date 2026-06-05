@@ -1,17 +1,222 @@
-import { Card, CardContent } from '@/components/ui/card'
+'use client'
 
+import { useState } from 'react'
+import { AlertTriangle, CheckCircle2, Lightbulb, Loader2, Sparkles, TrendingUp } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { MOCK_INSIGHTS, type AiInsight } from '@/lib/mock-data'
+
+// ─── Type helpers ─────────────────────────────────────────────────────────────
+const TYPE_CONFIG = {
+  opportunity: {
+    icon: TrendingUp,
+    label: 'Oportunidade',
+    borderColor: 'var(--chart-1)',
+    bgColor: 'oklch(0.60 0.22 258 / 0.08)',
+    badgeBg: 'oklch(0.60 0.22 258 / 0.15)',
+    badgeColor: 'oklch(0.72 0.16 258)',
+  },
+  alert: {
+    icon: AlertTriangle,
+    label: 'Alerta',
+    borderColor: 'var(--chart-5)',
+    bgColor: 'oklch(0.65 0.20 15 / 0.06)',
+    badgeBg: 'oklch(0.65 0.20 15 / 0.15)',
+    badgeColor: 'oklch(0.65 0.20 15)',
+  },
+  optimization: {
+    icon: Lightbulb,
+    label: 'Otimização',
+    borderColor: 'var(--chart-3)',
+    bgColor: 'oklch(0.75 0.18 155 / 0.06)',
+    badgeBg: 'oklch(0.75 0.18 155 / 0.15)',
+    badgeColor: 'oklch(0.75 0.18 155)',
+  },
+} as const
+
+const IMPACT_CONFIG = {
+  high:   { label: 'Alto impacto',  color: 'oklch(0.65 0.20 15)' },
+  medium: { label: 'Médio impacto', color: 'oklch(0.72 0.19 47)' },
+  low:    { label: 'Baixo impacto', color: 'oklch(0.556 0 0)' },
+} as const
+
+function formatDate(iso: string) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(iso))
+}
+
+// ─── Insight Card ─────────────────────────────────────────────────────────────
+function InsightCard({ insight }: { insight: AiInsight }) {
+  const cfg = TYPE_CONFIG[insight.type]
+  const impactCfg = IMPACT_CONFIG[insight.impact]
+  const Icon = cfg.icon
+
+  return (
+    <div
+      className="rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md"
+      style={{
+        borderColor: cfg.borderColor,
+        background: cfg.bgColor,
+        borderLeftWidth: '3px',
+      }}
+    >
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
+              style={{ background: cfg.badgeBg, color: cfg.badgeColor }}
+            >
+              <Icon className="size-3" aria-hidden="true" />
+              {cfg.label}
+            </span>
+            <span
+              className="text-xs font-medium"
+              style={{ color: impactCfg.color }}
+            >
+              · {impactCfg.label}
+            </span>
+          </div>
+          <time
+            dateTime={insight.createdAt}
+            className="text-xs text-muted-foreground/60 whitespace-nowrap flex-shrink-0"
+          >
+            {formatDate(insight.createdAt)}
+          </time>
+        </div>
+
+        {/* Title */}
+        <h2 className="text-sm font-semibold leading-snug mb-2 text-balance">
+          {insight.title}
+        </h2>
+
+        {/* Summary */}
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+          {insight.summary}
+        </p>
+
+        {/* Metrics chips */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {insight.metrics.map((m) => (
+            <div
+              key={m.label}
+              className="rounded-md border border-border/60 bg-card px-3 py-1.5"
+            >
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{m.label}</p>
+              <p className="text-sm font-semibold tabular-nums mt-0.5">
+                <span dangerouslySetInnerHTML={{ __html: m.value }} />
+                {m.delta && (
+                  <span className="text-xs font-normal text-muted-foreground ml-1.5">{m.delta}</span>
+                )}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Recommendations */}
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            Recomendações
+          </p>
+          <ul className="space-y-1.5">
+            {insight.recommendations.map((rec, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm">
+                <CheckCircle2
+                  className="size-3.5 flex-shrink-0 mt-0.5"
+                  style={{ color: cfg.badgeColor }}
+                  aria-hidden="true"
+                />
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function InsightsPage() {
+  const [generating, setGenerating] = useState(false)
+
+  const handleGenerate = () => {
+    setGenerating(true)
+    setTimeout(() => setGenerating(false), 2500)
+  }
+
   return (
     <section className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold leading-tight">AI Insights</h1>
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-2">
-          <h2 className="text-xl font-semibold leading-tight">Insights em construção</h2>
-          <p className="text-sm font-normal text-muted-foreground">
-            Os insights de IA estarão disponíveis na Fase 4.
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">AI Insights</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Recomendações geradas por Claude&nbsp;·&nbsp;{MOCK_INSIGHTS.length} análises
           </p>
-        </CardContent>
-      </Card>
+        </div>
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={generating}
+          className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
+          style={{
+            background: 'var(--sidebar-primary)',
+            color: 'var(--sidebar-primary-foreground)',
+          }}
+          aria-live="polite"
+        >
+          {generating ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              Analisando…
+            </>
+          ) : (
+            <>
+              <Sparkles className="size-4" aria-hidden="true" />
+              Gerar Novo Insight
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Generating placeholder */}
+      {generating && (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+            <div
+              className="p-3 rounded-full"
+              style={{ background: 'oklch(0.60 0.22 258 / 0.12)' }}
+            >
+              <Sparkles className="size-6" style={{ color: 'var(--chart-1)' }} aria-hidden="true" />
+            </div>
+            <p className="text-sm font-medium">Claude está analisando as campanhas…</p>
+            <p className="text-xs text-muted-foreground max-w-xs">
+              Avaliando ROAS, frequência, CTR e padrões históricos dos últimos 30 dias.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Insight list */}
+      <div className="flex flex-col gap-4">
+        {MOCK_INSIGHTS.map((insight) => (
+          <InsightCard key={insight.id} insight={insight} />
+        ))}
+      </div>
+
+      {/* Footer note */}
+      <p className="text-xs text-muted-foreground/50 text-center pb-2">
+        Análises geradas por claude-sonnet-4-6 com base em dados sincronizados via N8N.
+        Recomendações são sugestivas — valide antes de aplicar.
+      </p>
     </section>
   )
 }
