@@ -6,6 +6,8 @@ status: draft
 shadcn_initialized: true
 preset: detected from components.json
 created: 2026-06-05
+revised: 2026-06-05
+revision_reason: "fix checker issues — font-semibold removed (issue 1), py-0.5→py-1 (issue 2), primary anchor declared (dim 2)"
 scope: gap-closure-only
 ---
 
@@ -50,14 +52,14 @@ Multiples of 4 — alinhados ao padrão Tailwind do projeto:
 | Token | Value | Usage no channel drill-down |
 |-------|-------|-----------------------------|
 | xs | 4px | Gap entre ícone e label no badge de canal, `gap-1` |
-| sm | 8px | Padding interno dos badges, `px-2 py-0.5` |
+| sm | 8px | Padding interno dos badges, `px-2 py-1` |
 | md | 16px | Padding horizontal do SheetContent, `px-4` |
 | lg | 24px | Padding de seção dentro do Sheet, `pt-4` a `pt-5` |
 | xl | 32px | Não usado no Sheet |
 | 2xl | 48px | Não usado no Sheet |
 | 3xl | 64px | Não usado no Sheet |
 
-Exceções: nenhuma.
+Exceções: nenhuma. Todos os tokens são múltiplos de 4px.
 
 **Source:** padrão de espaçamento de `components/campanhas/campaign-sheet.tsx` (replicar exatamente).
 
@@ -65,15 +67,17 @@ Exceções: nenhuma.
 
 ## Typography
 
-Replicar exatamente o padrão do `CampaignSheet` existente:
+Replicar o padrão do `CampaignSheet` existente, com exatamente **2 font-weights**: 400 (normal) e 500 (medium).
 
 | Role | Size | Weight | Line Height | Uso no ChannelSheet |
 |------|------|--------|-------------|---------------------|
-| Sheet title | 16px (text-base) | 600 (font-semibold) | 1.25 (leading-tight) | Nome do canal no SheetHeader |
+| Sheet title | 16px (text-base) | 500 (font-medium) | 1.25 (leading-tight) | Nome do canal no SheetHeader |
 | Section label | 10px (text-xs) | 500 (font-medium) | — | "MÉTRICAS DO CANAL", "CAMPANHAS DESTE CANAL", uppercase + tracking-wide |
 | Body / data | 14px (text-sm) | 400 (normal) | 1.5 | Linhas da tabela de totais e lista de campanhas |
 | Metric value | 14px (text-sm) | 500 (font-medium) | — | Valores numéricos (tabular-nums) |
-| Muted label | 12px (text-xs) | 400 | — | Labels de métricas, subtextos |
+| Muted label | 12px (text-xs) | 400 (normal) | — | Labels de métricas, subtextos |
+
+**Pesos declarados:** apenas `font-medium` (500) e peso normal 400. `font-semibold` (600) não é usado neste componente.
 
 **Nota:** `text-2xl font-bold` reservado para KPI cards do dashboard principal — não usar no Sheet.
 
@@ -92,6 +96,8 @@ Replicar exatamente o padrão do `CampaignSheet` existente:
 - Badge de canal no SheetHeader (background 15% opacity, foreground full)
 - Stroke e fill do AreaChart (linha de gasto do canal)
 - Dot colorido na legenda inline
+
+**Âncora visual primária:** badge de canal colorido no SheetHeader — primeiro elemento que o olho deve encontrar ao abrir o Sheet. Deve ser o elemento de maior saturação cromática visível na composição inicial.
 
 **Cores de canal (estabelecidas no codebase — não alterar):**
 
@@ -167,7 +173,7 @@ const [selectedChannel, setSelectedChannel] = useState<'Google Ads' | 'Meta Ads'
 
 ### SheetHeader
 
-- `SheetTitle` (text-base, font-semibold, leading-tight): nome do canal — "Google Ads" ou "Meta Ads"
+- `SheetTitle` (text-base, font-medium, leading-tight): nome do canal — "Google Ads" ou "Meta Ads"
 - Badge de canal (reusar `ChannelBadge` de `campaign-sheet.tsx`)
 - Subtexto: total de gasto no período — ex: `R$ 12.450,00 no período`
 
@@ -377,7 +383,7 @@ type ChannelSheetProps = {
 | PieChart slice clicável | `role="button"` não necessário — Recharts `<Cell>` é SVG. Adicionar `aria-label` no container: `"Clique em um canal para ver detalhes"` via `aria-description` no `<ChartContainer>` |
 | SheetContent | `aria-labelledby` aponta para SheetTitle automaticamente (Base UI) |
 | SheetTitle | Deve conter o nome do canal para leitores de tela |
-| Loading skeleton | Container com `aria-busy="true"` enquanto `tsLoading === true` |
+| Loading skeleton | Container com `aria-busy="true"` enquanto `isLoading === true` |
 | Fechar Sheet | Botão X nativo do Sheet — `aria-label="Fechar"` já fornecido pelo shadcn |
 
 ---
@@ -400,7 +406,7 @@ Nenhum registry de terceiros declarado para este gap. Vetting gate: não aplicá
 │                                                              [X]  │
 │ ┌─ SheetHeader (pb-4, border-b) ──────────────────────────────┐  │
 │ │ Google Ads                                                   │  │
-│ │ [badge: Google Ads] · R$ 34.200,00 no período               │  │
+│ │ [badge: Google Ads ← ÂNCORA VISUAL PRIMÁRIA] · R$ 34.200,00 │  │
 │ └──────────────────────────────────────────────────────────────┘  │
 │                                                                    │
 │ GASTO NO PERÍODO                                                   │
@@ -447,6 +453,8 @@ Nenhum registry de terceiros declarado para este gap. Vetting gate: não aplicá
 
 6. **Não adicionar período anterior (delta)** ao drill-down de canal em v1 — simplicidade intencional.
 
+7. **Badge de canal** usa `px-2 py-1` (8px horizontal, 4px vertical) — não usar `py-0.5` (2px não é múltiplo de 4).
+
 ---
 
 ## Checker Sign-Off
@@ -465,4 +473,5 @@ Nenhum registry de terceiros declarado para este gap. Vetting gate: não aplicá
 *Gap: GAP-03-01*
 *Phase: 03-dashboard-ui*
 *UI-SPEC created: 2026-06-05*
+*UI-SPEC revised: 2026-06-05 — checker fix (font-semibold removed, py-0.5→py-1, visual anchor declared)*
 *Researcher: Claude (gsd-ui-researcher)*
