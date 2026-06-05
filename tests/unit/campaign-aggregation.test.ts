@@ -109,6 +109,11 @@ describe('groupCampaignMetrics', () => {
     expect(paused[0].status).toBe('paused')
   })
 
+  it('status ACTIVE (Meta Ads) → active', () => {
+    const result = groupCampaignMetrics([makeRow({ status: 'ACTIVE', channel: 'meta_ads' })])
+    expect(result[0].status).toBe('active')
+  })
+
   it('status nulo → paused', () => {
     const result = groupCampaignMetrics([makeRow({ status: null })])
     expect(result[0].status).toBe('paused')

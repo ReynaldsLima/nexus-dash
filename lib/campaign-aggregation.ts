@@ -79,7 +79,7 @@ export function groupCampaignMetrics(rows: CampaignMetricRow[]): AggregatedCampa
     id: campaignId,
     name: agg.name,
     channel: agg.channel as 'google_ads' | 'meta_ads',
-    status: agg.latestStatus === 'ENABLED' ? 'active' : 'paused',
+    status: (agg.latestStatus === 'ENABLED' || agg.latestStatus === 'ACTIVE') ? 'active' : 'paused',
     impressions: agg.impressions,
     clicks: agg.clicks,
     ctr: agg.impressions > 0 ? (agg.clicks / agg.impressions) * 100 : 0,
