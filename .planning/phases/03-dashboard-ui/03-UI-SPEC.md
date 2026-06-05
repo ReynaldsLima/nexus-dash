@@ -7,7 +7,7 @@ shadcn_initialized: true
 preset: detected from components.json
 created: 2026-06-05
 revised: 2026-06-05
-revision_reason: "fix checker issues — font-semibold removed (issue 1), py-0.5→py-1 (issue 2), primary anchor declared (dim 2)"
+revision_reason: "fix checker issues — font-semibold removed (issue 1), py-0.5→py-1 (issue 2), primary anchor declared (dim 2); pt-5→pt-6 spacing fix (dim 5)"
 scope: gap-closure-only
 ---
 
@@ -54,7 +54,7 @@ Multiples of 4 — alinhados ao padrão Tailwind do projeto:
 | xs | 4px | Gap entre ícone e label no badge de canal, `gap-1` |
 | sm | 8px | Padding interno dos badges, `px-2 py-1` |
 | md | 16px | Padding horizontal do SheetContent, `px-4` |
-| lg | 24px | Padding de seção dentro do Sheet, `pt-4` a `pt-5` |
+| lg | 24px | Padding de seção dentro do Sheet, `pt-6` |
 | xl | 32px | Não usado no Sheet |
 | 2xl | 48px | Não usado no Sheet |
 | 3xl | 64px | Não usado no Sheet |
@@ -160,11 +160,11 @@ const [selectedChannel, setSelectedChannel] = useState<'Google Ads' | 'Meta Ads'
 │   label uppercase: "GASTO NO PERÍODO"   │
 │   AreaChart — spend diário do canal     │
 ├─────────────────────────────────────────┤
-│ Seção: Métricas agregadas (pt-5)        │
+│ Seção: Métricas agregadas (pt-6)        │
 │   label uppercase: "MÉTRICAS DO CANAL"  │
 │   tabela TotalsRow: 6 métricas          │
 ├─────────────────────────────────────────┤
-│ Seção: Top campanhas (pt-5)             │
+│ Seção: Top campanhas (pt-6)             │
 │   label uppercase: "TOP CAMPANHAS"      │
 │   lista de até 5 campanhas deste canal  │
 │   com Spend, ROAS, Status               │
@@ -455,6 +455,8 @@ Nenhum registry de terceiros declarado para este gap. Vetting gate: não aplicá
 
 7. **Badge de canal** usa `px-2 py-1` (8px horizontal, 4px vertical) — não usar `py-0.5` (2px não é múltiplo de 4).
 
+8. **Padding de seção** usa `pt-6` (24px = token `lg`) em todas as seções internas do Sheet — não usar `pt-5` (20px, fora da escala padrão).
+
 ---
 
 ## Checker Sign-Off
@@ -474,4 +476,5 @@ Nenhum registry de terceiros declarado para este gap. Vetting gate: não aplicá
 *Phase: 03-dashboard-ui*
 *UI-SPEC created: 2026-06-05*
 *UI-SPEC revised: 2026-06-05 — checker fix (font-semibold removed, py-0.5→py-1, visual anchor declared)*
+*UI-SPEC revised: 2026-06-05 — spacing fix (pt-5→pt-6, token lg Usage corrigido para pt-6 exclusivo)*
 *Researcher: Claude (gsd-ui-researcher)*
