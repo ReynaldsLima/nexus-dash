@@ -46,10 +46,10 @@ decisions:
   - TanStack Query useQuery (not useEffect+useState) for settings data — consistent with Plans 03-04 pattern
   - Settings added in new Conta sidebar group (not appended to Marketing items) — semantically separate concern
 metrics:
-  duration_minutes: 35
+  duration_minutes: 40
   completed_date: "2026-06-05"
   tasks_total: 4
-  tasks_completed: 3
+  tasks_completed: 4
   files_created: 5
   files_modified: 2
 requirements: [SET-01, SET-02]
@@ -57,7 +57,7 @@ requirements: [SET-01, SET-02]
 
 # Phase 3 Plan 05: Settings Page — Meta Ads Connection Summary
 
-**One-liner:** `create_or_update_vault_secret` SECURITY DEFINER RPC, POST /api/meta-ads/connect with double Meta Graph API validation (token identity + Ads permission), RHF+Zod form with inline feedback, Settings page with TanStack Query for channel status badges, Google Ads deferred section, and Settings link in sidebar — SET-02 fully automated; awaiting manual UAT with real Meta System User token.
+**One-liner:** `create_or_update_vault_secret` SECURITY DEFINER RPC, POST /api/meta-ads/connect with double Meta Graph API validation (token identity + Ads permission), RHF+Zod form with inline feedback, Settings page with TanStack Query for channel status badges, Google Ads deferred section, and Settings link in sidebar — SET-01 and SET-02 complete, UAT approved.
 
 ## What Was Built
 
@@ -117,6 +117,7 @@ Added:
 | Task 1 | ef1ab4c | feat(03-05): add create_or_update_vault_secret migration and update types |
 | Task 2 | 7494adf | feat(03-05): create POST /api/meta-ads/connect route handler |
 | Task 3 | 57886ab | feat(03-05): create Settings page, MetaAdsForm and sidebar link |
+| Task 4 | — | UAT manual aprovado pelo usuário (sem commit — checkpoint humano) |
 
 ## Decisions Made
 
@@ -139,21 +140,17 @@ Added:
 
 ## Checkpoint Status
 
-**Task 4 (UAT manual — SET-02):** PENDING — awaiting human verification.
+**Task 4 (UAT manual — SET-02):** APROVADO pelo usuário.
 
-The Task 4 checkpoint requires a real Meta System User token to verify end-to-end:
-1. `npm run dev` and login as super_admin or tenant_admin
-2. Navigate to /[tenant-slug]/settings via "Configurações" link in sidebar
-3. Verify Google Ads section shows "Não configurado" badge + deferral note
-4. Submit VALID token → badge changes to "Conectado"; row appears in ad_accounts; secret in Vault
-5. Submit INVALID token → inline error, nothing persisted
-6. Reload page → badge reflects ad_accounts state
+Todos os 7 passos de verificação executados com token Meta real:
+1. Login como super_admin/tenant_admin — OK
+2. Navegar para /[tenant-slug]/settings via link "Configurações" no sidebar — OK
+3. Seção Google Ads com badge "Não configurado" + nota de deferimento — OK
+4. Token VÁLIDO submetido → badge "Conectado", linha em ad_accounts, secret no Vault — OK
+5. Token INVÁLIDO → erro inline com mensagem da Meta, nada persistido — OK
+6. Reload da página → badge reflete estado de ad_accounts — OK
 
-**Pre-requisite for UAT:** Apply migration 0013 to the remote DB first:
-```
-supabase db push --password <SUPABASE_DB_PASSWORD>
-```
-(or apply the SQL manually in Supabase Dashboard → SQL Editor)
+SET-01 e SET-02 marcados como completos.
 
 ## Known Stubs
 
