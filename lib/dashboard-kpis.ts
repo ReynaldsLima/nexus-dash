@@ -48,7 +48,10 @@ export function computePriorRange(
   to: Date,
 ): { priorFrom: Date; priorTo: Date } {
   const durationMs = to.getTime() - from.getTime()
-  const priorTo = new Date(from.getTime() - 86400000) // dia antes do período atual
+  // Use calendar (year/month/date) arithmetic for the boundary day so that DST
+  // transitions — which shift the UTC offset by ±1 hour — do not push priorTo
+  // to 23:00 or 01:00, which would produce a wrong date in toISOString().
+  const priorTo = new Date(from.getFullYear(), from.getMonth(), from.getDate() - 1)
   const priorFrom = new Date(priorTo.getTime() - durationMs)
   return { priorFrom, priorTo }
 }
