@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       ad_accounts: {
@@ -261,6 +286,8 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          sheet_id: string | null
+          sheets_api_key: string | null
           slug: string
         }
         Insert: {
@@ -268,6 +295,8 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          sheet_id?: string | null
+          sheets_api_key?: string | null
           slug: string
         }
         Update: {
@@ -275,6 +304,8 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          sheet_id?: string | null
+          sheets_api_key?: string | null
           slug?: string
         }
         Relationships: []
@@ -284,6 +315,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_or_update_vault_secret: {
+        Args: { p_name: string; p_secret: string }
+        Returns: string
+      }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       get_tenant_id: { Args: never; Returns: string }
       get_tenant_slug: { Args: never; Returns: string }
@@ -421,8 +456,10 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
 } as const
-
