@@ -24,6 +24,7 @@ import { groupCampaignMetrics } from '@/lib/campaign-aggregation'
 import type { AggregatedCampaign } from '@/lib/campaign-aggregation'
 import { brl, num } from '@/lib/formatters'
 import type { DailyRollupRow } from '@/lib/hooks/use-dashboard-data'
+import type { ChartConfig } from '@/components/ui/chart'
 
 // ─── Lookup maps ──────────────────────────────────────────────────────────────
 
@@ -124,7 +125,7 @@ export function ChannelSheet({ channel, channelRows, tenantSlug, onClose }: Chan
   const roas = totalSpend > 0 ? totalConvValue / totalSpend : 0
 
   // Dynamic chart config based on channel
-  const spendConfig = channel
+  const spendConfig: ChartConfig = channel
     ? { spend: { label: 'Gasto', color: CHART_COLOR[channel] } }
     : {}
 

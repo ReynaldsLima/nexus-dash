@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import {
   Area,
@@ -37,6 +38,7 @@ import {
   computeChannelSplit,
 } from '@/lib/dashboard-kpis'
 import { brl, num } from '@/lib/formatters'
+import { ChannelSheet } from '@/components/dashboard/channel-sheet'
 
 // ─── Chart configs ────────────────────────────────────────────────────────────
 const spendConfig = {
@@ -156,6 +158,7 @@ export default function DashboardPage() {
   const tenantSlug = params['tenant-slug'] as string
 
   const { data, isLoading, isError } = useDashboardData(tenantSlug)
+  const [selectedChannel, setSelectedChannel] = useState<'Google Ads' | 'Meta Ads' | null>(null)
 
   if (isLoading) return <DashboardSkeleton />
 
@@ -200,6 +203,14 @@ export default function DashboardPage() {
     { name: 'Google Ads', value: channelSplit.google.value, pct: channelSplit.google.pct.toFixed(1) },
     { name: 'Meta Ads',   value: channelSplit.meta.value,   pct: channelSplit.meta.pct.toFixed(1) },
   ]
+
+  // ── Channel drill-down (GAP-03-01) ──────────────────────────────────────────
+  const CHANNEL_KEY_MAP: Record<'Google Ads' | 'Meta Ads', string> = {
+    'Google Ads': 'google_ads',
+    'Meta Ads': 'meta_ads',
+  }
+  const channelKey = selectedChannel ? CHANNEL_KEY_MAP[selectedChannel] : null
+  const channelRows = data.current.filter((r) => r.channel === channelKey)
 
   // ── Trend chart (DASH-02): pivot daily rows into { date, google, meta } ────
   const trendMap = new Map<string, { google: number; meta: number }>()
@@ -387,9 +398,10 @@ export default function DashboardPage() {
                   outerRadius={70}
                   stroke="none"
                   paddingAngle={3}
+                  onClick={(data) => setSelectedChannel(data.name as 'Google Ads' | 'Meta Ads')}
                 >
-                  <Cell fill="var(--chart-1)" />
-                  <Cell fill="var(--chart-2)" />
+                  <Cell fill="var(--chart-1)" style={{ cursor: 'pointer' }} />
+                  <Cell fill="var(--chart-2)" style={{ cursor: 'pointer' }} />
                 </Pie>
                 <ChartTooltip
                   content={
@@ -422,6 +434,13 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ChannelSheet
+        channel={selectedChannel}
+        channelRows={channelRows}
+        tenantSlug={tenantSlug}
+        onClose={() => setSelectedChannel(null)}
+      />
     </section>
   )
 }
