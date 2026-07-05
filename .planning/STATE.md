@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03.1-02-PLAN.md
-last_updated: "2026-07-05T04:00:32.459Z"
+stopped_at: Completed 03.1-03-PLAN.md
+last_updated: "2026-07-05T05:42:15.644Z"
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 20
-  completed_plans: 19
-  percent: 95
+  completed_plans: 20
+  percent: 100
 ---
 
 # Project State
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Status
 
-- Current phase: 03.1 — Leads Management via Google Sheets Integration (Plan 02/03 complete)
-- Overall progress: 95% (19/20 plans complete)
-- Phases complete: 4/6
+- Current phase: 03.1 — Leads Management via Google Sheets Integration (3/3 plans complete)
+- Overall progress: 100% (20/20 plans complete)
+- Phases complete: 5/6
 
 ```
-[██████████] 95%
+[██████████] 100%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
-Phase 03.1: Leads Management via Google Sheets Integration (Plan 02/03 complete — write-back route: lib/sheets.ts + PATCH /api/leads/[id]/status)
+Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete — data layer + write-back route + editable status dropdown, verified in production)
 ```
 
 ---
@@ -46,6 +46,7 @@ Phase 03.1: Leads Management via Google Sheets Integration (Plan 02/03 complete 
 | 0 | Infrastructure | Done (3 deferred items) | 2026-05-10 |
 | 1 | Foundation | ✅ Concluída — UAT aprovado | 2026-05-16 |
 | 2 | Data Pipeline | Bloqueada (ver pré-requisitos) | — |
+| 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
 | 3 | Dashboard UI | Not started | — |
 | 4 | AI Insights | Not started | — |
 
@@ -69,6 +70,7 @@ Phase 03.1: Leads Management via Google Sheets Integration (Plan 02/03 complete 
 | Phase 02-data-pipeline P05 | 11207 | 4 tasks | 5 files |
 | Phase 03.1-leads-management-via-google-sheets-integration P01 | 6min | 2 tasks | 4 files |
 | Phase 03.1-leads-management-via-google-sheets-integration P02 | 25min | 3 tasks | 5 files |
+| Phase 03.1 P03 | 87min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -92,6 +94,9 @@ Phase 03.1: Leads Management via Google Sheets Integration (Plan 02/03 complete 
 - Phase 03.1 Plan 02: PATCH `/api/leads/[id]/status` role gate restricted to `super_admin`/`tenant_admin` — `viewer` explicitly rejected with 403, mirrors `app/api/meta-ads/connect/route.ts` pattern (resolves RESEARCH OQ #1)
 - Phase 03.1 Plan 02: `lead.id` (0-based array index from GET route) maps to sheet row via `id + 2` (`Leads!F{row}`) — deterministic while row order is stable; no pre-write row revalidation, no retry on Sheets API errors (D-07/D-08)
 - Phase 03.1 Plan 02: `google-auth-library`'s `JWT.fetch()` must be called with a single `GaxiosOptions` object (`{ url, method, data }`), not the two-arg `fetch(url, init)` form — `data` is not part of `RequestInit`
+- Phase 03.1 Plan 03: Editable status dropdown reuses `cat()`/`CATEGORY_LABELS`/`CATEGORY_BG` from `lib/leads.ts`, native `<select>`, no new UI dependency (no sonner) — optimistic write with revert-on-failure, no retry (D-06/D-07)
+- Phase 03.1 Plan 03: `GET /api/leads` now tagged per-tenant (`leads-${tenantSlug}`) and invalidated via `revalidateTag(tag, 'max')` right after a successful status write — without this, the pre-existing 60s fetch cache made successful writes look like silent failures on reload; `revalidateTag()` requires a second (`profile`) argument in Next.js 16
+- Phase 03.1 Plan 03: `lib/leads.ts` and `app/api/leads/route.ts` (pre-existing, written outside GSD flow) committed to git for the first time (`572b5ed`) — their absence from git broke the Vercel Turbopack production build as soon as this plan's `page.tsx` change was pushed
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -134,8 +139,8 @@ Phase 03.1: Leads Management via Google Sheets Integration (Plan 02/03 complete 
 ## Session Continuity
 
 **Last updated:** 2026-07-05
-**Last action:** Fase 03.1 Plano 02 concluído — `lib/sheets.ts` (rowForId/statusRange/mapSheetsError/updateLeadStatus) e rota `PATCH /api/leads/[id]/status` implementados com role gate, validação de id, e mapeamento de erro; suíte completa e `tsc --noEmit` verdes
-**Stopped at:** Completed 03.1-02-PLAN.md
-**Next action:** Executar 03.1-03-PLAN.md (UI do dropdown de status de leads) — requer que o usuário crie a Service Account no Google Cloud, compartilhe a planilha como Editor e insira o JSON em `tenants.sheets_service_account` para testar a escrita fim-a-fim em produção
+**Last action:** Fase 03.1 Plano 03 concluído e aprovado no checkpoint humano — dropdown de status editável na página de leads, com escrita otimista, revert em falha e mensagem de erro (D-06/D-07). Verificado em produção (lukseg tenant): grava na planilha Google Sheets real. Durante a verificação, dois bugs foram corrigidos (Rule 1): (1) `lib/leads.ts`/`app/api/leads/route.ts` não estavam commitados, quebrando o build de produção na Vercel; (2) cache de leitura de 60s mascarava escritas bem-sucedidas — corrigido com `revalidateTag` por tenant. Suíte completa (15 arquivos, 118 testes) e `tsc --noEmit`/`npm run build` verdes.
+**Stopped at:** Completed 03.1-03-PLAN.md
+**Next action:** Fase 03.1 concluída (3/3 plans). Próximo: retomar Fase 2 (Data Pipeline, Plan 05 pendente) — bloqueada até Google Ads Developer Token ser aprovado. Também considerar housekeeping: autorar LEADS-01..LEADS-05 em REQUIREMENTS.md e commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/` (deferred-items.md).
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md

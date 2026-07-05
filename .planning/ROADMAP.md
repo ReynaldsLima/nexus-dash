@@ -104,12 +104,12 @@ Plans:
 **Goal:** Super Admin/Tenant Admin can edit a lead status inline in the leads table, writing the change back to the source Google Sheet via a Service Account, with clear error handling on failure (revert + message, no auto-retry). Formalizes the already-shipped read path (dashboard, KPIs, funnel, AI chat).
 **Requirements:** LEADS-01, LEADS-02, LEADS-03, LEADS-04, LEADS-05
 **Depends on:** Phase 3
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 03.1-01-PLAN.md — Data layer: sheets_service_account JSONB column + types + google-auth-library + [BLOCKING] supabase db push (LEADS-02)
 - [x] 03.1-02-PLAN.md — lib/sheets.ts (row mapping + Service Account auth + error mapping) + PATCH /api/leads/[id]/status route + unit/integration tests (LEADS-01/02/04/05)
-- [ ] 03.1-03-PLAN.md — UI: inline status dropdown with optimistic write + revert on failure + manual verify checkpoint (LEADS-03/04)
+- [x] 03.1-03-PLAN.md — UI: inline status dropdown with optimistic write + revert on failure + manual verify checkpoint (LEADS-03/04)
 
 ### Phase 4: AI Insights
 **Goal:** Super Admin can trigger on-demand AI analysis of campaign performance and view a history of all generated recommendations, with automatic daily analysis and in-app anomaly alerts running without manual action.
