@@ -18,3 +18,12 @@ Items discovered during plan execution that are out of scope for the current tas
 - **Issue:** Same root cause as item 1 above — `.planning/REQUIREMENTS.md` still has no `LEADS-*` section or traceability rows. `mark-complete` returned `not_found` for all three IDs.
 - **Why deferred, not fixed:** Same as item 1 — authoring accurate requirement text for LEADS-03 (Plan 03's UI, not yet executed) from within Plan 02 would mean guessing at scope not yet built. Recommended fix remains: add all five LEADS-01..LEADS-05 requirement entries once Plan 03 is complete (or before it, using the Phase 03.1 ROADMAP.md Goal as source text), then re-run `requirements mark-complete` for all completed IDs at once.
 - **Effect on this plan:** Requirements checkboxes/traceability table not updated for LEADS-01, LEADS-04, LEADS-05 despite being functionally delivered by this plan's route implementation.
+
+## From 03.1-03 execution
+
+**3. Pre-existing "written outside GSD flow" files remain untracked in git**
+- **Found during:** Task 1 pre-commit `git status` check
+- **Issue:** `app/[tenant-slug]/leads/page.tsx` (before this plan's edit), `lib/leads.ts`, `app/api/leads/route.ts`, and `app/[tenant-slug]/leads/agente/` show as untracked (`??`) in git, confirming STATE.md's Roadmap Evolution note that this code was "escrito fora do fluxo GSD... formalizado em 2026-07-04" and never committed by any prior GSD plan.
+- **Why deferred, not fixed:** Committing these pre-existing files is not part of this plan's declared scope (`files_modified: [app/[tenant-slug]/leads/page.tsx]`) and doing so would mix unrelated, unreviewed history into this plan's atomic commit. This plan's Task 1 commit (`26a7cc3`) stages only `app/[tenant-slug]/leads/page.tsx` (the full current file, since there was no prior tracked version to diff against).
+- **Effect on this plan:** None — build and full test suite pass with these files present in the working tree regardless of git tracking status. Purely a repo-hygiene gap.
+- **Recommended fix:** In a future housekeeping task (or the phase's closing plan), `git add lib/leads.ts app/api/leads/route.ts app/[tenant-slug]/leads/agente/` and commit them as a `chore` so the full leads feature has proper commit history.
