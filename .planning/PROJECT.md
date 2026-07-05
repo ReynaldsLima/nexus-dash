@@ -19,6 +19,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [x] Sincronização automática de métricas Meta Ads via N8N (agendado) — Validated in Phase 2: Data Pipeline (workflow pronto; ativação aguarda System User tokens)
 - [x] Schema de dados de campanha (campaign_metrics, ad_accounts, sync_jobs, daily_rollups) com RLS — Validated in Phase 2: Data Pipeline
 - [x] Último sync timestamp por tenant/channel visível ao Super Admin — Validated in Phase 2: Data Pipeline (SyncStatusSection em /tenants)
+- [x] Gestão de leads com status editável, escrito de volta na planilha Google Sheets de origem (Super Admin/Tenant Admin) — Validated in Phase 03.1: Leads Management via Google Sheets Integration
 
 ### Active
 
@@ -33,7 +34,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 
 ### Out of Scope
 
-- Google Sheets como data source — eliminar do v1, adicionar somente quando custo Supabase justificar
+- ~~Google Sheets como data source~~ — Superado: já era usado em produção antes do fluxo GSD (leitura de leads); Phase 03.1 formalizou o path de leitura existente e adicionou escrita (status write-back). Decisão original assumia partir do zero — não se aplicava a código já em produção.
 - Self-service de cadastro de tenants — admin cria manualmente no v1
 - Integrações TikTok/LinkedIn/outros canais — apenas Google Ads e Meta no v1
 - Roles adicionais ou permissões granulares além de Super Admin / Tenant Admin / Viewer
@@ -61,7 +62,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 | N8N self-hosted em VPS | Execuções ilimitadas vs limitação do free tier N8N Cloud (2.500/mês) | — Pending |
 | Claude como AI provider | Melhor raciocínio analítico para dados de campanha; já é o modelo da sessão | — Pending |
 | RLS como camada de segurança primária | Isolamento garantido no banco, não apenas na aplicação | — Pending |
-| Google Sheets fora do v1 | Complexidade de sincronização sem benefício claro com base pequena de tenants | — Pending |
+| Google Sheets fora do v1 | Complexidade de sincronização sem benefício claro com base pequena de tenants | Revertida — já em uso em produção pré-GSD; formalizada e estendida (escrita) na Phase 03.1 |
 | Insights de IA apenas para Super Admin | Centraliza custo de API e controle de qualidade das recomendações | — Pending |
 | main → prod direto | Projeto interno v1, overhead de PR review não justificado agora | — Pending |
 
@@ -83,4 +84,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-05-16 after Phase 2: Data Pipeline*
+*Last updated: 2026-07-05 after Phase 03.1: Leads Management via Google Sheets Integration*
