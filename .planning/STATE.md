@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 4 context gathered
-last_updated: "2026-06-05T21:21:49.062Z"
+stopped_at: Phase 03.1 context gathered
+last_updated: "2026-07-05T02:54:32.157Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 4
   total_plans: 17
   completed_plans: 17
@@ -109,6 +109,10 @@ Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending
 - **HIGH:** N8N Tasks 1+2 deferred — CVE-2025-68613 (CVSS 10.0) status unverified, encryption key persistence unverified, process manager unknown. Must resolve before Phase 2 N8N workflows.
 - **MEDIUM:** Meta Business Manager — per-tenant System User access not confirmed. Needed for Phase 2.
 
+### Roadmap Evolution
+
+- Phase 03.1 inserted after Phase 3: Leads Management via Google Sheets integration (URGENT) — código já escrito fora do fluxo GSD (`app/api/leads/`, `lib/leads.ts`, `supabase/migrations/0012_add_google_sheets_to_tenants.sql`), formalizado em 2026-07-04. Não planejado ainda — rodar `/gsd-plan-phase 03.1`.
+
 ### Deferred Items from Phase 00 Plan 01
 
 - [ ] **Task 1 (N8N health):** SSH into Hostinger VPS — verify version >= 1.88.0, process manager, auth endpoint, DB type. CVE-2025-68613 status unknown.
@@ -123,7 +127,7 @@ Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending
 
 **Last updated:** 2026-05-16
 **Last action:** Fase 1 UAT aprovado (6/6 scripts) — app live em nexusdash-chi.vercel.app
-**Stopped at:** Phase 4 context gathered
+**Stopped at:** Phase 03.1 context gathered
 **Next action:** Resolver blockers abaixo, depois `/gsd-plan-phase 2`
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
