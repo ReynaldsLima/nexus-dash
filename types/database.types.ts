@@ -288,6 +288,7 @@ export type Database = {
           name: string
           sheet_id: string | null
           sheets_api_key: string | null
+          sheets_service_account: Json | null
           slug: string
         }
         Insert: {
@@ -297,6 +298,7 @@ export type Database = {
           name: string
           sheet_id?: string | null
           sheets_api_key?: string | null
+          sheets_service_account?: Json | null
           slug: string
         }
         Update: {
@@ -306,6 +308,7 @@ export type Database = {
           name?: string
           sheet_id?: string | null
           sheets_api_key?: string | null
+          sheets_service_account?: Json | null
           slug?: string
         }
         Relationships: []
