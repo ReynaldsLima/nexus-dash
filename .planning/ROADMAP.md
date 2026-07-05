@@ -143,15 +143,15 @@ Plans:
 **Plans:** 9 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Wave 0 test scaffolds (agency-rls, tenant-role-migration, agencies, leads-status-route extension)
-- [ ] 05-02-PLAN.md — Wave 1: Agency data layer — agencies/agency_users/agency_tenants + agency-scoped RLS + Custom Access Token Hook + [BLOCKING] supabase db push (AGENCY-06)
-- [ ] 05-03-PLAN.md — Wave 2: Cliente role collapse (D-03) — migration 0020 + [BLOCKING] db push + createTenantUser/add-user-modal simplification (AGENCY-07)
-- [ ] 05-04-PLAN.md — Wave 2: proxy.ts + [tenant-slug]/layout.tsx + tenant-switcher/sidebar-nav/header-actions wiring for the agency role (AGENCY-03/04)
-- [ ] 05-05-PLAN.md — Wave 2: lib/actions/agencies.ts Server Actions (AGENCY-01/02)
-- [ ] 05-06-PLAN.md — Wave 3: Super Admin agency management UI — /agencies list + detail + tenant grants (AGENCY-01/02)
-- [ ] 05-07-PLAN.md — Wave 2: Agência client-selector landing — /agencia (AGENCY-03/04)
-- [ ] 05-08-PLAN.md — Wave 2: Leads status route IDOR fix + agency support (AGENCY-05/08)
-- [ ] 05-09-PLAN.md — Wave 4: full-suite verification + BLOCKING manual UAT
+- [ ] 05-01-PLAN.md — Wave 1 test scaffolds (agency-rls, tenant-role-migration, agencies, leads-status-route extension)
+- [ ] 05-02-PLAN.md — Wave 2: Agency data layer — agencies/agency_users/agency_tenants + agency-scoped RLS + Custom Access Token Hook + [BLOCKING] supabase db push (AGENCY-06)
+- [ ] 05-03-PLAN.md — Wave 3: Cliente role collapse (D-03) — migration 0020 + [BLOCKING] db push + createTenantUser/add-user-modal simplification (AGENCY-07)
+- [ ] 05-04-PLAN.md — Wave 3: proxy.ts + [tenant-slug]/layout.tsx + tenant-switcher/sidebar-nav/header-actions wiring for the agency role (AGENCY-03/04)
+- [ ] 05-05-PLAN.md — Wave 3: lib/actions/agencies.ts Server Actions (AGENCY-01/02)
+- [ ] 05-06-PLAN.md — Wave 4: Super Admin agency management UI — /agencies list + detail + tenant grants (AGENCY-01/02)
+- [ ] 05-07-PLAN.md — Wave 3: Agência client-selector landing — /agencia (AGENCY-03/04)
+- [ ] 05-08-PLAN.md — Wave 3: Leads status route IDOR fix + agency support (AGENCY-05/08)
+- [ ] 05-09-PLAN.md — Wave 5: full-suite verification + BLOCKING manual UAT
 
 ---
 

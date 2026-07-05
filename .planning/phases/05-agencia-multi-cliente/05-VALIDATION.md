@@ -1,9 +1,9 @@
 ---
 phase: 5
 slug: agencia-multi-cliente
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: ready
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-07-05
 ---
 
@@ -38,13 +38,13 @@ created: 2026-07-05
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | 0 | AGENCY-06 | T-05-01 | Agency-scoped RLS returns only granted tenants' rows | integration | `npx vitest run tests/agency-rls.test.ts` | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | AGENCY-07 | — | `tenant_users.role` collapse leaves no row outside `('tenant_admin')` | integration | `npx vitest run tests/integration/tenant-role-migration.test.ts` | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | AGENCY-08 | T-05-02 | PATCH `/api/leads/[id]/status` rejects cross-tenant / ungranted-agency requests | unit | `npx vitest run tests/unit/leads-status-route.test.ts` | ✅ extend existing | ⬜ pending |
-| TBD | TBD | 0 | AGENCY-01/02 | — | `lib/actions/agencies.ts` create/grant/revoke Server Actions behave correctly | unit | `npx vitest run tests/agencies.test.ts` | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | AGENCY-03/04 | — | Agency-scoped tenant list resolution returns correct set | integration | `npx vitest run tests/agency-rls.test.ts` | ❌ W0 | ⬜ pending |
+| Plan 01 Task 1 (scaffold) → Plan 02 Task 2 (real assertions) | 01, 02 | 1, 2 | AGENCY-06 | T-05-01 | Agency-scoped RLS returns only granted tenants' rows | integration | `npx vitest run tests/agency-rls.test.ts` | pending execution | ⬜ pending |
+| Plan 01 Task 1 (scaffold) → Plan 03 Task 1 (real assertions) | 01, 03 | 1, 3 | AGENCY-07 | — | `tenant_users.role` collapse leaves no row outside `('tenant_admin')` | integration | `npx vitest run tests/integration/tenant-role-migration.test.ts` | pending execution | ⬜ pending |
+| Plan 01 Task 2 (scaffold) → Plan 08 Task 2 (real assertions) | 01, 08 | 1, 3 | AGENCY-08 | T-05-02 | PATCH `/api/leads/[id]/status` rejects cross-tenant / ungranted-agency requests | unit | `npx vitest run tests/unit/leads-status-route.test.ts` | pending execution (extends existing file) | ⬜ pending |
+| Plan 01 Task 2 (scaffold) → Plan 05 Task 2 (real assertions) | 01, 05 | 1, 3 | AGENCY-01/02 | — | `lib/actions/agencies.ts` create/grant/revoke Server Actions behave correctly | unit | `npx vitest run tests/agencies.test.ts` | pending execution | ⬜ pending |
+| Plan 01 Task 1 (scaffold) → Plan 02 Task 2 (real assertions) | 01, 02 | 1, 2 | AGENCY-03/04 | — | Agency-scoped tenant list resolution returns correct set | integration | `npx vitest run tests/agency-rls.test.ts` | pending execution | ⬜ pending |
 
-*Exact Task ID / Plan / Wave columns to be filled in by the planner once PLAN.md files exist — this map reflects the requirement→test mapping identified during research (05-RESEARCH.md § Validation Architecture).*
+*Task ID / Plan / Wave columns filled in after `/gsd-plan-phase 5` produced the 9 finalized PLAN.md files (plan-checker pass, 2026-07-05). Each requirement's test file is scaffolded with `it.todo()` in Plan 01 (Wave 1) and filled with real assertions by the plan that implements the corresponding behavior. "File Exists"/"Status" columns will be updated to reflect actual state once `/gsd-execute-phase 5` runs.*
 
 ---
 
@@ -69,11 +69,11 @@ created: 2026-07-05
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies (confirmed by gsd-plan-checker across all 9 PLAN.md)
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (Plan 01, Wave 1, scaffolds all 4 test files)
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** plan-checker verification passed (0 blockers) on 2026-07-05 — ready for `/gsd-execute-phase 5`
