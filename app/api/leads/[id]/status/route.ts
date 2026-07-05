@@ -3,13 +3,25 @@ import { revalidateTag } from 'next/cache'
 import { z } from 'zod/v4' // import é 'zod/v4' (padrão do projeto)
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { updateLeadStatus, mapSheetsError, type ServiceAccountCreds } from '@/lib/sheets'
+import { updateLeadStatus, mapSheetsError } from '@/lib/sheets'
+import { CATEGORY_LABELS } from '@/lib/leads'
 
 export const runtime = 'nodejs' // OBRIGATÓRIO: assinatura RS256 do JWT usa o módulo crypto do Node — não roda no Edge
 
+// status é gravado com valueInputOption=USER_ENTERED (Sheets interpreta fórmulas). O dropdown só
+// envia um dos 4 labels canônicos — restringir ao enum elimina injeção de fórmula na origem
+// (não é mitigação de "texto livre", já que nenhum texto livre deveria chegar aqui).
+const VALID_STATUSES = Object.values(CATEGORY_LABELS) as [string, ...string[]]
 const BodySchema = z.object({
   tenant: z.string().min(1),
-  status: z.string().min(1).max(200), // status vem de texto livre na planilha; cat() em lib/leads.ts parseia por keyword
+  status: z.enum(VALID_STATUSES),
+})
+
+// Shape mínimo esperado em tenants.sheets_service_account (JSONB sem validação de schema no
+// Postgres) — validado em runtime antes de usar, em vez de um type assertion cego.
+const ServiceAccountSchema = z.object({
+  client_email: z.string().min(1),
+  private_key: z.string().min(1),
 })
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -62,7 +74,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   // 6. Escrever na planilha
-  const sa = t.sheets_service_account as unknown as ServiceAccountCreds
+  const parsedSA = ServiceAccountSchema.safeParse(t.sheets_service_account)
+  if (!parsedSA.success) {
+    return NextResponse.json({ error: 'Credencial de escrita da planilha malformada' }, { status: 500 })
+  }
+  const sa = parsedSA.data
   try {
     await updateLeadStatus(t.sheet_id, sa, rowIndex, status)
     revalidateTag(`leads-${tenantSlug}`, 'max') // invalida o cache de 60s da leitura (GET /api/leads) para este tenant — Next 16 exige profile no 2º argumento
