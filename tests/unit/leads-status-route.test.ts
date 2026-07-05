@@ -3,6 +3,8 @@ import { NextRequest } from 'next/server'
 
 // server-only lança erro em ambientes não-RSC (como Vitest/Node).
 vi.mock('server-only', () => ({}))
+// revalidateTag exige um request-scoped cache context indisponível fora do runtime do Next.js.
+vi.mock('next/cache', () => ({ revalidateTag: vi.fn() }))
 
 const mockState = {
   user: null as { id: string } | null,

@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   }
 
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${tenant.sheet_id}/values/Leads!A2:H500?key=${tenant.sheets_api_key}`
-  const res = await fetch(url, { next: { revalidate: 60 } })
+  const res = await fetch(url, { next: { revalidate: 60, tags: [`leads-${tenantSlug}`] } })
   if (!res.ok) {
     const text = await res.text()
     return NextResponse.json({ error: `Sheets API error: ${res.status} ${text}` }, { status: 502 })

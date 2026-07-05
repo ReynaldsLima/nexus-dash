@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { z } from 'zod/v4' // import é 'zod/v4' (padrão do projeto)
 import { createClient } from '@/lib/supabase/server'
 import { updateLeadStatus, mapSheetsError, type ServiceAccountCreds } from '@/lib/sheets'
@@ -59,6 +60,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const sa = t.sheets_service_account as unknown as ServiceAccountCreds
   try {
     await updateLeadStatus(t.sheet_id, sa, rowIndex, status)
+    revalidateTag(`leads-${tenantSlug}`, 'max') // invalida o cache de 60s da leitura (GET /api/leads) para este tenant — Next 16 exige profile no 2º argumento
     return NextResponse.json({ success: true }) // NUNCA retornar `sa` (Threat T-03.1-02)
   } catch (e) {
     const mapped = mapSheetsError(e) // sem retry (D-07)
