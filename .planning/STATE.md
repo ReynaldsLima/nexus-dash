@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03.1-03-PLAN.md
-last_updated: "2026-07-05T06:31:26.812Z"
+stopped_at: Phase 5 context gathered
+last_updated: "2026-07-05T20:40:36.577Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 5
   total_plans: 20
   completed_plans: 20
@@ -144,7 +144,7 @@ Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete �
 
 **Last updated:** 2026-07-05
 **Last action:** Fase 03.1 concluída e verificada (16/16 must-haves, VERIFICATION.md status=passed). Plano 03 (dropdown de status editável, escrita otimista + revert) aprovado no checkpoint humano e confirmado em produção (lukseg tenant) gravando na planilha real. Durante a verificação e o code review, foram corrigidos: (1) `lib/leads.ts`/`app/api/leads/route.ts` não commitados, quebrando o build da Vercel; (2) cache de leitura de 60s mascarava escritas bem-sucedidas (`revalidateTag`); (3) CRÍTICO — `sheets_service_account` (chave privada da Service Account) era legível por qualquer membro do tenant via RLS, corrigido com migration `0016` (REVOKE/GRANT por coluna) + leitura via `service_role`; (4) `status` restrito a enum das 4 labels (injeção de fórmula no Sheets); (5) validação de shape da credencial em runtime. Suíte completa (118 testes), `tsc --noEmit`/`npm run build` verdes. Também aproveitado para apagar 7 tenants de teste órfãos do banco (mantidos apenas `lukseg` e `beta-test`) — não relacionado ao código da fase.
-**Stopped at:** Phase 03.1 complete — 03.1-VERIFICATION.md (status: passed)
+**Stopped at:** Phase 5 context gathered
 **Next action:** Retomar Fase 2 (Data Pipeline, Plan 05 pendente) — bloqueada até Google Ads Developer Token ser aprovado. Housekeeping pendente (não bloqueante): autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/` (deferred-items.md); usuário levantou pedido de dividir o produto em 3 módulos (Super Admin / Agência / Cliente) — Agência = tenant liberado pelo Super Admin com acesso a Dashboard, Campanhas e Gestão de Leads — ainda não desenhado, discutir via `/gsd-discuss-phase` antes de planejar.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
