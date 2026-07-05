@@ -21,6 +21,13 @@ vi.mock('@/lib/supabase/server', () => ({
       getUser: () => Promise.resolve({ data: { user: mockState.user } }),
     },
     rpc: () => Promise.resolve({ data: mockState.role, error: mockState.roleError }),
+  }),
+}))
+
+// sheets_service_account só é legível via service_role (migration 0016) — a rota usa
+// createServiceClient() para essa leitura, não o cliente vinculado ao usuário acima.
+vi.mock('@/lib/supabase/service', () => ({
+  createServiceClient: () => ({
     from: () => ({
       select: () => ({
         eq: () => ({

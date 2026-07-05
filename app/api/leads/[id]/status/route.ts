@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { z } from 'zod/v4' // import é 'zod/v4' (padrão do projeto)
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { updateLeadStatus, mapSheetsError, type ServiceAccountCreds } from '@/lib/sheets'
 
 export const runtime = 'nodejs' // OBRIGATÓRIO: assinatura RS256 do JWT usa o módulo crypto do Node — não roda no Edge
@@ -44,8 +45,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
   const { tenant: tenantSlug, status } = parsed.data
 
-  // 5. Buscar credencial — SELECT EXPLÍCITO (nunca '*'); RLS em tenants isola por tenant (Threat T-03.1-02/05)
-  const { data: t, error: tErr } = await supabase
+  // 5. Buscar credencial — SELECT EXPLÍCITO (nunca '*'). Usa service_role: sheets_service_account
+  // não é SELECT-ável por 'authenticated' (migration 0016) — tenants_member_select libera a linha
+  // para qualquer membro do tenant, então a coluna sensível só pode ser lida server-side, após o
+  // gate de papel acima (Threat T-03.1-02/05).
+  const service = createServiceClient()
+  const { data: t, error: tErr } = await service
     .from('tenants')
     .select('sheet_id, sheets_service_account')
     .eq('slug', tenantSlug)
