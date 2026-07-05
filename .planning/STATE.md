@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: unknown
 stopped_at: Completed 03.1-03-PLAN.md
-last_updated: "2026-07-05T05:42:15.644Z"
+last_updated: "2026-07-05T06:31:26.812Z"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -19,7 +19,7 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-05-10)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Phase 03.1 — leads-management-via-google-sheets-integration
+**Current focus:** Phase 03.1 complete — resuming Phase 2 (Data Pipeline, Plan 05), blocked on Google Ads Developer Token
 
 ---
 
@@ -97,6 +97,9 @@ Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete �
 - Phase 03.1 Plan 03: Editable status dropdown reuses `cat()`/`CATEGORY_LABELS`/`CATEGORY_BG` from `lib/leads.ts`, native `<select>`, no new UI dependency (no sonner) — optimistic write with revert-on-failure, no retry (D-06/D-07)
 - Phase 03.1 Plan 03: `GET /api/leads` now tagged per-tenant (`leads-${tenantSlug}`) and invalidated via `revalidateTag(tag, 'max')` right after a successful status write — without this, the pre-existing 60s fetch cache made successful writes look like silent failures on reload; `revalidateTag()` requires a second (`profile`) argument in Next.js 16
 - Phase 03.1 Plan 03: `lib/leads.ts` and `app/api/leads/route.ts` (pre-existing, written outside GSD flow) committed to git for the first time (`572b5ed`) — their absence from git broke the Vercel Turbopack production build as soon as this plan's `page.tsx` change was pushed
+- Phase 03.1 code review (CR-01, CRITICAL, fixed): `tenants_member_select` RLS policy grants row SELECT to any authenticated tenant member regardless of role — `sheets_service_account` inherited that, letting a `viewer` read the write-capable Service Account private key directly via PostgREST. Fixed via migration `0016` (`REVOKE SELECT` on `tenants` from `authenticated`, re-`GRANT` only on non-sensitive columns) plus switching `app/api/leads/[id]/status/route.ts` to `createServiceClient()` for that read — same pattern as `app/api/meta-ads/connect/route.ts`. Verified live via `information_schema.column_privileges`.
+- Phase 03.1 code review (WR-01/WR-02, fixed): `status` restricted to a Zod `enum` of the 4 `CATEGORY_LABELS` values (was free text — Sheets formula injection risk via `USER_ENTERED`); `sheets_service_account` shape now validated with `ServiceAccountSchema.safeParse` before use (was an unchecked `as unknown as` cast)
+- **Column-level Postgres grants matter, not just RLS:** any new sensitive column added to a table with a permissive row-level SELECT policy (like `tenants_member_select`) is exposed to every role that policy covers unless explicitly column-revoked — RLS alone does not scope by column
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -139,8 +142,8 @@ Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete �
 ## Session Continuity
 
 **Last updated:** 2026-07-05
-**Last action:** Fase 03.1 Plano 03 concluído e aprovado no checkpoint humano — dropdown de status editável na página de leads, com escrita otimista, revert em falha e mensagem de erro (D-06/D-07). Verificado em produção (lukseg tenant): grava na planilha Google Sheets real. Durante a verificação, dois bugs foram corrigidos (Rule 1): (1) `lib/leads.ts`/`app/api/leads/route.ts` não estavam commitados, quebrando o build de produção na Vercel; (2) cache de leitura de 60s mascarava escritas bem-sucedidas — corrigido com `revalidateTag` por tenant. Suíte completa (15 arquivos, 118 testes) e `tsc --noEmit`/`npm run build` verdes.
-**Stopped at:** Completed 03.1-03-PLAN.md
-**Next action:** Fase 03.1 concluída (3/3 plans). Próximo: retomar Fase 2 (Data Pipeline, Plan 05 pendente) — bloqueada até Google Ads Developer Token ser aprovado. Também considerar housekeeping: autorar LEADS-01..LEADS-05 em REQUIREMENTS.md e commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/` (deferred-items.md).
+**Last action:** Fase 03.1 concluída e verificada (16/16 must-haves, VERIFICATION.md status=passed). Plano 03 (dropdown de status editável, escrita otimista + revert) aprovado no checkpoint humano e confirmado em produção (lukseg tenant) gravando na planilha real. Durante a verificação e o code review, foram corrigidos: (1) `lib/leads.ts`/`app/api/leads/route.ts` não commitados, quebrando o build da Vercel; (2) cache de leitura de 60s mascarava escritas bem-sucedidas (`revalidateTag`); (3) CRÍTICO — `sheets_service_account` (chave privada da Service Account) era legível por qualquer membro do tenant via RLS, corrigido com migration `0016` (REVOKE/GRANT por coluna) + leitura via `service_role`; (4) `status` restrito a enum das 4 labels (injeção de fórmula no Sheets); (5) validação de shape da credencial em runtime. Suíte completa (118 testes), `tsc --noEmit`/`npm run build` verdes. Também aproveitado para apagar 7 tenants de teste órfãos do banco (mantidos apenas `lukseg` e `beta-test`) — não relacionado ao código da fase.
+**Stopped at:** Phase 03.1 complete — 03.1-VERIFICATION.md (status: passed)
+**Next action:** Retomar Fase 2 (Data Pipeline, Plan 05 pendente) — bloqueada até Google Ads Developer Token ser aprovado. Housekeeping pendente (não bloqueante): autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/` (deferred-items.md); usuário levantou pedido de dividir o produto em 3 módulos (Super Admin / Agência / Cliente) — Agência = tenant liberado pelo Super Admin com acesso a Dashboard, Campanhas e Gestão de Leads — ainda não desenhado, discutir via `/gsd-discuss-phase` antes de planejar.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
