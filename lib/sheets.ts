@@ -53,7 +53,8 @@ export async function updateLeadStatus(
   })
   const range = statusRange(id)
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`
-  await client.fetch(url, {
+  await client.fetch({
+    url,
     method: 'PUT',
     data: { range, majorDimension: 'ROWS', values: [[statusValue]] },
   })

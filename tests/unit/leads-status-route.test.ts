@@ -10,7 +10,7 @@ const mockState = {
   roleError: null as { message: string } | null,
   tenant: null as { sheet_id: string; sheets_service_account: unknown } | null,
   tenantError: null as { message: string } | null,
-  updateLeadStatusImpl: async () => {},
+  updateLeadStatusImpl: async (..._args: unknown[]) => {},
 }
 
 vi.mock('@/lib/supabase/server', () => ({
