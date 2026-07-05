@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 03.1 context gathered
-last_updated: "2026-07-05T02:54:32.157Z"
+stopped_at: Completed 03.1-01-PLAN.md
+last_updated: "2026-07-05T03:46:31.041Z"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 17
-  completed_plans: 17
-  percent: 100
+  total_plans: 20
+  completed_plans: 18
+  percent: 90
 ---
 
 # Project State
@@ -19,21 +19,22 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-05-10)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Phase 03 — dashboard-ui
+**Current focus:** Phase 03.1 — leads-management-via-google-sheets-integration
 
 ---
 
 ## Status
 
-- Current phase: 1 (Plan 05 complete — awaiting manual UAT Task 3)
-- Overall progress: 100% (Phase 1 plans complete; manual UAT pending before phase close)
-- Phases complete: 1/5
+- Current phase: 03.1 — Leads Management via Google Sheets Integration (Plan 01/03 complete)
+- Overall progress: 90% (18/20 plans complete)
+- Phases complete: 4/6
 
 ```
-[█████████░] 91%
+[█████████░] 90%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
+Phase 03.1: Leads Management via Google Sheets Integration (Plan 01/03 complete — data layer: sheets_service_account column + google-auth-library)
 ```
 
 ---
@@ -66,6 +67,7 @@ Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending
 | Phase 02-data-pipeline P03 | 30 | 2 tasks | 1 files |
 | Phase 02-data-pipeline P04 | 45 | 2 tasks | 1 files |
 | Phase 02-data-pipeline P05 | 11207 | 4 tasks | 5 files |
+| Phase 03.1-leads-management-via-google-sheets-integration P01 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -84,6 +86,8 @@ Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending
 - Deployment: main → Vercel prod automatic; no PR review gates in v1
 - Staging schema in same Supabase project as prod (not separate project) — shared auth.users, test users use `test-` email prefix
 - Supabase Vercel Integration used — env var name is `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (NOT deprecated `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- Phase 03.1 Plan 01: Installed `google-auth-library` (not full `googleapis`, ~600KB vs ~207MB) for Service Account OAuth2 write auth to Google Sheets
+- Phase 03.1 Plan 01: `tenants.sheets_service_account` (JSONB) stored as a separate column from `sheets_api_key` — existing read path stays untouched, write credential isolated per-tenant
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -125,9 +129,9 @@ Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending
 
 ## Session Continuity
 
-**Last updated:** 2026-05-16
-**Last action:** Fase 1 UAT aprovado (6/6 scripts) — app live em nexusdash-chi.vercel.app
-**Stopped at:** Phase 03.1 context gathered
-**Next action:** Resolver blockers abaixo, depois `/gsd-plan-phase 2`
+**Last updated:** 2026-07-05
+**Last action:** Fase 03.1 Plano 01 concluído — coluna `tenants.sheets_service_account` (JSONB) criada e aplicada no banco live, `google-auth-library` instalado, tipos atualizados
+**Stopped at:** Completed 03.1-01-PLAN.md
+**Next action:** Executar 03.1-02-PLAN.md (rota de escrita de status na planilha) — requer que o usuário crie a Service Account no Google Cloud e insira o JSON em `tenants.sheets_service_account` antes da verificação end-to-end
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
