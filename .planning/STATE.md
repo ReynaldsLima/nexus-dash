@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03.1-01-PLAN.md
-last_updated: "2026-07-05T03:46:31.041Z"
+stopped_at: Completed 03.1-02-PLAN.md
+last_updated: "2026-07-05T04:00:32.459Z"
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 20
-  completed_plans: 18
-  percent: 90
+  completed_plans: 19
+  percent: 95
 ---
 
 # Project State
@@ -25,16 +25,16 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Status
 
-- Current phase: 03.1 — Leads Management via Google Sheets Integration (Plan 01/03 complete)
-- Overall progress: 90% (18/20 plans complete)
+- Current phase: 03.1 — Leads Management via Google Sheets Integration (Plan 02/03 complete)
+- Overall progress: 95% (19/20 plans complete)
 - Phases complete: 4/6
 
 ```
-[█████████░] 90%
+[██████████] 95%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
-Phase 03.1: Leads Management via Google Sheets Integration (Plan 01/03 complete — data layer: sheets_service_account column + google-auth-library)
+Phase 03.1: Leads Management via Google Sheets Integration (Plan 02/03 complete — write-back route: lib/sheets.ts + PATCH /api/leads/[id]/status)
 ```
 
 ---
@@ -68,6 +68,7 @@ Phase 03.1: Leads Management via Google Sheets Integration (Plan 01/03 complete 
 | Phase 02-data-pipeline P04 | 45 | 2 tasks | 1 files |
 | Phase 02-data-pipeline P05 | 11207 | 4 tasks | 5 files |
 | Phase 03.1-leads-management-via-google-sheets-integration P01 | 6min | 2 tasks | 4 files |
+| Phase 03.1-leads-management-via-google-sheets-integration P02 | 25min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ Phase 03.1: Leads Management via Google Sheets Integration (Plan 01/03 complete 
 - Supabase Vercel Integration used — env var name is `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (NOT deprecated `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - Phase 03.1 Plan 01: Installed `google-auth-library` (not full `googleapis`, ~600KB vs ~207MB) for Service Account OAuth2 write auth to Google Sheets
 - Phase 03.1 Plan 01: `tenants.sheets_service_account` (JSONB) stored as a separate column from `sheets_api_key` — existing read path stays untouched, write credential isolated per-tenant
+- Phase 03.1 Plan 02: PATCH `/api/leads/[id]/status` role gate restricted to `super_admin`/`tenant_admin` — `viewer` explicitly rejected with 403, mirrors `app/api/meta-ads/connect/route.ts` pattern (resolves RESEARCH OQ #1)
+- Phase 03.1 Plan 02: `lead.id` (0-based array index from GET route) maps to sheet row via `id + 2` (`Leads!F{row}`) — deterministic while row order is stable; no pre-write row revalidation, no retry on Sheets API errors (D-07/D-08)
+- Phase 03.1 Plan 02: `google-auth-library`'s `JWT.fetch()` must be called with a single `GaxiosOptions` object (`{ url, method, data }`), not the two-arg `fetch(url, init)` form — `data` is not part of `RequestInit`
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -130,8 +134,8 @@ Phase 03.1: Leads Management via Google Sheets Integration (Plan 01/03 complete 
 ## Session Continuity
 
 **Last updated:** 2026-07-05
-**Last action:** Fase 03.1 Plano 01 concluído — coluna `tenants.sheets_service_account` (JSONB) criada e aplicada no banco live, `google-auth-library` instalado, tipos atualizados
-**Stopped at:** Completed 03.1-01-PLAN.md
-**Next action:** Executar 03.1-02-PLAN.md (rota de escrita de status na planilha) — requer que o usuário crie a Service Account no Google Cloud e insira o JSON em `tenants.sheets_service_account` antes da verificação end-to-end
+**Last action:** Fase 03.1 Plano 02 concluído — `lib/sheets.ts` (rowForId/statusRange/mapSheetsError/updateLeadStatus) e rota `PATCH /api/leads/[id]/status` implementados com role gate, validação de id, e mapeamento de erro; suíte completa e `tsc --noEmit` verdes
+**Stopped at:** Completed 03.1-02-PLAN.md
+**Next action:** Executar 03.1-03-PLAN.md (UI do dropdown de status de leads) — requer que o usuário crie a Service Account no Google Cloud, compartilhe a planilha como Editor e insira o JSON em `tenants.sheets_service_account` para testar a escrita fim-a-fim em produção
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
