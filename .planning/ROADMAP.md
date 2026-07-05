@@ -135,6 +135,16 @@ Plans:
 | 3. Dashboard UI | 5/6 | Gap closure in progress | — |
 | 4. AI Insights | 0/? | Not started | — |
 
+### Phase 5: Access Modules — Multi-Client Agency
+
+**Goal:** Nova entidade Agência (sem tenant próprio), liberada pelo Super Admin para acessar N tenants Cliente via grant N:N (`agency_tenants`). Agência vê Dashboard, Campanhas e Gestão de Leads consolidados dos clientes que gerencia, e pode editar status de lead — assim como Cliente (equivalente ao `tenant_admin` atual, só vê os próprios dados) e Super Admin. Requer RLS estendida reconhecendo acesso via associação a uma agência com grant no tenant, além do acesso direto por `tenant_id` já existente.
+**Requirements**: TBD
+**Depends on:** Phase 4
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 5 to break down)
+
 ---
 
 ## Coverage Validation
