@@ -46,6 +46,17 @@
 - [ ] **SET-01**: Tenant Admin can connect a Google Ads account to their tenant via OAuth2 flow
 - [ ] **SET-02**: Tenant Admin can connect a Meta Ads account to their tenant via System User token input
 
+### Access Modules — Multi-Client Agency (Phase 5)
+
+- [ ] **AGENCY-01**: Super Admin can create an Agência entity and add/remove agency users via an in-app screen (`/agencies`) — a deliberate exception to the "no onboarding UI" rule, since assigning/removing agency users is a recurring operation
+- [ ] **AGENCY-02**: Super Admin can grant/revoke an Agência's access to N Cliente tenants via the same in-app screen, with optimistic (no-confirmation) toggle UX
+- [ ] **AGENCY-03**: An Agência user, on login, is routed to a client-selector view (`/agencia`) listing only their granted Cliente tenants — never a consolidated cross-client dashboard
+- [ ] **AGENCY-04**: An Agência user can view Dashboard, Campanhas, and Gestão de Leads for any granted tenant, identical to what a Cliente sees
+- [ ] **AGENCY-05**: An Agência user can edit lead status for any granted tenant, the same capability as Cliente/Super Admin
+- [ ] **AGENCY-06**: RLS enforces Agência access at the database level (`tenants`, `campaign_metrics`, `ad_accounts`, `sync_jobs`, `daily_rollups`) via an `agency_tenants` grant, not just direct `tenant_id` membership
+- [ ] **AGENCY-07**: `tenant_users.role` collapses to a single flat Cliente value (`tenant_admin`); existing `viewer` rows are promoted, no tenant loses access
+- [ ] **AGENCY-08**: Tenant/agency-scoped write endpoints (starting with `PATCH /api/leads/[id]/status`) verify the caller's authorization server-side instead of trusting a client-supplied tenant identifier
+
 ---
 
 ## v2 Requirements (Deferred)
@@ -67,6 +78,7 @@ These are table stakes or expected features not included in v1 due to complexity
 - Google Sheets data source — eliminated; add when Supabase read costs justify it
 - Custom attribution modeling — out of scope indefinitely
 - Self-service tenant onboarding / billing — deferred to SaaS phase
+- Consolidated cross-client dashboard for Agência (portfolio-level aggregation across all clients an agency manages) — deferred by Phase 5 D-01; could become its own future phase if demanded
 
 ---
 
@@ -78,12 +90,13 @@ These are table stakes or expected features not included in v1 due to complexity
 - **Google Sheets integration** — Eliminated from v1. Revisit only if Supabase read costs become a constraint.
 - **Self-service SaaS onboarding / billing** — v1 is internal use; SaaS evolution is a separate milestone.
 - **Custom attribution modeling** — Beyond scope of analytics display tool.
+- ~~**Roles adicionais ou permissões granulares além de Super Admin / Tenant Admin / Viewer**~~ — Superado por Phase 5: módulo Agência (grant N:N) e colapso de Tenant Admin/Viewer em papel único (Cliente).
 
 ---
 
 ## Traceability
 
-*Populated by roadmap agent — 2026-05-10. 26/26 requirements mapped.*
+*Populated by roadmap agent — 2026-05-10. 26/26 requirements mapped. Phase 5 (AGENCY-01–08) added by planner — 2026-07-05.*
 
 | REQ-ID | Phase | Status | Plan |
 |--------|-------|--------|------|
@@ -113,3 +126,11 @@ These are table stakes or expected features not included in v1 due to complexity
 | AI-02 | 4 — AI Insights | Pending | TBD |
 | AI-03 | 4 — AI Insights | Pending | TBD |
 | AI-04 | 4 — AI Insights | Pending | TBD |
+| AGENCY-01 | 5 — Access Modules | Pending | 05-05, 05-06 |
+| AGENCY-02 | 5 — Access Modules | Pending | 05-05, 05-06 |
+| AGENCY-03 | 5 — Access Modules | Pending | 05-04, 05-07 |
+| AGENCY-04 | 5 — Access Modules | Pending | 05-02, 05-04, 05-07 |
+| AGENCY-05 | 5 — Access Modules | Pending | 05-08 |
+| AGENCY-06 | 5 — Access Modules | Pending | 05-02 |
+| AGENCY-07 | 5 — Access Modules | Pending | 05-03 |
+| AGENCY-08 | 5 — Access Modules | Pending | 05-08 |

@@ -138,12 +138,20 @@ Plans:
 ### Phase 5: Access Modules — Multi-Client Agency
 
 **Goal:** Nova entidade Agência (sem tenant próprio), liberada pelo Super Admin para acessar N tenants Cliente via grant N:N (`agency_tenants`). Agência vê Dashboard, Campanhas e Gestão de Leads consolidados dos clientes que gerencia, e pode editar status de lead — assim como Cliente (equivalente ao `tenant_admin` atual, só vê os próprios dados) e Super Admin. Requer RLS estendida reconhecendo acesso via associação a uma agência com grant no tenant, além do acesso direto por `tenant_id` já existente.
-**Requirements**: TBD
+**Requirements**: AGENCY-01, AGENCY-02, AGENCY-03, AGENCY-04, AGENCY-05, AGENCY-06, AGENCY-07, AGENCY-08
 **Depends on:** Phase 4
-**Plans:** 0 plans
+**Plans:** 9 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 5 to break down)
+- [ ] 05-01-PLAN.md — Wave 0 test scaffolds (agency-rls, tenant-role-migration, agencies, leads-status-route extension)
+- [ ] 05-02-PLAN.md — Wave 1: Agency data layer — agencies/agency_users/agency_tenants + agency-scoped RLS + Custom Access Token Hook + [BLOCKING] supabase db push (AGENCY-06)
+- [ ] 05-03-PLAN.md — Wave 2: Cliente role collapse (D-03) — migration 0020 + [BLOCKING] db push + createTenantUser/add-user-modal simplification (AGENCY-07)
+- [ ] 05-04-PLAN.md — Wave 2: proxy.ts + [tenant-slug]/layout.tsx + tenant-switcher/sidebar-nav/header-actions wiring for the agency role (AGENCY-03/04)
+- [ ] 05-05-PLAN.md — Wave 2: lib/actions/agencies.ts Server Actions (AGENCY-01/02)
+- [ ] 05-06-PLAN.md — Wave 3: Super Admin agency management UI — /agencies list + detail + tenant grants (AGENCY-01/02)
+- [ ] 05-07-PLAN.md — Wave 2: Agência client-selector landing — /agencia (AGENCY-03/04)
+- [ ] 05-08-PLAN.md — Wave 2: Leads status route IDOR fix + agency support (AGENCY-05/08)
+- [ ] 05-09-PLAN.md — Wave 4: full-suite verification + BLOCKING manual UAT
 
 ---
 
@@ -178,5 +186,18 @@ Plans:
 | AI-04 | 4 | Anomaly detection in-app alert |
 | SET-01 | 3 | Google Ads OAuth2 connection |
 | SET-02 | 3 | Meta Ads System User token connection |
+| LEADS-01 | 03.1 | Lead status write-back via Service Account |
+| LEADS-02 | 03.1 | sheets_service_account credential storage |
+| LEADS-03 | 03.1 | Inline editable status dropdown |
+| LEADS-04 | 03.1 | Optimistic write + revert on failure |
+| LEADS-05 | 03.1 | Error mapping (rate limit / permission) |
+| AGENCY-01 | 5 | Super Admin creates agency + agency users (in-app screen, D-02) |
+| AGENCY-02 | 5 | Super Admin grants/revokes agency access to N Cliente tenants |
+| AGENCY-03 | 5 | Agency user post-login routed to client-selector (/agencia) |
+| AGENCY-04 | 5 | Agency user views Dashboard/Campanhas/Leads for granted tenants |
+| AGENCY-05 | 5 | Agency user can edit lead status for granted tenants |
+| AGENCY-06 | 5 | RLS enforces agency access at the database level |
+| AGENCY-07 | 5 | tenant_users.role collapses to single flat Cliente value |
+| AGENCY-08 | 5 | Tenant/agency-scoped write endpoints verify authorization server-side |
 
-**Mapped: 26/26 core + 1 gap extension — 100% coverage. No orphaned requirements.**
+**Mapped: 26/26 core + 1 gap extension + 5 LEADS + 8 AGENCY — 100% coverage. No orphaned requirements.**
