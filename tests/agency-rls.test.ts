@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { createClient } from '@supabase/supabase-js'
 
 /**
  * AGENCY-06 — RLS enforces agency access at the database level via agency_tenants grants.
@@ -13,22 +14,350 @@ import { describe, it, expect } from 'vitest'
  * These integration tests require a live Supabase project (staging schema) with migrations
  * 0017-0019 applied. They self-skip if SUPABASE_TEST_URL is unset so the scaffold phase passes.
  *
+ * Fixture pattern mirrors tests/integration/sync-jobs-rls.test.ts: service_role client sets up
+ * fixtures (tenants, agency, agency_tenants grants, an auth user with `app_metadata: { role:
+ * 'agency', agency_id }` set DIRECTLY at `admin.createUser()` time — same technique
+ * sync-jobs-rls.test.ts uses for `role`/`tenant_id`), then a signed-in client scoped by that JWT
+ * is used to confirm `_agency_select` RLS policy row visibility.
+ *
+ * IMPORTANT deviation note (see 05-02-SUMMARY.md "Deviations"): this project's LIVE Auth Hook
+ * (Supabase Dashboard → Authentication → Hooks) is currently wired to an HTTP Edge Function
+ * (`supabase/functions/custom-access-token`) instead of the `public.custom_access_token_hook`
+ * Postgres function that migrations 0005/0019 maintain — confirmed via the Management API
+ * (`hook_custom_access_token_uri` points at the Edge Function, not `pg-functions://...`). That
+ * Edge Function does not look up `agency_users`/`tenant_users` at all; it only echoes whatever
+ * `app_metadata` a user already has. Presetting `app_metadata` at `createUser()` time (as done
+ * below) verifies the `_agency_select` RLS POLICIES correctly — which is this file's actual
+ * target (AGENCY-06) — independent of that pre-existing, out-of-scope hook-wiring bug. The
+ * hook-wiring bug itself is flagged for the user in 05-02-SUMMARY.md and NOT fixed here (Rule 4
+ * — changing production Auth Hook config affects every authenticated session in the live app).
+ *
  * Filled in by Plan 02 (agency data layer) verification step.
  */
 const hasTestEnv = !!process.env.SUPABASE_TEST_URL && !!process.env.SUPABASE_TEST_SERVICE_KEY
 const describeIfEnv = hasTestEnv ? describe : describe.skip
 
 describeIfEnv('Agency-scoped RLS (AGENCY-06)', () => {
-  it.todo('agency user sees only tenants present in agency_tenants for their agency_id')
-  it.todo('agency user sees 0 tenant rows when agency_tenants has no grants for them')
-  it.todo('agency user sees 0 rows for a tenant that was granted then revoked')
-  it.todo('agency user sees 0 rows for a granted tenant that is active=false (soft-deleted)')
-  it.todo('agency_select policy does not expose rows from campaign_metrics for an ungranted tenant_id')
-  it.todo('super_admin still sees all tenants regardless of agency_tenants contents (existing policy unaffected)')
+  const serviceClient = createClient(
+    process.env.SUPABASE_TEST_URL!,
+    process.env.SUPABASE_TEST_SERVICE_KEY!
+  )
+
+  let agencyId: string
+  let emptyAgencyId: string
+  let tenantGrantedId: string
+  let tenantUngrantedId: string
+  let tenantRevokedId: string
+  let tenantInactiveId: string
+  let agencyUserId: string
+  let emptyAgencyUserId: string
+  let superAdminUserId: string
+  const agencyEmail = `agency-rls-${Date.now()}@test.nexus`
+  const emptyAgencyEmail = `agency-rls-empty-${Date.now()}@test.nexus`
+  const superAdminEmail = `agency-rls-sa-${Date.now()}@test.nexus`
+  const password = 'TestPassword123!'
+
+  let agencyAccessToken: string | undefined
+  let superAdminAccessToken: string | undefined
+
+  beforeAll(async () => {
+    // Agency with grants
+    const { data: agency } = await serviceClient
+      .from('agencies')
+      .insert({ name: 'rls-test-agency' })
+      .select()
+      .single()
+    agencyId = agency!.id
+
+    // Agency with zero grants
+    const { data: emptyAgency } = await serviceClient
+      .from('agencies')
+      .insert({ name: 'rls-test-agency-empty' })
+      .select()
+      .single()
+    emptyAgencyId = emptyAgency!.id
+
+    // Tenants
+    const { data: tenantGranted } = await serviceClient
+      .from('tenants')
+      .insert({ name: 'rls-agency-tenant-granted', slug: `rls-agency-tg-${Date.now()}` })
+      .select()
+      .single()
+    tenantGrantedId = tenantGranted!.id
+
+    const { data: tenantUngranted } = await serviceClient
+      .from('tenants')
+      .insert({ name: 'rls-agency-tenant-ungranted', slug: `rls-agency-tu-${Date.now()}` })
+      .select()
+      .single()
+    tenantUngrantedId = tenantUngranted!.id
+
+    const { data: tenantRevoked } = await serviceClient
+      .from('tenants')
+      .insert({ name: 'rls-agency-tenant-revoked', slug: `rls-agency-tr-${Date.now()}` })
+      .select()
+      .single()
+    tenantRevokedId = tenantRevoked!.id
+
+    const { data: tenantInactive } = await serviceClient
+      .from('tenants')
+      .insert({
+        name: 'rls-agency-tenant-inactive',
+        slug: `rls-agency-ti-${Date.now()}`,
+        active: false,
+      })
+      .select()
+      .single()
+    tenantInactiveId = tenantInactive!.id
+
+    // Grants: granted + revoked (inserted then deleted below) + inactive (still granted)
+    await serviceClient.from('agency_tenants').insert([
+      { agency_id: agencyId, tenant_id: tenantGrantedId },
+      { agency_id: agencyId, tenant_id: tenantRevokedId },
+      { agency_id: agencyId, tenant_id: tenantInactiveId },
+    ])
+
+    // Revoke the "revoked" grant immediately — simulates a grant that existed then was removed
+    await serviceClient
+      .from('agency_tenants')
+      .delete()
+      .eq('agency_id', agencyId)
+      .eq('tenant_id', tenantRevokedId)
+
+    // campaign_metrics fixtures for the agency_select policy check on a tenant-scoped table
+    await serviceClient.from('campaign_metrics').insert([
+      {
+        tenant_id: tenantGrantedId,
+        campaign_id: 'rls-agency-campaign-granted',
+        campaign_name: 'Granted Campaign',
+        channel: 'google_ads',
+        date: '2026-01-01',
+      },
+      {
+        tenant_id: tenantUngrantedId,
+        campaign_id: 'rls-agency-campaign-ungranted',
+        campaign_name: 'Ungranted Campaign',
+        channel: 'google_ads',
+        date: '2026-01-01',
+      },
+    ])
+
+    // Agency user — app_metadata preset directly at createUser time (same technique
+    // sync-jobs-rls.test.ts uses for tenant_admin/tenant_id) so the JWT carries
+    // role='agency'/agency_id regardless of the live Auth Hook's wiring (see file-level
+    // comment above). The agency_users row is still inserted for DB-level consistency with
+    // the documented design (Plan 05's Server Actions will rely on this table existing).
+    const { data: agencyUser } = await serviceClient.auth.admin.createUser({
+      email: agencyEmail,
+      password,
+      email_confirm: true,
+      app_metadata: { role: 'agency', agency_id: agencyId },
+    })
+    agencyUserId = agencyUser.user!.id
+    await serviceClient.from('agency_users').insert({ agency_id: agencyId, user_id: agencyUserId })
+
+    // Empty-agency user — belongs to an agency with zero agency_tenants grants
+    const { data: emptyAgencyUser } = await serviceClient.auth.admin.createUser({
+      email: emptyAgencyEmail,
+      password,
+      email_confirm: true,
+      app_metadata: { role: 'agency', agency_id: emptyAgencyId },
+    })
+    emptyAgencyUserId = emptyAgencyUser.user!.id
+    await serviceClient
+      .from('agency_users')
+      .insert({ agency_id: emptyAgencyId, user_id: emptyAgencyUserId })
+
+    // Super admin user — role flagged directly in auth.users.app_metadata (0005/0019 branch 1)
+    const { data: superAdminUser } = await serviceClient.auth.admin.createUser({
+      email: superAdminEmail,
+      password,
+      email_confirm: true,
+      app_metadata: { role: 'super_admin' },
+    })
+    superAdminUserId = superAdminUser.user!.id
+
+    // Sign in to obtain hook-processed JWTs
+    const { data: agencySignIn } = await serviceClient.auth.signInWithPassword({
+      email: agencyEmail,
+      password,
+    })
+    agencyAccessToken = agencySignIn?.session?.access_token
+
+    const { data: superAdminSignIn } = await serviceClient.auth.signInWithPassword({
+      email: superAdminEmail,
+      password,
+    })
+    superAdminAccessToken = superAdminSignIn?.session?.access_token
+  })
+
+  afterAll(async () => {
+    // Cascades remove agency_tenants, agency_users, campaign_metrics, tenant_users
+    await serviceClient.from('agencies').delete().eq('id', agencyId)
+    await serviceClient.from('agencies').delete().eq('id', emptyAgencyId)
+    await serviceClient.from('tenants').delete().eq('id', tenantGrantedId)
+    await serviceClient.from('tenants').delete().eq('id', tenantUngrantedId)
+    await serviceClient.from('tenants').delete().eq('id', tenantRevokedId)
+    await serviceClient.from('tenants').delete().eq('id', tenantInactiveId)
+    if (agencyUserId) await serviceClient.auth.admin.deleteUser(agencyUserId)
+    if (emptyAgencyUserId) await serviceClient.auth.admin.deleteUser(emptyAgencyUserId)
+    if (superAdminUserId) await serviceClient.auth.admin.deleteUser(superAdminUserId)
+  })
+
+  function agencyScopedClient() {
+    return createClient(process.env.SUPABASE_TEST_URL!, process.env.SUPABASE_TEST_SERVICE_KEY!, {
+      global: { headers: { Authorization: `Bearer ${agencyAccessToken}` } },
+    })
+  }
+
+  it('agency user sees only tenants present in agency_tenants for their agency_id', async () => {
+    expect(agencyAccessToken).toBeDefined()
+    const { data } = await agencyScopedClient().from('tenants').select('id')
+    const ids = (data ?? []).map((t) => t.id)
+    expect(ids).toContain(tenantGrantedId)
+    expect(ids).not.toContain(tenantUngrantedId)
+  })
+
+  it('agency user sees 0 tenant rows when agency_tenants has no grants for them', async () => {
+    const { data: emptySignIn } = await serviceClient.auth.signInWithPassword({
+      email: emptyAgencyEmail,
+      password,
+    })
+    const emptyAgencyClient = createClient(
+      process.env.SUPABASE_TEST_URL!,
+      process.env.SUPABASE_TEST_SERVICE_KEY!,
+      {
+        global: {
+          headers: { Authorization: `Bearer ${emptySignIn?.session?.access_token}` },
+        },
+      }
+    )
+    const { data } = await emptyAgencyClient.from('tenants').select('id')
+    expect(data).toHaveLength(0)
+  })
+
+  it('agency user sees 0 rows for a tenant that was granted then revoked', async () => {
+    const { data } = await agencyScopedClient()
+      .from('tenants')
+      .select('id')
+      .eq('id', tenantRevokedId)
+    expect(data).toHaveLength(0)
+  })
+
+  it('agency user sees 0 rows for a granted tenant that is active=false (soft-deleted)', async () => {
+    const { data } = await agencyScopedClient()
+      .from('tenants')
+      .select('id')
+      .eq('id', tenantInactiveId)
+    expect(data).toHaveLength(0)
+  })
+
+  it('agency_select policy does not expose rows from campaign_metrics for an ungranted tenant_id', async () => {
+    const client = agencyScopedClient()
+    const { data: ungranted } = await client
+      .from('campaign_metrics')
+      .select('id')
+      .eq('tenant_id', tenantUngrantedId)
+    expect(ungranted).toHaveLength(0)
+
+    const { data: granted } = await client
+      .from('campaign_metrics')
+      .select('id')
+      .eq('tenant_id', tenantGrantedId)
+    expect(granted!.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('super_admin still sees all tenants regardless of agency_tenants contents (existing policy unaffected)', async () => {
+    expect(superAdminAccessToken).toBeDefined()
+    const superAdminClient = createClient(
+      process.env.SUPABASE_TEST_URL!,
+      process.env.SUPABASE_TEST_SERVICE_KEY!,
+      { global: { headers: { Authorization: `Bearer ${superAdminAccessToken}` } } }
+    )
+    const { data } = await superAdminClient
+      .from('tenants')
+      .select('id')
+      .in('id', [tenantGrantedId, tenantUngrantedId, tenantRevokedId, tenantInactiveId])
+    const ids = (data ?? []).map((t) => t.id)
+    // super_admin_all policy has no agency_tenants dependency — sees granted AND ungranted alike
+    expect(ids).toContain(tenantGrantedId)
+    expect(ids).toContain(tenantUngrantedId)
+    expect(ids).toContain(tenantRevokedId)
+    expect(ids).toContain(tenantInactiveId)
+  })
 })
 
 describeIfEnv('Agency-scoped tenant list resolution (AGENCY-03/04)', () => {
-  it.todo('loadTenantsForSwitcher-equivalent query returns granted tenants when called with an agency JWT')
+  const serviceClient = createClient(
+    process.env.SUPABASE_TEST_URL!,
+    process.env.SUPABASE_TEST_SERVICE_KEY!
+  )
+
+  let agencyId: string
+  let grantedTenantId: string
+  let otherTenantId: string
+  let agencyUserId: string
+  const email = `agency-switcher-${Date.now()}@test.nexus`
+  const password = 'TestPassword123!'
+  let accessToken: string | undefined
+
+  beforeAll(async () => {
+    const { data: agency } = await serviceClient
+      .from('agencies')
+      .insert({ name: 'rls-test-agency-switcher' })
+      .select()
+      .single()
+    agencyId = agency!.id
+
+    const { data: granted } = await serviceClient
+      .from('tenants')
+      .insert({ name: 'switcher-granted', slug: `switcher-g-${Date.now()}` })
+      .select()
+      .single()
+    grantedTenantId = granted!.id
+
+    const { data: other } = await serviceClient
+      .from('tenants')
+      .insert({ name: 'switcher-other', slug: `switcher-o-${Date.now()}` })
+      .select()
+      .single()
+    otherTenantId = other!.id
+
+    await serviceClient
+      .from('agency_tenants')
+      .insert({ agency_id: agencyId, tenant_id: grantedTenantId })
+
+    const { data: user } = await serviceClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      app_metadata: { role: 'agency', agency_id: agencyId },
+    })
+    agencyUserId = user.user!.id
+    await serviceClient.from('agency_users').insert({ agency_id: agencyId, user_id: agencyUserId })
+
+    const { data: signIn } = await serviceClient.auth.signInWithPassword({ email, password })
+    accessToken = signIn?.session?.access_token
+  })
+
+  afterAll(async () => {
+    await serviceClient.from('agencies').delete().eq('id', agencyId)
+    await serviceClient.from('tenants').delete().eq('id', grantedTenantId)
+    await serviceClient.from('tenants').delete().eq('id', otherTenantId)
+    if (agencyUserId) await serviceClient.auth.admin.deleteUser(agencyUserId)
+  })
+
+  it('loadTenantsForSwitcher-equivalent query returns granted tenants when called with an agency JWT', async () => {
+    expect(accessToken).toBeDefined()
+    const client = createClient(process.env.SUPABASE_TEST_URL!, process.env.SUPABASE_TEST_SERVICE_KEY!, {
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    })
+    // Same shape as the tenant switcher query: id + name, ordered by name — no service_role.
+    const { data } = await client.from('tenants').select('id, name').order('name')
+    const ids = (data ?? []).map((t) => t.id)
+    expect(ids).toContain(grantedTenantId)
+    expect(ids).not.toContain(otherTenantId)
+  })
 })
 
 describe('agency-rls scaffold sanity', () => {
