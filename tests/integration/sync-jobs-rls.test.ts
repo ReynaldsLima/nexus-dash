@@ -93,12 +93,31 @@ describeIfEnv('sync_jobs RLS (SYNC-04)', () => {
   })
 
   afterAll(async () => {
-    // Cleanup — CASCADE remove sync_jobs e tenant_users ao deletar tenant
-    await serviceClient.from('tenants').delete().eq('id', tenantAId)
-    await serviceClient.from('tenants').delete().eq('id', tenantBId)
+    // Cleanup — CASCADE remove sync_jobs e tenant_users ao deletar tenant.
+    // IMPORTANT: serviceClient must still be authenticated as service_role at
+    // this point. Never call serviceClient.auth.signInWithPassword(...) (or
+    // anything else that mutates serviceClient's own session) anywhere above —
+    // doing so silently swaps its Authorization header from the service_role
+    // key to the signed-in user's session for every request from then on,
+    // including these deletes (see tests/README or debug session
+    // test-tenants-leaking-into-production.md for the full incident).
+    const delA = await serviceClient.from('tenants').delete().eq('id', tenantAId)
+    if (delA.error) {
+      console.error('[sync-jobs-rls afterAll] Failed to delete tenantA:', tenantAId, delA.error)
+    }
+    const delB = await serviceClient.from('tenants').delete().eq('id', tenantBId)
+    if (delB.error) {
+      console.error('[sync-jobs-rls afterAll] Failed to delete tenantB:', tenantBId, delB.error)
+    }
     // Cleanup users
-    if (userAId) await serviceClient.auth.admin.deleteUser(userAId)
-    if (userBId) await serviceClient.auth.admin.deleteUser(userBId)
+    if (userAId) {
+      const { error } = await serviceClient.auth.admin.deleteUser(userAId)
+      if (error) console.error('[sync-jobs-rls afterAll] Failed to delete userA:', userAId, error)
+    }
+    if (userBId) {
+      const { error } = await serviceClient.auth.admin.deleteUser(userBId)
+      if (error) console.error('[sync-jobs-rls afterAll] Failed to delete userB:', userBId, error)
+    }
   })
 
   it('tenant_admin do tenant A vê 0 rows ao SELECT sync_jobs WHERE tenant_id = <tenant B>', async () => {
@@ -232,7 +251,16 @@ describeIfEnv('sync_jobs RLS (SYNC-04)', () => {
       role: 'tenant_admin',
     })
 
-    const { data: signInData } = await serviceClient.auth.signInWithPassword({
+    // IMPORTANT: sign in on a disposable client, NEVER on serviceClient itself —
+    // signing in on serviceClient overwrites its session and silently downgrades
+    // every later serviceClient.from(...) call (including afterAll's cleanup
+    // deletes) from service_role to this signed-in user's role. See
+    // .planning/debug/resolved/test-tenants-leaking-into-production.md.
+    const signInClient = createClient(
+      process.env.SUPABASE_TEST_URL!,
+      process.env.SUPABASE_TEST_SERVICE_KEY!
+    )
+    const { data: signInData } = await signInClient.auth.signInWithPassword({
       email: emailTA,
       password: 'TestPassword123!',
     })

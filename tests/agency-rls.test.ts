@@ -177,14 +177,25 @@ describeIfEnv('Agency-scoped RLS (AGENCY-06)', () => {
     })
     superAdminUserId = superAdminUser.user!.id
 
-    // Sign in to obtain hook-processed JWTs
-    const { data: agencySignIn } = await serviceClient.auth.signInWithPassword({
+    // Sign in to obtain hook-processed JWTs.
+    // IMPORTANT: always sign in on a disposable client, NEVER on serviceClient
+    // itself — signing in on serviceClient overwrites its session and silently
+    // downgrades every later serviceClient.from(...) call (including afterAll's
+    // cleanup deletes) from service_role to whichever user last signed in. See
+    // .planning/debug/resolved/test-tenants-leaking-into-production.md.
+    const { data: agencySignIn } = await createClient(
+      process.env.SUPABASE_TEST_URL!,
+      process.env.SUPABASE_TEST_SERVICE_KEY!
+    ).auth.signInWithPassword({
       email: agencyEmail,
       password,
     })
     agencyAccessToken = agencySignIn?.session?.access_token
 
-    const { data: superAdminSignIn } = await serviceClient.auth.signInWithPassword({
+    const { data: superAdminSignIn } = await createClient(
+      process.env.SUPABASE_TEST_URL!,
+      process.env.SUPABASE_TEST_SERVICE_KEY!
+    ).auth.signInWithPassword({
       email: superAdminEmail,
       password,
     })
@@ -192,16 +203,48 @@ describeIfEnv('Agency-scoped RLS (AGENCY-06)', () => {
   })
 
   afterAll(async () => {
-    // Cascades remove agency_tenants, agency_users, campaign_metrics, tenant_users
-    await serviceClient.from('agencies').delete().eq('id', agencyId)
-    await serviceClient.from('agencies').delete().eq('id', emptyAgencyId)
-    await serviceClient.from('tenants').delete().eq('id', tenantGrantedId)
-    await serviceClient.from('tenants').delete().eq('id', tenantUngrantedId)
-    await serviceClient.from('tenants').delete().eq('id', tenantRevokedId)
-    await serviceClient.from('tenants').delete().eq('id', tenantInactiveId)
-    if (agencyUserId) await serviceClient.auth.admin.deleteUser(agencyUserId)
-    if (emptyAgencyUserId) await serviceClient.auth.admin.deleteUser(emptyAgencyUserId)
-    if (superAdminUserId) await serviceClient.auth.admin.deleteUser(superAdminUserId)
+    // Cascades remove agency_tenants, agency_users, campaign_metrics, tenant_users.
+    // serviceClient must still be authenticated as service_role at this point —
+    // see the beforeAll comment above for why sign-ins must never touch it.
+    const logIfError = (label: string, error: { message: string } | null) => {
+      if (error) console.error(`[agency-rls afterAll] Failed to delete ${label}:`, error)
+    }
+    logIfError('agency', (await serviceClient.from('agencies').delete().eq('id', agencyId)).error)
+    logIfError(
+      'emptyAgency',
+      (await serviceClient.from('agencies').delete().eq('id', emptyAgencyId)).error
+    )
+    logIfError(
+      'tenantGranted',
+      (await serviceClient.from('tenants').delete().eq('id', tenantGrantedId)).error
+    )
+    logIfError(
+      'tenantUngranted',
+      (await serviceClient.from('tenants').delete().eq('id', tenantUngrantedId)).error
+    )
+    logIfError(
+      'tenantRevoked',
+      (await serviceClient.from('tenants').delete().eq('id', tenantRevokedId)).error
+    )
+    logIfError(
+      'tenantInactive',
+      (await serviceClient.from('tenants').delete().eq('id', tenantInactiveId)).error
+    )
+    if (agencyUserId) {
+      logIfError('agencyUser', (await serviceClient.auth.admin.deleteUser(agencyUserId)).error)
+    }
+    if (emptyAgencyUserId) {
+      logIfError(
+        'emptyAgencyUser',
+        (await serviceClient.auth.admin.deleteUser(emptyAgencyUserId)).error
+      )
+    }
+    if (superAdminUserId) {
+      logIfError(
+        'superAdminUser',
+        (await serviceClient.auth.admin.deleteUser(superAdminUserId)).error
+      )
+    }
   })
 
   function agencyScopedClient() {
@@ -219,7 +262,11 @@ describeIfEnv('Agency-scoped RLS (AGENCY-06)', () => {
   })
 
   it('agency user sees 0 tenant rows when agency_tenants has no grants for them', async () => {
-    const { data: emptySignIn } = await serviceClient.auth.signInWithPassword({
+    // Sign in on a disposable client — never serviceClient itself (see afterAll comment).
+    const { data: emptySignIn } = await createClient(
+      process.env.SUPABASE_TEST_URL!,
+      process.env.SUPABASE_TEST_SERVICE_KEY!
+    ).auth.signInWithPassword({
       email: emptyAgencyEmail,
       password,
     })
@@ -336,15 +383,33 @@ describeIfEnv('Agency-scoped tenant list resolution (AGENCY-03/04)', () => {
     agencyUserId = user.user!.id
     await serviceClient.from('agency_users').insert({ agency_id: agencyId, user_id: agencyUserId })
 
-    const { data: signIn } = await serviceClient.auth.signInWithPassword({ email, password })
+    // Sign in on a disposable client — never serviceClient itself. Doing so would
+    // overwrite serviceClient's session and silently downgrade afterAll's cleanup
+    // deletes from service_role to this signed-in user's role (see
+    // .planning/debug/resolved/test-tenants-leaking-into-production.md).
+    const { data: signIn } = await createClient(
+      process.env.SUPABASE_TEST_URL!,
+      process.env.SUPABASE_TEST_SERVICE_KEY!
+    ).auth.signInWithPassword({ email, password })
     accessToken = signIn?.session?.access_token
   })
 
   afterAll(async () => {
-    await serviceClient.from('agencies').delete().eq('id', agencyId)
-    await serviceClient.from('tenants').delete().eq('id', grantedTenantId)
-    await serviceClient.from('tenants').delete().eq('id', otherTenantId)
-    if (agencyUserId) await serviceClient.auth.admin.deleteUser(agencyUserId)
+    const logIfError = (label: string, error: { message: string } | null) => {
+      if (error) console.error(`[agency-rls switcher afterAll] Failed to delete ${label}:`, error)
+    }
+    logIfError('agency', (await serviceClient.from('agencies').delete().eq('id', agencyId)).error)
+    logIfError(
+      'grantedTenant',
+      (await serviceClient.from('tenants').delete().eq('id', grantedTenantId)).error
+    )
+    logIfError(
+      'otherTenant',
+      (await serviceClient.from('tenants').delete().eq('id', otherTenantId)).error
+    )
+    if (agencyUserId) {
+      logIfError('agencyUser', (await serviceClient.auth.admin.deleteUser(agencyUserId)).error)
+    }
   })
 
   it('loadTenantsForSwitcher-equivalent query returns granted tenants when called with an agency JWT', async () => {
