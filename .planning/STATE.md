@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 5 context gathered
-last_updated: "2026-07-05T20:40:36.577Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-07-09T21:57:51.671Z"
 progress:
   total_phases: 7
   completed_phases: 5
-  total_plans: 20
-  completed_plans: 20
-  percent: 100
+  total_plans: 29
+  completed_plans: 21
+  percent: 72
 ---
 
 # Project State
@@ -19,22 +19,23 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-05-10)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Phase 03.1 complete — resuming Phase 2 (Data Pipeline, Plan 05), blocked on Google Ads Developer Token
+**Current focus:** Phase 05 — agencia-multi-cliente
 
 ---
 
 ## Status
 
-- Current phase: 03.1 — Leads Management via Google Sheets Integration (3/3 plans complete)
-- Overall progress: 100% (20/20 plans complete)
-- Phases complete: 5/6
+- Current phase: 05 — Agência Multi-Cliente (1/9 plans complete)
+- Overall progress: 72% (21/29 plans complete)
+- Phases complete: 5/7
 
 ```
-[██████████] 100%
+[███████░░░] 72%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
 Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete — data layer + write-back route + editable status dropdown, verified in production)
+Phase 05: Agência Multi-Cliente (1/9 plans complete — Plan 01 Wave 0 test scaffolds done)
 ```
 
 ---
@@ -49,6 +50,7 @@ Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete �
 | 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
 | 3 | Dashboard UI | Not started | — |
 | 4 | AI Insights | Not started | — |
+| 5 | Agência Multi-Cliente | Em andamento — 1/9 plans (Plan 01 Wave 0 test scaffolds concluído) | — |
 
 ---
 
@@ -71,6 +73,7 @@ Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete �
 | Phase 03.1-leads-management-via-google-sheets-integration P01 | 6min | 2 tasks | 4 files |
 | Phase 03.1-leads-management-via-google-sheets-integration P02 | 25min | 3 tasks | 5 files |
 | Phase 03.1 P03 | 87min | 2 tasks | 5 files |
+| Phase 05-agencia-multi-cliente P01 | 12min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -100,6 +103,7 @@ Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete �
 - Phase 03.1 code review (CR-01, CRITICAL, fixed): `tenants_member_select` RLS policy grants row SELECT to any authenticated tenant member regardless of role — `sheets_service_account` inherited that, letting a `viewer` read the write-capable Service Account private key directly via PostgREST. Fixed via migration `0016` (`REVOKE SELECT` on `tenants` from `authenticated`, re-`GRANT` only on non-sensitive columns) plus switching `app/api/leads/[id]/status/route.ts` to `createServiceClient()` for that read — same pattern as `app/api/meta-ads/connect/route.ts`. Verified live via `information_schema.column_privileges`.
 - Phase 03.1 code review (WR-01/WR-02, fixed): `status` restricted to a Zod `enum` of the 4 `CATEGORY_LABELS` values (was free text — Sheets formula injection risk via `USER_ENTERED`); `sheets_service_account` shape now validated with `ServiceAccountSchema.safeParse` before use (was an unchecked `as unknown as` cast)
 - **Column-level Postgres grants matter, not just RLS:** any new sensitive column added to a table with a permissive row-level SELECT policy (like `tenants_member_select`) is exposed to every role that policy covers unless explicitly column-revoked — RLS alone does not scope by column
+- Phase 05 Plan 01: Wave 0 test scaffolds (`tests/agency-rls.test.ts`, `tests/integration/tenant-role-migration.test.ts`, `tests/agencies.test.ts`, extended `tests/unit/leads-status-route.test.ts`) reuse the exact skip-if-no-env (`tests/rls.test.ts`) and mock-based (`tests/tenants.test.ts`) patterns from Phase 1/03.1 — no new env vars or mock infra introduced; each file is the designated verification target for a later Phase 5 plan (02, 03, 05, 08)
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -142,9 +146,9 @@ Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete �
 
 ## Session Continuity
 
-**Last updated:** 2026-07-05
-**Last action:** Fase 03.1 concluída e verificada (16/16 must-haves, VERIFICATION.md status=passed). Plano 03 (dropdown de status editável, escrita otimista + revert) aprovado no checkpoint humano e confirmado em produção (lukseg tenant) gravando na planilha real. Durante a verificação e o code review, foram corrigidos: (1) `lib/leads.ts`/`app/api/leads/route.ts` não commitados, quebrando o build da Vercel; (2) cache de leitura de 60s mascarava escritas bem-sucedidas (`revalidateTag`); (3) CRÍTICO — `sheets_service_account` (chave privada da Service Account) era legível por qualquer membro do tenant via RLS, corrigido com migration `0016` (REVOKE/GRANT por coluna) + leitura via `service_role`; (4) `status` restrito a enum das 4 labels (injeção de fórmula no Sheets); (5) validação de shape da credencial em runtime. Suíte completa (118 testes), `tsc --noEmit`/`npm run build` verdes. Também aproveitado para apagar 7 tenants de teste órfãos do banco (mantidos apenas `lukseg` e `beta-test`) — não relacionado ao código da fase.
-**Stopped at:** Phase 5 context gathered
-**Next action:** Retomar Fase 2 (Data Pipeline, Plan 05 pendente) — bloqueada até Google Ads Developer Token ser aprovado. Housekeeping pendente (não bloqueante): autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/` (deferred-items.md); usuário levantou pedido de dividir o produto em 3 módulos (Super Admin / Agência / Cliente) — Agência = tenant liberado pelo Super Admin com acesso a Dashboard, Campanhas e Gestão de Leads — ainda não desenhado, discutir via `/gsd-discuss-phase` antes de planejar.
+**Last updated:** 2026-07-09
+**Last action:** Fase 05 (Agência Multi-Cliente) Plano 01 executado — Wave 0 test infrastructure. Criados `tests/agency-rls.test.ts` (AGENCY-06, AGENCY-03/04), `tests/integration/tenant-role-migration.test.ts` (AGENCY-07) e `tests/agencies.test.ts` (AGENCY-01/02) com `it.todo()` scaffolds; `tests/unit/leads-status-route.test.ts` estendido com 5 `it.todo()` para AGENCY-08 (todas as 9 asserções pré-existentes intactas). Suíte completa: 121 passed / 1 skipped / 32 todo, `npm test` verde. `tsc --noEmit` reportou 4 erros pré-existentes em `tests/integration/vault-rpc.test.ts` e `tests/tenants.test.ts` (fora do escopo deste plano — não tocados pelas mudanças) — logados em `.planning/phases/05-agencia-multi-cliente/deferred-items.md` para correção futura.
+**Stopped at:** Completed 05-01-PLAN.md
+**Next action:** Executar Plano 02 da Fase 05 (agency data layer — migrations 0017-0019, agency_tenants RLS). Pendências não bloqueantes seguem: retomar Fase 2 (Data Pipeline, Plan 05) bloqueada até Google Ads Developer Token ser aprovado; autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/`; corrigir os 4 erros de `tsc` pré-existentes listados em deferred-items.md antes do Plano 03 (role collapse) para evitar mascarar uma regressão de tipo real.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md

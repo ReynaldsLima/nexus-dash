@@ -143,7 +143,7 @@ Plans:
 **Plans:** 9 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Wave 1 test scaffolds (agency-rls, tenant-role-migration, agencies, leads-status-route extension)
+- [x] 05-01-PLAN.md — Wave 1 test scaffolds (agency-rls, tenant-role-migration, agencies, leads-status-route extension)
 - [ ] 05-02-PLAN.md — Wave 2: Agency data layer — agencies/agency_users/agency_tenants + agency-scoped RLS + Custom Access Token Hook + [BLOCKING] supabase db push (AGENCY-06)
 - [ ] 05-03-PLAN.md — Wave 3: Cliente role collapse (D-03) — migration 0020 + [BLOCKING] db push + createTenantUser/add-user-modal simplification (AGENCY-07)
 - [ ] 05-04-PLAN.md — Wave 3: proxy.ts + [tenant-slug]/layout.tsx + tenant-switcher/sidebar-nav/header-actions wiring for the agency role (AGENCY-03/04)
