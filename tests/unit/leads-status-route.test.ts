@@ -167,3 +167,11 @@ describe('PATCH /api/leads/[id]/status', () => {
     expect(json.error).toContain('permissão')
   })
 })
+
+describe('PATCH /api/leads/[id]/status — tenant/agency scope enforcement (AGENCY-08)', () => {
+  it.todo("role 'tenant_admin' whose own tenant_slug differs from body.tenant → 403 (cross-tenant IDOR)")
+  it.todo("role 'tenant_admin' whose own tenant_slug matches body.tenant → 200 (unchanged happy path)")
+  it.todo("role 'agency' with no grant for body.tenant in agency_tenants → 403")
+  it.todo("role 'agency' with a grant for body.tenant in agency_tenants → 200")
+  it.todo("role 'agency' with no agency_id in app_metadata → 403 (malformed claim, fail closed)")
+})
