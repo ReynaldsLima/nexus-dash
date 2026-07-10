@@ -37,7 +37,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - ~~Google Sheets como data source~~ — Superado: já era usado em produção antes do fluxo GSD (leitura de leads); Phase 03.1 formalizou o path de leitura existente e adicionou escrita (status write-back). Decisão original assumia partir do zero — não se aplicava a código já em produção.
 - Self-service de cadastro de tenants — admin cria manualmente no v1
 - Integrações TikTok/LinkedIn/outros canais — apenas Google Ads e Meta no v1
-- Roles adicionais ou permissões granulares além de Super Admin / Tenant Admin / Viewer
+- ~~Roles adicionais ou permissões granulares além de Super Admin / Tenant Admin / Viewer~~ — Superado: Phase 5 introduziu o módulo Agência (grant N:N via agency_tenants) e colapsou Tenant Admin/Viewer em um papel único (Cliente).
 
 ## Context
 
