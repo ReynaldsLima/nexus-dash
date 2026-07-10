@@ -146,6 +146,12 @@ Phase 05: Agência Multi-Cliente (8/9 plans complete — Plan 01 Wave 0 test sca
 - **MEDIUM:** Meta Business Manager — per-tenant System User access not confirmed. Needed for Phase 2.
 - ~~Live Supabase Auth Hook wired to an unrelated Edge Function (custom-access-token), not public.custom_access_token_hook~~ — **RESOLVED 2026-07-09** via `/gsd-debug` session `auth-hook-wired-to-wrong-function`. User switched the Dashboard's Custom Access Token Hook selection to `pg-functions://postgres/public/custom_access_token_hook`. Verified via Management API (`hook_custom_access_token_uri` now correct) and a live fresh-user sign-in test (JWT `app_metadata.role`/`tenant_id`/`tenant_slug` now populate correctly from `tenant_users`). See `.planning/debug/resolved/auth-hook-wired-to-wrong-function.md`.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260710-lhx | Add the official Playwright MCP server to .mcp.json for driving a browser to run Phase 5 manual UAT | 2026-07-10 | 8046c41 | [260710-lhx-add-the-official-playwright-mcp-server-t](./quick/260710-lhx-add-the-official-playwright-mcp-server-t/) |
+
 ### Roadmap Evolution
 
 - Phase 03.1 inserted after Phase 3: Leads Management via Google Sheets integration (URGENT) — código já escrito fora do fluxo GSD (`app/api/leads/`, `lib/leads.ts`, `supabase/migrations/0012_add_google_sheets_to_tenants.sql`), formalizado em 2026-07-04. Não planejado ainda — rodar `/gsd-plan-phase 03.1`.
@@ -163,7 +169,7 @@ Phase 05: Agência Multi-Cliente (8/9 plans complete — Plan 01 Wave 0 test sca
 
 ## Session Continuity
 
-**Last updated:** 2026-07-10
+**Last updated:** 2026-07-10 - Completed quick task 260710-lhx: Add the official Playwright MCP server to .mcp.json
 **Last action:** Fase 05 Plano 06 executado (UI de gerenciamento de agências, AGENCY-01/AGENCY-02). `app/agencies/page.tsx` + `app/agencies/layout.tsx` (lista, guard `user.app_metadata.role`, nav "Tenants | Agências") e `app/agencies/[id]/page.tsx` (detalhe — cards Informações/Usuários/Clientes vinculados) criados como espelho estrutural 1:1 de `app/tenants/*`, consumindo `lib/actions/agencies.ts` (Plano 05) verbatim. `app/tenants/layout.tsx` teve o `decodeRole()` (JWT decode manual) removido e padronizado em `user.app_metadata.role`, alinhado a `app/agencies/layout.tsx`/`app/[tenant-slug]/layout.tsx`/`proxy.ts`. Novos componentes: `create-agency-form.tsx`, `agencies-table.tsx`, `deactivate-agency-button.tsx`, `add-agency-user-modal.tsx`, `agency-tenant-grants.tsx` (toggle otimista de grant/revoke, sem diálogo de confirmação, revert-on-failure). `components/ui/checkbox.tsx` instalado via shadcn (`@base-ui/react/checkbox`). `.planning/PROJECT.md` atualizado (linha "Roles adicionais..." marcada como superada pelo módulo Agência). Zero desvios — código do plano executado verbatim. `npx tsc --noEmit` (só os 2 erros pré-existentes em `vault-rpc.test.ts`), `npm run build` limpo, `npx vitest run` (18 arquivos, 148 passed/1 skipped/5 todo pré-existentes, sem regressão).
 **Stopped at:** Completed 05-06-PLAN.md
 **Next action:** Executar Plano 09 da Fase 05 (verificação final/UAT) para fechar a fase. Pendências não bloqueantes seguem: retomar Fase 2 (Data Pipeline, Plan 05) bloqueada até Google Ads Developer Token ser aprovado; autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/`; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
