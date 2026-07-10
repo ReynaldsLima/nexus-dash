@@ -76,8 +76,12 @@ export async function POST(req: NextRequest) {
   if (role === 'super_admin') {
     tenantId = parsed.data.tenantId
   } else {
-    // getUser() result already has server-verified app_metadata
-    const callerTenantId = user.app_metadata?.tenant_id as string | undefined
+    // tenant_id MUST come from getClaims() (verified JWT claims), not getUser()'s
+    // user.app_metadata, which mirrors the persisted auth.users.raw_app_meta_data column that
+    // the Custom Access Token Hook never writes to. See
+    // .planning/debug/resolved/agency-app-metadata-getuser-mismatch.md.
+    const { data: claimsData } = await supabase.auth.getClaims()
+    const callerTenantId = claimsData?.claims?.app_metadata?.tenant_id as string | undefined
     if (!callerTenantId) {
       return NextResponse.json({ error: 'Não foi possível verificar o tenant do usuário' }, { status: 403 })
     }

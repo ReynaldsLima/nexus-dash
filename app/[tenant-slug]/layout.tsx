@@ -28,9 +28,16 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Read claims from server-verified app_metadata instead of decoding the raw JWT cookie.
-  // getUser() validates the token server-side; app_metadata is populated by that verified token.
-  const role = (user.app_metadata?.role as string | null) ?? null
+  // Role MUST come from getClaims() (verified JWT claims), not getUser()'s user.app_metadata.
+  // user.app_metadata mirrors the persisted auth.users.raw_app_meta_data column, which the
+  // Custom Access Token Hook never writes to — it only injects role/tenant_id/tenant_slug/
+  // agency_id into the JWT being minted at sign-in. That column is empty for every user created
+  // via admin.createUser() in lib/actions/tenants.ts / agencies.ts, so user.app_metadata.role was
+  // always null here for every non-super_admin user. getClaims() verifies and reads the same
+  // live JWT that get_user_role()/RLS policies already use. See
+  // .planning/debug/resolved/agency-app-metadata-getuser-mismatch.md.
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const role = (claimsData?.claims?.app_metadata?.role as string | null) ?? null
 
   // Live, RLS-scoped existence check — replaces the old JWT string-equality guard, which
   // structurally cannot express "member of a set of tenants" (agency) and never re-verified

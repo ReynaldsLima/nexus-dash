@@ -59,13 +59,27 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   // 5. Verificar escopo do tenant — NUNCA confiar no `tenant` do body para papéis não-super_admin
   //    (Threat T-05-13, IDOR/BOLA — OWASP API1:2023, mesma classe do gap fechado em meta-ads/connect)
+  //
+  // tenant_slug/agency_id MUST come from getClaims() (verified JWT claims), not from
+  // user.app_metadata (getUser()'s result). user.app_metadata mirrors the persisted
+  // auth.users.raw_app_meta_data column, which the Custom Access Token Hook never writes to —
+  // only the JWT being minted at sign-in gets role/tenant_slug/agency_id injected. That column
+  // is empty for every user created via admin.createUser() (lib/actions/tenants.ts /
+  // agencies.ts), so this check always fell through to the "unverifiable" 403 branch for BOTH
+  // tenant_admin and agency callers. See
+  // .planning/debug/resolved/agency-app-metadata-getuser-mismatch.md.
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const callerAppMetadata = claimsData?.claims?.app_metadata as
+    | { tenant_slug?: string; agency_id?: string }
+    | undefined
+
   if (role === 'tenant_admin') {
-    const callerSlug = user.app_metadata?.tenant_slug as string | undefined
+    const callerSlug = callerAppMetadata?.tenant_slug
     if (callerSlug !== tenantSlug) {
       return NextResponse.json({ error: 'Sem acesso a este tenant' }, { status: 403 })
     }
   } else if (role === 'agency') {
-    const agencyId = user.app_metadata?.agency_id as string | undefined
+    const agencyId = callerAppMetadata?.agency_id
     if (!agencyId) {
       return NextResponse.json({ error: 'Não foi possível verificar a agência do usuário' }, { status: 403 })
     }

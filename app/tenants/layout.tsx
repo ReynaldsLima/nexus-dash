@@ -9,7 +9,10 @@ export default async function TenantsLayout({ children }: { children: React.Reac
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const role = (user.app_metadata?.role as string | null) ?? null
+  // Role MUST come from getClaims() (verified JWT claims), not getUser()'s user.app_metadata —
+  // see .planning/debug/resolved/agency-app-metadata-getuser-mismatch.md.
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const role = (claimsData?.claims?.app_metadata?.role as string | null) ?? null
   if (role !== 'super_admin') redirect('/')
 
   return (

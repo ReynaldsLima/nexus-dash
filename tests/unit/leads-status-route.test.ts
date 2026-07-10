@@ -20,6 +20,12 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
     auth: {
       getUser: () => Promise.resolve({ data: { user: mockState.user } }),
+      // Route reads tenant_slug/agency_id from getClaims() (verified JWT claims), not from
+      // getUser()'s user.app_metadata — see
+      // .planning/debug/resolved/agency-app-metadata-getuser-mismatch.md. Mock mirrors
+      // mockState.user.app_metadata so existing test setups keep working unchanged.
+      getClaims: () =>
+        Promise.resolve({ data: { claims: { app_metadata: mockState.user?.app_metadata ?? {} } } }),
     },
     rpc: () => Promise.resolve({ data: mockState.role, error: mockState.roleError }),
     from: () => ({
