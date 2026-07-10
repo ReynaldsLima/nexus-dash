@@ -31,13 +31,24 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
   // Read claims from server-verified app_metadata instead of decoding the raw JWT cookie.
   // getUser() validates the token server-side; app_metadata is populated by that verified token.
   const role = (user.app_metadata?.role as string | null) ?? null
-  const tokenSlug = (user.app_metadata?.tenant_slug as string | null) ?? null
 
-  if (role !== 'super_admin' && tokenSlug !== urlSlug) {
-    redirect('/')
+  // Live, RLS-scoped existence check — replaces the old JWT string-equality guard, which
+  // structurally cannot express "member of a set of tenants" (agency) and never re-verified
+  // `active` status for a Cliente whose tenant was deactivated after login.
+  if (role !== 'super_admin') {
+    const { data: tenantRow } = await supabase
+      .from('tenants')
+      .select('id')
+      .eq('slug', urlSlug)
+      .eq('active', true)
+      .maybeSingle()
+    if (!tenantRow) redirect('/')
   }
 
-  const tenants = role === 'super_admin' ? await loadTenantsForSwitcher() : []
+  const tenants = (role === 'super_admin' || role === 'agency') ? await loadTenantsForSwitcher() : []
+
+  const manageHref = role === 'agency' ? '/agencia' : '/tenants'
+  const manageLabel = role === 'agency' ? 'Gerenciar clientes…' : 'Gerenciar tenants…'
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -45,12 +56,12 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
         <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight" style={{ fontFamily: 'var(--font-syne)' }}>
           NEXUS<span className="logo-dot" />DASH
         </Link>
-        <HeaderActions role={role} tenants={tenants} activeSlug={urlSlug} />
+        <HeaderActions role={role} tenants={tenants} activeSlug={urlSlug} manageHref={manageHref} manageLabel={manageLabel} />
       </header>
 
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-56 flex-shrink-0 border-r border-border bg-sidebar overflow-y-auto">
-          <SidebarNav slug={urlSlug} />
+          <SidebarNav slug={urlSlug} role={role} />
         </aside>
         <main className="flex-1 overflow-y-auto">
           <div className="px-8 py-8">{children}</div>
