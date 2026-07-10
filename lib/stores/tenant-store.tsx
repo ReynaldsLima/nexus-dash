@@ -10,7 +10,7 @@ export type Tenant = {
   active: boolean
 }
 
-export type Role = 'super_admin' | 'tenant_admin' | 'viewer' | 'none' | null
+export type Role = 'super_admin' | 'tenant_admin' | 'viewer' | 'agency' | 'none' | null
 
 export interface TenantState {
   activeTenant: Tenant | null

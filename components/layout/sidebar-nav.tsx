@@ -33,8 +33,9 @@ function NavLink({ href, icon: Icon, label, isActive }: { href: string; icon: Re
   )
 }
 
-export function SidebarNav({ slug }: { slug: string }) {
+export function SidebarNav({ slug, role }: { slug: string; role?: string | null }) {
   const pathname = usePathname()
+  const marketingItems = role === 'agency' ? MARKETING_ITEMS.filter((item) => item.key !== 'insights') : MARKETING_ITEMS
 
   return (
     <div className="flex flex-col h-full py-4 gap-4">
@@ -43,7 +44,7 @@ export function SidebarNav({ slug }: { slug: string }) {
           Marketing
         </p>
         <nav className="flex flex-col gap-0.5 px-2">
-          {MARKETING_ITEMS.map(({ icon, label, key }) => (
+          {marketingItems.map(({ icon, label, key }) => (
             <NavLink
               key={key}
               href={`/${slug}/${key}`}
@@ -73,19 +74,21 @@ export function SidebarNav({ slug }: { slug: string }) {
         </nav>
       </div>
 
-      <div className="border-t border-border/50 pt-4 mt-auto">
-        <p className="px-4 mb-2 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/60">
-          Conta
-        </p>
-        <nav className="flex flex-col gap-0.5 px-2">
-          <NavLink
-            href={`/${slug}/settings`}
-            icon={Settings}
-            label="Configurações"
-            isActive={pathname.startsWith(`/${slug}/settings`)}
-          />
-        </nav>
-      </div>
+      {role !== 'agency' && (
+        <div className="border-t border-border/50 pt-4 mt-auto">
+          <p className="px-4 mb-2 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/60">
+            Conta
+          </p>
+          <nav className="flex flex-col gap-0.5 px-2">
+            <NavLink
+              href={`/${slug}/settings`}
+              icon={Settings}
+              label="Configurações"
+              isActive={pathname.startsWith(`/${slug}/settings`)}
+            />
+          </nav>
+        </div>
+      )}
     </div>
   )
 }

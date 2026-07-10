@@ -10,21 +10,29 @@ export interface TenantOption {
 }
 
 interface TenantSwitcherProps {
-  role: 'super_admin' | 'tenant_admin' | 'viewer' | string | null
+  role: 'super_admin' | 'tenant_admin' | 'viewer' | 'agency' | string | null
   tenants: TenantOption[]
   activeSlug: string
+  manageHref?: string
+  manageLabel?: string
 }
 
-export function TenantSwitcher({ role, tenants, activeSlug }: TenantSwitcherProps) {
+export function TenantSwitcher({
+  role,
+  tenants,
+  activeSlug,
+  manageHref = '/tenants',
+  manageLabel = 'Gerenciar tenants…',
+}: TenantSwitcherProps) {
   const router = useRouter()
-  if (role !== 'super_admin') return null
+  if (role !== 'super_admin' && role !== 'agency') return null
 
   return (
     <select
       value={activeSlug}
       onChange={(e) => {
         const slug = e.target.value
-        if (slug === '__manage__') router.push('/tenants')
+        if (slug === '__manage__') router.push(manageHref)
         else router.push(`/${slug}/dashboard`)
       }}
       className="h-8 rounded-md border border-border bg-background px-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
@@ -34,7 +42,7 @@ export function TenantSwitcher({ role, tenants, activeSlug }: TenantSwitcherProp
           {t.name}
         </option>
       ))}
-      <option value="__manage__">Gerenciar tenants…</option>
+      <option value="__manage__">{manageLabel}</option>
     </select>
   )
 }
