@@ -151,7 +151,35 @@ Plans:
 - [x] 05-06-PLAN.md — Wave 4: Super Admin agency management UI — /agencies list + detail + tenant grants (AGENCY-01/02)
 - [x] 05-07-PLAN.md — Wave 3: Agência client-selector landing — /agencia (AGENCY-03/04)
 - [x] 05-08-PLAN.md — Wave 3: Leads status route IDOR fix + agency support (AGENCY-05/08)
-- [ ] 05-09-PLAN.md — Wave 5: full-suite verification + BLOCKING manual UAT
+- [x] 05-09-PLAN.md — Wave 5: full-suite verification + BLOCKING manual UAT — found and fixed a phase-blocking bug (getUser().app_metadata vs JWT claims) via /gsd-debug; all 7 UAT scripts passed post-fix
+
+---
+
+### Phase 6: Security & Consistency — Leads Endpoints (GAP CLOSURE)
+
+**Goal:** Close two findings from the v1.0 milestone audit (2026-07-10): an uncommitted, unauthorized-scope AI chat endpoint riding on the leads feature, and a leads read-endpoint that doesn't follow the explicit authorization pattern AGENCY-08 established.
+**Requirements:** AGENCY-08 (completes the partial closure)
+**Depends on:** Phase 5
+**Origin:** `.planning/v1.0-MILESTONE-AUDIT.md` — Integration Finding F3 (uncommitted `app/api/leads/chat/route.ts` + `app/[tenant-slug]/leads/agente/page.tsx`, no role/tenant/rate-limit checks, open proxy to the shared Anthropic API key) and the AGENCY-08 partial gap (`GET /api/leads` relies on implicit RLS only, unlike the explicit `getClaims()` + grant check `PATCH /api/leads/[id]/status` uses).
+**Success criteria:**
+1. `app/api/leads/chat/route.ts` either enforces the same explicit tenant/role scoping as `PATCH /api/leads/[id]/status` (plus reasonable rate limiting) and is committed, or is removed entirely if not wanted for v1.
+2. `GET /api/leads` derives its tenant/agency scope explicitly via `getClaims()`, matching the pattern `PATCH /api/leads/[id]/status` already uses, instead of relying solely on implicit RLS.
+3. No untracked files remain under `app/api/leads/` or `app/[tenant-slug]/leads/` that aren't part of a decided, committed feature.
+**Plans:** TBD
+
+---
+
+### Phase 7: Google Ads OAuth2 Connect (GAP CLOSURE)
+
+**Goal:** Tenant Admin can connect a Google Ads account to their tenant via OAuth2, mirroring the existing Meta Ads System User token connection flow.
+**Requirements:** SET-01
+**Depends on:** Phase 3
+**Origin:** `.planning/v1.0-MILESTONE-AUDIT.md` — SET-01 was never implemented; `app/[tenant-slug]/settings/page.tsx` only renders a static "not configured" placeholder. Building this now is reasonable even though live sync is still gated on the Google Ads Developer Token approval — the connection flow and credential storage can exist and be tested independently of the token approval, so the moment the token is approved this phase doesn't block the sync from having real per-tenant accounts.
+**Success criteria:**
+1. Tenant Admin can initiate a Google Ads OAuth2 flow from the Settings page and, after granting consent, see the connection reflected as active immediately (mirrors SET-02's Meta Ads UX).
+2. The resulting refresh token is stored in Supabase Vault (same pattern as Meta Ads's `create_or_update_vault_secret` RPC), never in `ad_accounts` directly or logged.
+3. `ad_accounts` gets a `google_ads` row per connected tenant, consistent with the existing `meta_ads` row shape.
+**Plans:** TBD
 
 ---
 
@@ -184,7 +212,7 @@ Plans:
 | AI-02 | 4 | Scheduled daily AI analysis via N8N |
 | AI-03 | 4 | AI Insights history page |
 | AI-04 | 4 | Anomaly detection in-app alert |
-| SET-01 | 3 | Google Ads OAuth2 connection |
+| SET-01 | 7 | Google Ads OAuth2 connection (gap closure — never implemented in Phase 3, only a placeholder) |
 | SET-02 | 3 | Meta Ads System User token connection |
 | LEADS-01 | 03.1 | Lead status write-back via Service Account |
 | LEADS-02 | 03.1 | sheets_service_account credential storage |
@@ -198,6 +226,8 @@ Plans:
 | AGENCY-05 | 5 | Agency user can edit lead status for granted tenants |
 | AGENCY-06 | 5 | RLS enforces agency access at the database level |
 | AGENCY-07 | 5 | tenant_users.role collapses to single flat Cliente value |
-| AGENCY-08 | 5 | Tenant/agency-scoped write endpoints verify authorization server-side |
+| AGENCY-08 | 5, 6 | Tenant/agency-scoped write endpoints verify authorization server-side (PATCH done in Phase 5; GET /api/leads consistency gap closed in Phase 6) |
 
 **Mapped: 26/26 core + 1 gap extension + 5 LEADS + 8 AGENCY — 100% coverage. No orphaned requirements.**
+
+**Gap closure phases (added 2026-07-10 per `/gsd-audit-milestone` → `.planning/v1.0-MILESTONE-AUDIT.md`):** Phase 6 (Security & Consistency — Leads Endpoints, closes AGENCY-08's remaining gap + integration finding F3) and Phase 7 (Google Ads OAuth2 Connect, closes SET-01). AI-01 through AI-04 require no new phase — they are closed by finally planning/executing the pre-existing Phase 4 (AI Insights), which had context gathered but no plans yet.
