@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-08-PLAN.md
-last_updated: "2026-07-10T15:04:56.139Z"
+stopped_at: Completed 05-09-PLAN.md
+last_updated: "2026-07-10T21:20:00.000Z"
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 29
-  completed_plans: 28
-  percent: 97
+  completed_plans: 29
+  percent: 100
 ---
 
 # Project State
@@ -25,17 +25,17 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Status
 
-- Current phase: 05 — Agência Multi-Cliente (8/9 plans complete)
-- Overall progress: 97% (28/29 plans complete)
-- Phases complete: 5/7
+- Current phase: 05 — Agência Multi-Cliente (9/9 plans complete) ✅ CONCLUÍDA
+- Overall progress: 100% (29/29 plans complete)
+- Phases complete: 6/7
 
 ```
-[██████████] 97%
+[██████████] 100%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
 Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete — data layer + write-back route + editable status dropdown, verified in production)
-Phase 05: Agência Multi-Cliente (8/9 plans complete — Plan 01 Wave 0 test scaffolds + Plan 02 agency data layer + Plan 03 Cliente role collapse + Plan 04 routing/navigation + Plan 05 agency Server Actions + Plan 06 agency management UI + Plan 07 agency landing page + Plan 08 leads route scope enforcement done; Plan 09 final verification/UAT remaining)
+Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a phase-blocking bug mid-verification (getUser().app_metadata vs JWT claims), fixed via /gsd-debug, all 7 UAT scripts re-verified live and passed)
 ```
 
 ---
@@ -50,7 +50,7 @@ Phase 05: Agência Multi-Cliente (8/9 plans complete — Plan 01 Wave 0 test sca
 | 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
 | 3 | Dashboard UI | Not started | — |
 | 4 | AI Insights | Not started | — |
-| 5 | Agência Multi-Cliente | Em andamento — 8/9 plans (Plan 01 Wave 0 test scaffolds + Plan 02 agency data layer + Plan 03 Cliente role collapse + Plan 04 routing/navigation + Plan 05 agency Server Actions + Plan 06 agency management UI + Plan 07 agency landing page + Plan 08 leads route scope enforcement concluídos; Plan 09 verificação final/UAT pendente) | — |
+| 5 | Agência Multi-Cliente | ✅ Concluída — 9/9 plans, UAT completo (achou e corrigiu bug bloqueante via /gsd-debug) | 2026-07-10 |
 
 ---
 
@@ -110,6 +110,7 @@ Phase 05: Agência Multi-Cliente (8/9 plans complete — Plan 01 Wave 0 test sca
 - Phase 03.1 code review (CR-01, CRITICAL, fixed): `tenants_member_select` RLS policy grants row SELECT to any authenticated tenant member regardless of role — `sheets_service_account` inherited that, letting a `viewer` read the write-capable Service Account private key directly via PostgREST. Fixed via migration `0016` (`REVOKE SELECT` on `tenants` from `authenticated`, re-`GRANT` only on non-sensitive columns) plus switching `app/api/leads/[id]/status/route.ts` to `createServiceClient()` for that read — same pattern as `app/api/meta-ads/connect/route.ts`. Verified live via `information_schema.column_privileges`.
 - Phase 03.1 code review (WR-01/WR-02, fixed): `status` restricted to a Zod `enum` of the 4 `CATEGORY_LABELS` values (was free text — Sheets formula injection risk via `USER_ENTERED`); `sheets_service_account` shape now validated with `ServiceAccountSchema.safeParse` before use (was an unchecked `as unknown as` cast)
 - **Column-level Postgres grants matter, not just RLS:** any new sensitive column added to a table with a permissive row-level SELECT policy (like `tenants_member_select`) is exposed to every role that policy covers unless explicitly column-revoked — RLS alone does not scope by column
+- **`supabase.auth.getUser()`'s `user.app_metadata` does NOT reflect Custom Access Token Hook claims — use `supabase.auth.getClaims()` instead.** Found via Phase 05 Plan 09's manual UAT (`/gsd-debug` session `agency-app-metadata-getuser-mismatch`): `getUser()`'s `app_metadata` is the raw, persisted `auth.users.raw_app_meta_data` column, which is only ever set directly for `super_admin`; for `tenant_admin`/`agency`/`viewer`, `role`/`tenant_id`/`tenant_slug`/`agency_id` only exist as claims the hook injects into the JWT at sign-in/refresh, readable via `getClaims()` (or JWT-decode as `proxy.ts` already did). This was a real, live regression affecting 6 call sites — `app/agencia/layout.tsx`, `app/[tenant-slug]/layout.tsx`, `app/agencies/layout.tsx`, `app/tenants/layout.tsx`, `app/api/leads/[id]/status/route.ts`, `app/api/meta-ads/connect/route.ts` — fixed in commit `eec002f`. Any FUTURE code that needs role/tenant/agency identity from `auth.users` must use `getClaims()`, never `getUser().app_metadata`, for non-super_admin roles.
 - Phase 05 Plan 01: Wave 0 test scaffolds (`tests/agency-rls.test.ts`, `tests/integration/tenant-role-migration.test.ts`, `tests/agencies.test.ts`, extended `tests/unit/leads-status-route.test.ts`) reuse the exact skip-if-no-env (`tests/rls.test.ts`) and mock-based (`tests/tenants.test.ts`) patterns from Phase 1/03.1 — no new env vars or mock infra introduced; each file is the designated verification target for a later Phase 5 plan (02, 03, 05, 08)
 - Phase 05 Plan 02: Migrations 0017-0019 (agencies/agency_users/agency_tenants tables + RLS + get_agency_id(), 5-table _agency_select policy pass, custom_access_token_hook agency branch) applied verbatim to the live Supabase project — matched Phase 1's conventions exactly, no adaptation needed
 - **CRITICAL discovery (Phase 05 Plan 02), RESOLVED 2026-07-09:** the live project's Custom Access Token Hook (Supabase Dashboard → Authentication → Hooks) was wired to an HTTP Edge Function (`custom-access-token`), NOT the `public.custom_access_token_hook` Postgres function that migrations 0005/0019 maintain — confirmed via Management API (`hook_custom_access_token_uri` pointed at the Edge Function). That Edge Function never queried `agency_users`/`tenant_users`; it only echoed pre-existing `app_metadata` and wrote the tenant slug under the wrong key (`slug` instead of `tenant_slug`, which `app/[tenant-slug]/layout.tsx` reads). Fixed via `/gsd-debug` session: user switched the Dashboard hook selection to the Postgres function. Verified via Management API + live sign-in test (fresh test user + real `beta-test` tenant_users row → JWT `app_metadata` now correctly populates `role`/`tenant_id`/`tenant_slug`). See `.planning/debug/resolved/auth-hook-wired-to-wrong-function.md` and `.planning/phases/05-agencia-multi-cliente/deferred-items.md`.
@@ -169,9 +170,9 @@ Phase 05: Agência Multi-Cliente (8/9 plans complete — Plan 01 Wave 0 test sca
 
 ## Session Continuity
 
-**Last updated:** 2026-07-10 - Completed quick task 260710-lhx: Add the official Playwright MCP server to .mcp.json
-**Last action:** Fase 05 Plano 06 executado (UI de gerenciamento de agências, AGENCY-01/AGENCY-02). `app/agencies/page.tsx` + `app/agencies/layout.tsx` (lista, guard `user.app_metadata.role`, nav "Tenants | Agências") e `app/agencies/[id]/page.tsx` (detalhe — cards Informações/Usuários/Clientes vinculados) criados como espelho estrutural 1:1 de `app/tenants/*`, consumindo `lib/actions/agencies.ts` (Plano 05) verbatim. `app/tenants/layout.tsx` teve o `decodeRole()` (JWT decode manual) removido e padronizado em `user.app_metadata.role`, alinhado a `app/agencies/layout.tsx`/`app/[tenant-slug]/layout.tsx`/`proxy.ts`. Novos componentes: `create-agency-form.tsx`, `agencies-table.tsx`, `deactivate-agency-button.tsx`, `add-agency-user-modal.tsx`, `agency-tenant-grants.tsx` (toggle otimista de grant/revoke, sem diálogo de confirmação, revert-on-failure). `components/ui/checkbox.tsx` instalado via shadcn (`@base-ui/react/checkbox`). `.planning/PROJECT.md` atualizado (linha "Roles adicionais..." marcada como superada pelo módulo Agência). Zero desvios — código do plano executado verbatim. `npx tsc --noEmit` (só os 2 erros pré-existentes em `vault-rpc.test.ts`), `npm run build` limpo, `npx vitest run` (18 arquivos, 148 passed/1 skipped/5 todo pré-existentes, sem regressão).
-**Stopped at:** Completed 05-06-PLAN.md
-**Next action:** Executar Plano 09 da Fase 05 (verificação final/UAT) para fechar a fase. Pendências não bloqueantes seguem: retomar Fase 2 (Data Pipeline, Plan 05) bloqueada até Google Ads Developer Token ser aprovado; autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/`; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
+**Last updated:** 2026-07-10 - Fase 05 CONCLUÍDA: Plano 09 achou um bug bloqueante no UAT manual, corrigido via /gsd-debug, todos os 7 scripts re-verificados e aprovados
+**Last action:** Fase 05 Plano 09 Task 2 (UAT manual, 7 scripts) executada pelo próprio agente via Playwright MCP contra `npm run dev` (mesmo projeto Supabase real), com autorização e credenciais fornecidas pelo usuário. Primeira passada: Script 1 passou, mas Scripts 2/4 falharam e 3/5 falharam parcialmente — causa raiz: `app/agencia/layout.tsx`, `app/[tenant-slug]/layout.tsx`, `app/api/leads/[id]/status/route.ts`, `app/agencies/layout.tsx`, `app/tenants/layout.tsx` e `app/api/meta-ads/connect/route.ts` liam `role`/`tenant_slug`/`agency_id` de `user.app_metadata` via `supabase.auth.getUser()` (reflete `auth.users.raw_app_meta_data`, nunca setado para `tenant_admin`/`agency`), em vez dos claims reais injetados pelo Custom Access Token Hook no JWT. Roteado para `/gsd-debug` (sessão `agency-app-metadata-getuser-mismatch`, agora em `.planning/debug/resolved/`), que confirmou a causa raiz ao vivo contra o Supabase Auth real e corrigiu os 6 pontos trocando `user.app_metadata` por `supabase.auth.getClaims()` — commits `eec002f` (fix), `2bfd73b`/`b63371e` (docs). Achado importante: o bug também afetava `tenant_admin` (Cliente) e o fluxo de conexão do Meta Ads, não só a Agência — contradizendo a alegação de "verificado em produção" da Fase 03.1 para esse caminho específico. Re-rodei os 7 scripts do UAT ao vivo via Playwright após o fix: todos passaram (Script 7 confirmado diretamente pelo usuário no Supabase Dashboard). Fase 5 marcada como concluída (9/9 planos, 29/29 planos totais, 100%). Anomalia sem explicação, não bloqueante: o lead "James Soares" em `lukseg` reverteu de "Quente" para "Novo Lead" alguns minutos após um PATCH bem-sucedido, sem relação com o fix (confirmado pelo agente de debug que seu script de verificação nunca tocou `/api/leads` nem a API do Sheets) — registrado no arquivo de debug resolvido para investigação futura. Fixtures de teste criadas e não removidas no projeto Supabase real: agência "Agência Teste" (`8ddc4d6e-2af7-4ae2-bf83-ee0eba98a9a4`) + `agente-teste@example.com`, e um `tenant_admin` de teste `cliente-teste@example.com` em `lukseg`. Também notado (não tratado): `/agencies` tem várias linhas de teste remanescentes (`rls-test-agency-*`, `debug-agency`) de execuções de teste anteriores.
+**Stopped at:** Fase 05 Plano 09 — CONCLUÍDO. Fase 5 (Agência Multi-Cliente) fechada.
+**Next action:** Rodar `/gsd-verify-work` para a Fase 5, ou avançar para a próxima fase pendente (Fase 3 — Dashboard UI, ou retomar Fase 2 — Data Pipeline, bloqueada até o Google Ads Developer Token ser aprovado). Pendências não bloqueantes: autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/`; limpar fixtures de teste no Supabase (agência/usuários de teste desta sessão + `rls-test-agency-*`/`debug-agency` pré-existentes); investigar a reversão inexplicada do lead "James Soares"; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
