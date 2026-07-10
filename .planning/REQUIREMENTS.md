@@ -50,8 +50,8 @@
 
 - [ ] **AGENCY-01**: Super Admin can create an Agência entity and add/remove agency users via an in-app screen (`/agencies`) — a deliberate exception to the "no onboarding UI" rule, since assigning/removing agency users is a recurring operation
 - [ ] **AGENCY-02**: Super Admin can grant/revoke an Agência's access to N Cliente tenants via the same in-app screen, with optimistic (no-confirmation) toggle UX
-- [ ] **AGENCY-03**: An Agência user, on login, is routed to a client-selector view (`/agencia`) listing only their granted Cliente tenants — never a consolidated cross-client dashboard
-- [ ] **AGENCY-04**: An Agência user can view Dashboard, Campanhas, and Gestão de Leads for any granted tenant, identical to what a Cliente sees
+- [x] **AGENCY-03**: An Agência user, on login, is routed to a client-selector view (`/agencia`) listing only their granted Cliente tenants — never a consolidated cross-client dashboard
+- [x] **AGENCY-04**: An Agência user can view Dashboard, Campanhas, and Gestão de Leads for any granted tenant, identical to what a Cliente sees
 - [ ] **AGENCY-05**: An Agência user can edit lead status for any granted tenant, the same capability as Cliente/Super Admin
 - [x] **AGENCY-06**: RLS enforces Agência access at the database level (`tenants`, `campaign_metrics`, `ad_accounts`, `sync_jobs`, `daily_rollups`) via an `agency_tenants` grant, not just direct `tenant_id` membership
 - [x] **AGENCY-07**: `tenant_users.role` collapses to a single flat Cliente value (`tenant_admin`); existing `viewer` rows are promoted, no tenant loses access
@@ -128,8 +128,8 @@ These are table stakes or expected features not included in v1 due to complexity
 | AI-04 | 4 — AI Insights | Pending | TBD |
 | AGENCY-01 | 5 — Access Modules | Pending | 05-05, 05-06 |
 | AGENCY-02 | 5 — Access Modules | Pending | 05-05, 05-06 |
-| AGENCY-03 | 5 — Access Modules | Pending | 05-04, 05-07 |
-| AGENCY-04 | 5 — Access Modules | Pending | 05-02, 05-04, 05-07 |
+| AGENCY-03 | 5 — Access Modules | Complete | 05-04, 05-07 |
+| AGENCY-04 | 5 — Access Modules | Complete | 05-02, 05-04, 05-07 |
 | AGENCY-05 | 5 — Access Modules | Pending | 05-08 |
 | AGENCY-06 | 5 — Access Modules | Complete | 05-02 |
 | AGENCY-07 | 5 — Access Modules | Complete | 05-03 |
