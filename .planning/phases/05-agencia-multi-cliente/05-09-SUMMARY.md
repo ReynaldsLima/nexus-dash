@@ -164,7 +164,7 @@ No DB migration or hook change was needed — the hook (migration 0019) was alwa
 ## Next Phase Readiness
 
 - **Phase 5 is COMPLETE and ready for `/gsd-verify-work`** — all automated gates green, all 7 UAT scripts pass after the `/gsd-debug` fix, user confirmed Script 7 (hook still selected) directly in the Supabase Dashboard
-- Recommended follow-up (non-blocking): clean up the `Agência Teste` / `agente-teste@example.com` / `cliente-teste@example.com` test fixtures and the pre-existing `rls-test-agency-*` rows in the live Supabase project when convenient
+- Test fixture partially cleaned up post-session: "Agência Teste" deactivated and its `lukseg` grant revoked via the `/agencies` UI (no longer grants any access). The underlying Supabase Auth users (`agente-teste@example.com`, `cliente-teste@example.com`) and the `cliente-teste@example.com` row in `lukseg`'s `tenant_users` could NOT be removed by this agent — the app's UI has no user-deletion affordance ("listagem de usuários é gerenciada via Supabase Dashboard em v1") and this agent's Supabase MCP access was unauthorized throughout the session. Remove those two accounts via Supabase Dashboard → Authentication → Users if a full cleanup is wanted. The pre-existing `rls-test-agency-*`/`debug-agency` rows (unrelated to this session) are also still present.
 
 ---
 *Phase: 05-agencia-multi-cliente*
