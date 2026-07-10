@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-09-PLAN.md
-last_updated: "2026-07-10T21:20:00.000Z"
+stopped_at: Phase 04 UI-SPEC approved
+last_updated: "2026-07-10T23:31:42.100Z"
 progress:
-  total_phases: 7
+  total_phases: 9
   completed_phases: 6
   total_plans: 29
   completed_plans: 29
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Status
 
-- Current phase: 05 — Agência Multi-Cliente (9/9 plans complete) ✅ CONCLUÍDA
-- Overall progress: 100% (29/29 plans complete)
-- Phases complete: 6/7
+- Current phase: 04 — AI Insights (planning in progress — gap closure per v1.0-MILESTONE-AUDIT.md)
+- Overall progress: 29/29 planned plans complete (100% of what's planned) — 6/9 phases fully done, 3 gap-closure phases (4, 6, 7) in progress/pending
+- Phases complete: 6/9
 
 ```
 [██████████] 100%
@@ -48,9 +48,11 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 | 1 | Foundation | ✅ Concluída — UAT aprovado | 2026-05-16 |
 | 2 | Data Pipeline | Bloqueada (ver pré-requisitos) | — |
 | 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
-| 3 | Dashboard UI | Not started | — |
-| 4 | AI Insights | Not started | — |
+| 3 | Dashboard UI | ✅ Concluída — 6/6 plans, 15/15 must-haves verificados (`03-VERIFICATION.md`) | 2026-06-05 |
+| 4 | AI Insights | Planejamento em andamento — CONTEXT.md + RESEARCH.md + UI-SPEC.md prontos, PLAN.md em geração | — |
 | 5 | Agência Multi-Cliente | ✅ Concluída — 9/9 plans, UAT completo (achou e corrigiu bug bloqueante via /gsd-debug) | 2026-07-10 |
+| 6 | Security & Consistency — Leads Endpoints (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
+| 7 | Google Ads OAuth2 Connect (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
 
 ---
 
@@ -58,18 +60,21 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 
 | Metric | Value |
 |--------|-------|
-| Requirements total | 26 |
-| Requirements complete | 3 (AUTH-03, AUTH-04, AUTH-05) |
-| Plans written | 5 |
-| Plans complete | 5 |
-| Phases complete | 1/5 |
+| Requirements total | 26 core (v1) + 5 LEADS + 8 AGENCY = 39, + SET-01/AGENCY-08 gap-closure re-scoping (see v1.0-MILESTONE-AUDIT.md) |
+| Requirements complete | 33/39 satisfied, 1 partial (AGENCY-08), 5 unsatisfied (AI-01..04, SET-01) — per `.planning/v1.0-MILESTONE-AUDIT.md` (2026-07-10) |
+| Plans written | 29 |
+| Plans complete | 29 |
+| Phases complete | 6/9 (0, 1, 03.1, 5 done; 2 code-complete/externally blocked; 3 done; 4/6/7 pending — gap closure in progress) |
 
----
-| Phase 01 P03 | 30 | 3 tasks | 26 files |
-| Phase 01 P05 | 10 | 2 tasks | 10 files |
-| Phase 02-data-pipeline P03 | 30 | 2 tasks | 1 files |
-| Phase 02-data-pipeline P04 | 45 | 2 tasks | 1 files |
-| Phase 02-data-pipeline P05 | 11207 | 4 tasks | 5 files |
+### Per-Plan Execution Log
+
+| Phase/Plan | Duration | Tasks | Files Modified |
+|------------|----------|-------|-----------------|
+| Phase 01 P03 | 30min | 3 tasks | 26 files |
+| Phase 01 P05 | 10min | 2 tasks | 10 files |
+| Phase 02-data-pipeline P03 | 30min | 2 tasks | 1 files |
+| Phase 02-data-pipeline P04 | 45min | 2 tasks | 1 files |
+| Phase 02-data-pipeline P05 | 11207 (sec, likely a logging unit inconsistency — not re-derived retroactively) | 4 tasks | 5 files |
 | Phase 03.1-leads-management-via-google-sheets-integration P01 | 6min | 2 tasks | 4 files |
 | Phase 03.1-leads-management-via-google-sheets-integration P02 | 25min | 3 tasks | 5 files |
 | Phase 03.1 P03 | 87min | 2 tasks | 5 files |
@@ -78,9 +83,10 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 | Phase 05-agencia-multi-cliente P03 | 19min | 3 tasks | 5 files |
 | Phase 05-agencia-multi-cliente P04 | 10min | 3 tasks | 7 files |
 | Phase 05-agencia-multi-cliente P05 | 15min | 2 tasks | 2 files |
+| Phase 05-agencia-multi-cliente P06 | 25min | 2 tasks | 11 files |
 | Phase 05-agencia-multi-cliente P07 | 10min | 2 tasks | 3 files |
 | Phase 05-agencia-multi-cliente P08 | 12min | 2 tasks | 2 files |
-| Phase 05-agencia-multi-cliente P06 | 25min | 2 tasks | 11 files |
+| Phase 05-agencia-multi-cliente P09 | 4min (Task 1) + ~50min (Task 2 first pass) + ~25min (Task 2 re-verification) | 2 tasks | 0 app files (fix applied by the /gsd-debug session it spawned, 7 files) |
 
 ## Accumulated Context
 
@@ -173,7 +179,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 
 **Last updated:** 2026-07-10 - Fase 05 CONCLUÍDA: Plano 09 achou um bug bloqueante no UAT manual, corrigido via /gsd-debug, todos os 7 scripts re-verificados e aprovados
 **Last action:** Fase 05 Plano 09 Task 2 (UAT manual, 7 scripts) executada pelo próprio agente via Playwright MCP contra `npm run dev` (mesmo projeto Supabase real), com autorização e credenciais fornecidas pelo usuário. Primeira passada: Script 1 passou, mas Scripts 2/4 falharam e 3/5 falharam parcialmente — causa raiz: `app/agencia/layout.tsx`, `app/[tenant-slug]/layout.tsx`, `app/api/leads/[id]/status/route.ts`, `app/agencies/layout.tsx`, `app/tenants/layout.tsx` e `app/api/meta-ads/connect/route.ts` liam `role`/`tenant_slug`/`agency_id` de `user.app_metadata` via `supabase.auth.getUser()` (reflete `auth.users.raw_app_meta_data`, nunca setado para `tenant_admin`/`agency`), em vez dos claims reais injetados pelo Custom Access Token Hook no JWT. Roteado para `/gsd-debug` (sessão `agency-app-metadata-getuser-mismatch`, agora em `.planning/debug/resolved/`), que confirmou a causa raiz ao vivo contra o Supabase Auth real e corrigiu os 6 pontos trocando `user.app_metadata` por `supabase.auth.getClaims()` — commits `eec002f` (fix), `2bfd73b`/`b63371e` (docs). Achado importante: o bug também afetava `tenant_admin` (Cliente) e o fluxo de conexão do Meta Ads, não só a Agência — contradizendo a alegação de "verificado em produção" da Fase 03.1 para esse caminho específico. Re-rodei os 7 scripts do UAT ao vivo via Playwright após o fix: todos passaram (Script 7 confirmado diretamente pelo usuário no Supabase Dashboard). Fase 5 marcada como concluída (9/9 planos, 29/29 planos totais, 100%). Anomalia sem explicação, não bloqueante: o lead "James Soares" em `lukseg` reverteu de "Quente" para "Novo Lead" alguns minutos após um PATCH bem-sucedido, sem relação com o fix (confirmado pelo agente de debug que seu script de verificação nunca tocou `/api/leads` nem a API do Sheets) — registrado no arquivo de debug resolvido para investigação futura. Fixtures de teste criadas e não removidas no projeto Supabase real: agência "Agência Teste" (`8ddc4d6e-2af7-4ae2-bf83-ee0eba98a9a4`) + `agente-teste@example.com`, e um `tenant_admin` de teste `cliente-teste@example.com` em `lukseg`. Também notado (não tratado): `/agencies` tem várias linhas de teste remanescentes (`rls-test-agency-*`, `debug-agency`) de execuções de teste anteriores.
-**Stopped at:** `/gsd-plan-milestone-gaps` concluído — Fases 6 e 7 criadas, roadmap/requirements atualizados e commitados (`39cfcb6`).
+**Stopped at:** Phase 04 UI-SPEC approved
 **Next action:** Planejar a próxima fase de fechamento de gap: `/gsd-plan-phase 4` (AI Insights — maior gap, contexto já coletado), depois `/gsd-plan-phase 6` e `/gsd-plan-phase 7`. Após as três fecharem, rodar `/gsd-audit-milestone` de novo para confirmar `status: passed` antes de `/gsd-complete-milestone v1.0`. Pendências não bloqueantes: `app/api/leads/chat/route.ts`/`app/[tenant-slug]/leads/agente/` seguem não commitados (endereçados pela Fase 6); limpar fixtures de teste no Supabase (agência/usuários de teste da sessão de UAT da Fase 5 + `rls-test-agency-*`/`debug-agency` pré-existentes); investigar a reversão inexplicada do lead "James Soares"; formalizar VERIFICATION.md para as Fases 1 e 5 (funcionalmente evidenciadas, mas sem o artefato padrão do gsd-verifier); os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
