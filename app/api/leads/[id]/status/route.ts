@@ -37,13 +37,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // 3. Role gate — só super_admin/tenant_admin (OQ #1, AUTH-05, Threat T-03.1-01)
+  // 3. Role gate — super_admin/tenant_admin/agency (OQ #1, AUTH-05, AGENCY-05, Threat T-03.1-01)
   const { data: role, error: roleErr } = await supabase.rpc('get_user_role')
   if (roleErr || !role) {
     return NextResponse.json({ error: 'Não foi possível verificar o papel do usuário' }, { status: 403 })
   }
-  if (role !== 'super_admin' && role !== 'tenant_admin') {
-    return NextResponse.json({ error: 'Apenas super_admin e tenant_admin podem editar status de leads' }, { status: 403 })
+  if (role !== 'super_admin' && role !== 'tenant_admin' && role !== 'agency') {
+    return NextResponse.json({ error: 'Apenas super_admin, tenant_admin e agency podem editar status de leads' }, { status: 403 })
   }
 
   // 4. Validar body
@@ -57,7 +57,31 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
   const { tenant: tenantSlug, status } = parsed.data
 
-  // 5. Buscar credencial — SELECT EXPLÍCITO (nunca '*'). Usa service_role: sheets_service_account
+  // 5. Verificar escopo do tenant — NUNCA confiar no `tenant` do body para papéis não-super_admin
+  //    (Threat T-05-13, IDOR/BOLA — OWASP API1:2023, mesma classe do gap fechado em meta-ads/connect)
+  if (role === 'tenant_admin') {
+    const callerSlug = user.app_metadata?.tenant_slug as string | undefined
+    if (callerSlug !== tenantSlug) {
+      return NextResponse.json({ error: 'Sem acesso a este tenant' }, { status: 403 })
+    }
+  } else if (role === 'agency') {
+    const agencyId = user.app_metadata?.agency_id as string | undefined
+    if (!agencyId) {
+      return NextResponse.json({ error: 'Não foi possível verificar a agência do usuário' }, { status: 403 })
+    }
+    const { data: grant } = await supabase
+      .from('agency_tenants')
+      .select('tenant_id, tenants!inner(slug)')
+      .eq('agency_id', agencyId)
+      .eq('tenants.slug', tenantSlug)
+      .maybeSingle()
+    if (!grant) {
+      return NextResponse.json({ error: 'Sem acesso a este tenant' }, { status: 403 })
+    }
+  }
+  // role === 'super_admin' falls through with no additional check — unchanged behavior
+
+  // 6. Buscar credencial — SELECT EXPLÍCITO (nunca '*'). Usa service_role: sheets_service_account
   // não é SELECT-ável por 'authenticated' (migration 0016) — tenants_member_select libera a linha
   // para qualquer membro do tenant, então a coluna sensível só pode ser lida server-side, após o
   // gate de papel acima (Threat T-03.1-02/05).
@@ -73,7 +97,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Planilha ou credencial de escrita não configurada' }, { status: 404 })
   }
 
-  // 6. Escrever na planilha
+  // 7. Escrever na planilha
   const parsedSA = ServiceAccountSchema.safeParse(t.sheets_service_account)
   if (!parsedSA.success) {
     return NextResponse.json({ error: 'Credencial de escrita da planilha malformada' }, { status: 500 })
