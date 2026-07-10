@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { LogoutButton } from '@/components/auth/logout-button'
 import { createClient } from '@/lib/supabase/server'
 
-export default async function TenantsLayout({ children }: { children: React.ReactNode }) {
+export default async function AgenciesLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -18,8 +18,8 @@ export default async function TenantsLayout({ children }: { children: React.Reac
         <div className="flex items-center gap-6">
           <Link href="/tenants" className="text-sm font-semibold">NEXUS-DASH</Link>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/tenants" className="font-semibold text-foreground" aria-current="page">Tenants</Link>
-            <Link href="/agencies" className="text-muted-foreground hover:text-foreground">Agências</Link>
+            <Link href="/tenants" className="text-muted-foreground hover:text-foreground">Tenants</Link>
+            <Link href="/agencies" className="font-semibold text-foreground" aria-current="page">Agências</Link>
           </nav>
         </div>
         <LogoutButton />
