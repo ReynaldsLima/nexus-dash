@@ -5,10 +5,9 @@ Out-of-scope issues discovered during plan execution but not fixed (per scope bo
 ## Plan 05-01
 
 - **Pre-existing `tsc --noEmit` errors, unrelated to this plan's files:**
-  - `tests/integration/vault-rpc.test.ts:124,135` — `TS2345: Argument of type '{ p_secret_name: string; }' is not assignable to parameter of type 'undefined'` (likely a Supabase generated-types drift for the `read_vault_secret` RPC signature)
-  - `tests/tenants.test.ts:119,122` — `TS2578: Unused '@ts-expect-error' directive` + `TS2322: Type '"super_admin"' is not assignable to type '"tenant_admin" | "viewer"'` (role union type probably needs updating, or the `@ts-expect-error` above it is now stale)
+  - `tests/integration/vault-rpc.test.ts:124,135` — `TS2345: Argument of type '{ p_secret_name: string; }' is not assignable to parameter of type 'undefined'` (likely a Supabase generated-types drift for the `read_vault_secret` RPC signature) — **still unresolved**, unrelated to any Phase 5 plan's files
+  - ~~`tests/tenants.test.ts:119,122` — `TS2578: Unused '@ts-expect-error' directive` + `TS2322: Type '"super_admin"' is not assignable to type '"tenant_admin" | "viewer"'`~~ — **RESOLVED by Plan 05-03**: the test containing these lines ("rejects role super_admin ...") was removed entirely as part of the role-collapse work (the scenario it tested became impossible once `createTenantUser` no longer accepts a `role` parameter), which naturally eliminated both errors. Confirmed via `npx tsc --noEmit` after Plan 05-03 Task 3 — only the 2 `vault-rpc.test.ts` errors remain.
   - Confirmed via `npx tsc --noEmit`: these errors exist in files not touched by Plan 05-01's tasks (`tests/agency-rls.test.ts`, `tests/integration/tenant-role-migration.test.ts`, `tests/agencies.test.ts`, `tests/unit/leads-status-route.test.ts` — none appear in the tsc output). Full test suite (`npm test`) still exits 0 since these are type-only errors, not runtime test failures.
-  - Recommend a follow-up plan or quick task to fix both before Phase 5's role-collapse migration (Plan 03) lands, since `tests/tenants.test.ts`'s stale `@ts-expect-error` may mask a real type regression once `tenant_users.role` is collapsed to a single value.
 
 ## Plan 05-02
 

@@ -54,7 +54,7 @@
 - [ ] **AGENCY-04**: An Agência user can view Dashboard, Campanhas, and Gestão de Leads for any granted tenant, identical to what a Cliente sees
 - [ ] **AGENCY-05**: An Agência user can edit lead status for any granted tenant, the same capability as Cliente/Super Admin
 - [x] **AGENCY-06**: RLS enforces Agência access at the database level (`tenants`, `campaign_metrics`, `ad_accounts`, `sync_jobs`, `daily_rollups`) via an `agency_tenants` grant, not just direct `tenant_id` membership
-- [ ] **AGENCY-07**: `tenant_users.role` collapses to a single flat Cliente value (`tenant_admin`); existing `viewer` rows are promoted, no tenant loses access
+- [x] **AGENCY-07**: `tenant_users.role` collapses to a single flat Cliente value (`tenant_admin`); existing `viewer` rows are promoted, no tenant loses access
 - [ ] **AGENCY-08**: Tenant/agency-scoped write endpoints (starting with `PATCH /api/leads/[id]/status`) verify the caller's authorization server-side instead of trusting a client-supplied tenant identifier
 
 ---
@@ -132,5 +132,5 @@ These are table stakes or expected features not included in v1 due to complexity
 | AGENCY-04 | 5 — Access Modules | Pending | 05-02, 05-04, 05-07 |
 | AGENCY-05 | 5 — Access Modules | Pending | 05-08 |
 | AGENCY-06 | 5 — Access Modules | Complete | 05-02 |
-| AGENCY-07 | 5 — Access Modules | Pending | 05-03 |
+| AGENCY-07 | 5 — Access Modules | Complete | 05-03 |
 | AGENCY-08 | 5 — Access Modules | Pending | 05-08 |
