@@ -150,7 +150,7 @@ Plans:
 - [x] 05-05-PLAN.md — Wave 3: lib/actions/agencies.ts Server Actions (AGENCY-01/02)
 - [ ] 05-06-PLAN.md — Wave 4: Super Admin agency management UI — /agencies list + detail + tenant grants (AGENCY-01/02)
 - [x] 05-07-PLAN.md — Wave 3: Agência client-selector landing — /agencia (AGENCY-03/04)
-- [ ] 05-08-PLAN.md — Wave 3: Leads status route IDOR fix + agency support (AGENCY-05/08)
+- [x] 05-08-PLAN.md — Wave 3: Leads status route IDOR fix + agency support (AGENCY-05/08)
 - [ ] 05-09-PLAN.md — Wave 5: full-suite verification + BLOCKING manual UAT
 
 ---
