@@ -23,9 +23,6 @@ const tenantIdSchema = z.object({
 
 const createUserSchema = z.object({
   email: z.email({ message: 'E-mail inválido' }),
-  role: z.enum(['tenant_admin', 'viewer'], {
-    message: 'Role deve ser tenant_admin ou viewer',
-  }),
   tenantId: z.string().uuid(),
   password: z.string().min(12).optional(),
 })
@@ -96,7 +93,6 @@ export type CreateUserResult =
 
 export async function createTenantUser(input: {
   email: string
-  role: 'tenant_admin' | 'viewer'
   tenantId: string
   password?: string
 }): Promise<CreateUserResult> {
@@ -129,7 +125,7 @@ export async function createTenantUser(input: {
     .insert({
       tenant_id: parsed.data.tenantId,
       user_id: authUser.user.id,
-      role: parsed.data.role,
+      role: 'tenant_admin',
     })
 
   if (tuError) {

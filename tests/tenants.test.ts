@@ -92,44 +92,30 @@ describe('deactivateTenant Server Action (AUTH-03)', () => {
   })
 })
 
-describe('createTenantUser Server Action (AUTH-03 + D-10)', () => {
+describe('createTenantUser Server Action (AUTH-03 + D-10 + Phase 5 D-03)', () => {
   it('calls supabase.auth.admin.createUser with email_confirm=true', async () => {
     const { createTenantUser } = await import('@/lib/actions/tenants')
     const result = await createTenantUser({
       email: 'test@example.com',
-      role: 'tenant_admin',
       tenantId: TEST_TENANT_ID,
     })
     expect(result).toMatchObject({ ok: true, userId: 'new-user-uuid' })
     if ('ok' in result) expect(result.tempPassword.length).toBeGreaterThanOrEqual(16)
   })
 
-  it('inserts the new user into tenant_users with role tenant_admin or viewer', async () => {
+  it('always inserts role tenant_admin — Cliente has a single flat role (D-03)', async () => {
     const { createTenantUser } = await import('@/lib/actions/tenants')
     const result = await createTenantUser({
       email: 'test@example.com',
-      role: 'viewer',
       tenantId: TEST_TENANT_ID,
     })
-    expect('ok' in result).toBe(true)
-  })
-
-  it('rejects role super_admin (not allowed in tenant_users per D-09 CHECK constraint)', async () => {
-    const { createTenantUser } = await import('@/lib/actions/tenants')
-    // @ts-expect-error intentionally passing invalid role
-    const result = await createTenantUser({
-      email: 'test@example.com',
-      role: 'super_admin',
-      tenantId: TEST_TENANT_ID,
-    })
-    expect(result).toMatchObject({ error: expect.stringContaining('Role') })
+    expect(result).toMatchObject({ ok: true })
   })
 
   it('generates a 16-char temporary password when none is supplied', async () => {
     const { createTenantUser } = await import('@/lib/actions/tenants')
     const result = await createTenantUser({
       email: 'test@example.com',
-      role: 'viewer',
       tenantId: TEST_TENANT_ID,
     })
     if (!('ok' in result)) throw new Error('expected ok')

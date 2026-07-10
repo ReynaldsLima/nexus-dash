@@ -14,13 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -47,10 +40,9 @@ export function AddUserModal({ tenantId, tenantName }: AddUserModalProps) {
   async function handleSubmit(formData: FormData) {
     setError(null)
     const email = String(formData.get('email') ?? '')
-    const role = String(formData.get('role') ?? '') as 'tenant_admin' | 'viewer'
 
     startTransition(async () => {
-      const result = await createTenantUser({ email, role, tenantId })
+      const result = await createTenantUser({ email, tenantId })
       if ('error' in result) {
         setError(result.error)
       } else {
@@ -109,23 +101,13 @@ export function AddUserModal({ tenantId, tenantName }: AddUserModalProps) {
             <DialogHeader>
               <DialogTitle>Adicionar usuário</DialogTitle>
               <DialogDescription>
-                O usuário receberá acesso ao tenant <strong>{tenantName}</strong> com a role selecionada.
+                O usuário receberá acesso completo ao tenant <strong>{tenantName}</strong>.
               </DialogDescription>
             </DialogHeader>
             <form action={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="user-email" className="text-sm font-semibold">E-mail</Label>
                 <Input id="user-email" name="email" type="email" required autoComplete="off" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="user-role" className="text-sm font-semibold">Role</Label>
-                <Select name="role" defaultValue="viewer" required>
-                  <SelectTrigger id="user-role"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tenant_admin">Administrador</SelectItem>
-                    <SelectItem value="viewer">Visualizador</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
               <DialogFooter>
