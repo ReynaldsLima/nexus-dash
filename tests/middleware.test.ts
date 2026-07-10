@@ -63,3 +63,11 @@ describe('JWT claim extraction (AUTH-05 prereq)', () => {
     expect(decoded.app_metadata.tenant_slug).toBe('acme')
   })
 })
+
+describe('agency role claims (AGENCY-03)', () => {
+  it('decodes role=agency with tenant_id/tenant_slug both null', () => {
+    const token = makeToken({ role: 'agency', tenant_id: null, tenant_slug: null, agency_id: 'agency-1' })
+    const claims = decodeAppMetadata(token)
+    expect(claims?.role).toBe('agency')
+  })
+})
