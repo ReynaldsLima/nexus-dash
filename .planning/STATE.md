@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-07-10T00:40:41.960Z"
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-07-10T01:14:49.312Z"
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 29
-  completed_plans: 24
-  percent: 83
+  completed_plans: 25
+  percent: 86
 ---
 
 # Project State
@@ -25,17 +25,17 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Status
 
-- Current phase: 05 — Agência Multi-Cliente (4/9 plans complete)
-- Overall progress: 83% (24/29 plans complete)
+- Current phase: 05 — Agência Multi-Cliente (5/9 plans complete)
+- Overall progress: 86% (25/29 plans complete)
 - Phases complete: 5/7
 
 ```
-[████████░░] 83%
+[█████████░] 86%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
 Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete — data layer + write-back route + editable status dropdown, verified in production)
-Phase 05: Agência Multi-Cliente (4/9 plans complete — Plan 01 Wave 0 test scaffolds + Plan 02 agency data layer + Plan 03 Cliente role collapse + Plan 04 routing/navigation done)
+Phase 05: Agência Multi-Cliente (5/9 plans complete — Plan 01 Wave 0 test scaffolds + Plan 02 agency data layer + Plan 03 Cliente role collapse + Plan 04 routing/navigation + Plan 05 agency Server Actions done)
 ```
 
 ---
@@ -50,7 +50,7 @@ Phase 05: Agência Multi-Cliente (4/9 plans complete — Plan 01 Wave 0 test sca
 | 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
 | 3 | Dashboard UI | Not started | — |
 | 4 | AI Insights | Not started | — |
-| 5 | Agência Multi-Cliente | Em andamento — 4/9 plans (Plan 01 Wave 0 test scaffolds + Plan 02 agency data layer + Plan 03 Cliente role collapse + Plan 04 routing/navigation concluídos) | — |
+| 5 | Agência Multi-Cliente | Em andamento — 5/9 plans (Plan 01 Wave 0 test scaffolds + Plan 02 agency data layer + Plan 03 Cliente role collapse + Plan 04 routing/navigation + Plan 05 agency Server Actions concluídos) | — |
 
 ---
 
@@ -77,6 +77,7 @@ Phase 05: Agência Multi-Cliente (4/9 plans complete — Plan 01 Wave 0 test sca
 | Phase 05-agencia-multi-cliente P02 | 33min | 2 tasks | 5 files |
 | Phase 05-agencia-multi-cliente P03 | 19min | 3 tasks | 5 files |
 | Phase 05-agencia-multi-cliente P04 | 10min | 3 tasks | 7 files |
+| Phase 05-agencia-multi-cliente P05 | 15min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,7 @@ Phase 05: Agência Multi-Cliente (4/9 plans complete — Plan 01 Wave 0 test sca
 - Phase 05 Plan 02: `tests/agency-rls.test.ts`'s RLS fixtures preset `app_metadata: { role: 'agency', agency_id }` directly at `admin.createUser()` time (mirrors `tests/integration/sync-jobs-rls.test.ts`'s existing tenant_admin pattern) rather than relying on the Custom Access Token Hook — necessary given the hook-wiring bug above, and sufficient to verify the `_agency_select` RLS policies themselves (AGENCY-06)
 - Phase 05 Plan 03 (AGENCY-07): `tenant_users.role` collapsed to a single surviving value `tenant_admin` via live migration `0020` — pre-migration check (`SELECT role, count(*) FROM tenant_users GROUP BY role`) found only `{tenant_admin: 1}` live, zero `viewer` rows, so the promotive `UPDATE viewer->tenant_admin` was a documented no-op on current data but the `CHECK (role = 'tenant_admin')` constraint tightening still applied and is now live. `createTenantUser` and `components/tenants/add-user-modal.tsx` no longer accept/offer a role choice (D-03 "Cliente" = full access, including lead status edits). Removing the now-impossible "rejects role super_admin" test in `tests/tenants.test.ts` also resolved 2 of the 4 pre-existing `tsc --noEmit` errors flagged in `deferred-items.md` (Plan 05-01) as a natural side effect.
 - Phase 05 Plan 04 (AGENCY-03/AGENCY-04): `proxy.ts` redirects `role === 'agency'` to `/agencia` post-login and blocks non-`super_admin` from `/agencies`; `app/[tenant-slug]/layout.tsx`'s tenant guard replaced with a live RLS-scoped `tenants` existence query (`.eq('active', true).maybeSingle()`) instead of JWT string-equality — closes a latent bug where a deactivated tenant was never re-verified after login, and works identically for Cliente/Agencia/Super Admin. Switcher/sidebar/header/store all recognize `role === 'agency'`: switcher gains `manageHref`/`manageLabel` props, sidebar hides `AI Insights` and the entire `Conta` section for agency. `'viewer'` deliberately kept in `proxy.ts`'s `AppMetadata.role` and `tenant-store.tsx`'s `Role` type as a rollout-safety net even after Plan 03's live role collapse, in case a stale/cached JWT with `role=viewer` is still in circulation at deploy time.
+- Phase 05 Plan 05 (AGENCY-01/AGENCY-02): `lib/actions/agencies.ts` implements the 6 Super-Admin agency Server Actions (createAgency, deactivateAgency, reactivateAgency, createAgencyUser, grantTenant, revokeTenant), mirroring `lib/actions/tenants.ts`'s pattern exactly (Zod validation, `createServiceClient()`, `generateTempPassword()`, `revalidatePath`). `createAgencyUser` inserts exclusively into `agency_users`, never `tenant_users` (D-04) — verified by grep. `grantTenant`/`revokeTenant` are idempotent (`upsert(..., ignoreDuplicates: true)` / plain delete, both no-op on repeat calls) rather than erroring on duplicate/missing `agency_tenants` rows. `tests/agencies.test.ts` converted from Plan 01's `it.todo()` scaffold to 12 real, passing mock-based tests. Zero deviations — plan's provided code executed verbatim.
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -155,9 +157,9 @@ Phase 05: Agência Multi-Cliente (4/9 plans complete — Plan 01 Wave 0 test sca
 
 ## Session Continuity
 
-**Last updated:** 2026-07-09
-**Last action:** Fase 05 Plano 04 executado (routing/navigation, AGENCY-03/AGENCY-04). `proxy.ts` agora redireciona `role === 'agency'` para `/agencia` no pós-login e bloqueia não-`super_admin` de `/agencies`. `app/[tenant-slug]/layout.tsx` teve seu guard de tenant substituído por uma query RLS-scoped ao vivo (`.eq('active', true).maybeSingle()`) no lugar da comparação de string do JWT — funciona identicamente para Cliente/Agência/Super Admin e fecha um bug latente (tenant desativado nunca era re-verificado após o login). `tenant-switcher.tsx`/`header-actions.tsx`/`sidebar-nav.tsx`/`tenant-store.tsx` todos reconhecem `role === 'agency'` com escopo e copy corretos (manageHref/manageLabel, AI Insights e seção Conta ocultos para agência). `npm test` (18 arquivos, 132 passed/1 skipped/21 todo, sem regressões), `tsc --noEmit` sem novos erros (só os 2 pré-existentes em `vault-rpc.test.ts`), `npm run build` limpo. Nenhum desvio do plano.
-**Stopped at:** Completed 05-04-PLAN.md
-**Next action:** Retomar execução da Fase 05 a partir do Plano 05 (agency Server Actions) — o role collapse do Plano 03 está live, o blocker do Auth Hook (Plano 02) está resolvido, e agora o routing/navigation do Plano 04 reconhece corretamente o role agency, então a base de dados/RLS/routing está pronta para os planos de agência subsequentes (05, 06, 07, 08). Pendências não bloqueantes seguem: retomar Fase 2 (Data Pipeline, Plan 05) bloqueada até Google Ads Developer Token ser aprovado; autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/`; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
+**Last updated:** 2026-07-10
+**Last action:** Fase 05 Plano 05 executado (agency Server Actions, AGENCY-01/AGENCY-02). `lib/actions/agencies.ts` criado com as 6 Server Actions (createAgency, deactivateAgency, reactivateAgency, createAgencyUser, grantTenant, revokeTenant), espelhando exatamente o padrão de `lib/actions/tenants.ts` (Zod, `createServiceClient()`, `generateTempPassword()`, `revalidatePath`). `createAgencyUser` insere exclusivamente em `agency_users`, nunca em `tenant_users` (D-04, confirmado via grep). `grantTenant`/`revokeTenant` são idempotentes (upsert com `ignoreDuplicates`/delete simples). `tests/agencies.test.ts` teve todos os `it.todo()` do Plano 01 substituídos por 12 testes reais mock-based, todos passando. `npm test` (18 arquivos, 143 passed/1 skipped/10 todo, sem regressões), `tsc --noEmit` sem novos erros (só os 2 pré-existentes em `vault-rpc.test.ts`), `npm run build` limpo. Nenhum desvio do plano — código executado verbatim conforme especificado.
+**Stopped at:** Completed 05-05-PLAN.md
+**Next action:** Retomar execução da Fase 05 a partir do Plano 06 (UI de gerenciamento de agências/grants — consome `lib/actions/agencies.ts` como contrato). Pendências não bloqueantes seguem: retomar Fase 2 (Data Pipeline, Plan 05) bloqueada até Google Ads Developer Token ser aprovado; autorar LEADS-01..LEADS-05 em REQUIREMENTS.md; commitar `app/[tenant-slug]/leads/agente/`/`app/api/leads/chat/`; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
