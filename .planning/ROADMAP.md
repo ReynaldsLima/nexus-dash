@@ -201,6 +201,28 @@ Plans:
 - [x] 07-03-PLAN.md — Wave 2: GET /api/google-ads/callback (verify state, token exchange, Vault write, ad_accounts upsert) (SET-01)
 - [x] 07-04-PLAN.md — Wave 2: GoogleAdsForm + Settings page card (Customer ID input, inline error, pre-fill, Connect button) (SET-01)
 
+### Phase 8: Tech Debt Cleanup (TECH DEBT — non-blocking)
+
+**Goal:** Close out the non-blocking tech debt items from the `/gsd-audit-milestone` v1.0 re-audit (`.planning/v1.0-MILESTONE-AUDIT.md`, status `tech_debt`, 0 unsatisfied requirements). No requirement is unsatisfied — this phase is documentation/hygiene, not gap closure.
+
+**Requirements:** None new. Corrects stale bookkeeping for SET-02, DASH-01–04, CAMP-01–04 (already satisfied per `03-VERIFICATION.md` and this audit's integration checker) and formalizes AUTH-01/02/06 (already functionally proven, Phase 1).
+
+**Origin:** `.planning/v1.0-MILESTONE-AUDIT.md` (2026-07-11 re-audit) tech_debt block.
+
+**Depends on:** Phase 7
+
+**Scope:**
+1. Flip stale `REQUIREMENTS.md` checkboxes/traceability rows for SET-02, DASH-01–04, CAMP-01–04 from `[ ]`/Pending to `[x]`/Complete; add missing LEADS-01..05 and DASH-03-ext rows to the traceability table.
+2. Retroactively verify Phase 1 (Foundation) — produce a formal `01-VERIFICATION.md` closing AUTH-01/02/06's documentation gap (likely via `/gsd-verify-work 1`).
+3. Remove leftover test fixtures from the live Supabase project (agency "Agência Teste", test users `agente-teste@example.com`/`cliente-teste@example.com`, `rls-test-*`/`debug-agency` rows in `/agencies`).
+4. Delete the stray uncommitted `supabase/migrations/0012_add_google_sheets_to_tenants.sql` (superseded by the shipped `sheets_service_account` approach, never applied to any environment).
+5. Track (not code) the two remaining external/ops follow-ups: N8N daily-insights workflow activation (`ANTHROPIC_API_KEY`/`N8N_INSIGHTS_SECRET` in Vercel Prod) and the Phase 0 VPS security check (N8N version/health, editor auth) — both are ops steps outside this phase's code scope.
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 8 to break down)
+
 ---
 
 ## Coverage Validation
