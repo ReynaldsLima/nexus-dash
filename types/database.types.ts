@@ -144,6 +144,97 @@ export type Database = {
           },
         ]
       }
+      ai_insights: {
+        Row: {
+          created_at: string
+          id: string
+          impact: string
+          metrics: Json
+          recommendations: Json
+          source: string
+          summary: string
+          tenant_id: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          impact: string
+          metrics?: Json
+          recommendations?: Json
+          source: string
+          summary: string
+          tenant_id: string
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          impact?: string
+          metrics?: Json
+          recommendations?: Json
+          source?: string
+          summary?: string
+          tenant_id?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anomaly_alerts: {
+        Row: {
+          campaign_id: string
+          campaign_name: string
+          channel: string
+          created_at: string
+          drop_pct: number
+          id: string
+          metric: string
+          tenant_id: string
+          window_hours: number
+        }
+        Insert: {
+          campaign_id: string
+          campaign_name: string
+          channel: string
+          created_at?: string
+          drop_pct: number
+          id?: string
+          metric?: string
+          tenant_id: string
+          window_hours?: number
+        }
+        Update: {
+          campaign_id?: string
+          campaign_name?: string
+          channel?: string
+          created_at?: string
+          drop_pct?: number
+          id?: string
+          metric?: string
+          tenant_id?: string
+          window_hours?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anomaly_alerts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_metrics: {
         Row: {
           ad_group_id: string | null
