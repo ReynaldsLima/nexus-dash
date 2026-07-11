@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import { generateText } from 'ai'
 import { insightModel } from '@/lib/ai/anthropic'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -9,10 +10,19 @@ import { buildDailyPrompt } from '@/lib/ai/insight-prompt'
 export const runtime = 'nodejs'
 export const maxDuration = 60 // no human watching; well under Fluid Compute's 300s ceiling
 
+/** Constant-time string comparison to avoid a timing side-channel on the shared secret. */
+function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a)
+  const bufB = Buffer.from(b)
+  if (bufA.length !== bufB.length) return false
+  return timingSafeEqual(bufA, bufB)
+}
+
 export async function POST(req: Request) {
   // Shared-secret auth (no Supabase session — server-to-server call from N8N)
   const secret = req.headers.get('x-n8n-secret')
-  if (!secret || secret !== process.env.N8N_INSIGHTS_SECRET) {
+  const expected = process.env.N8N_INSIGHTS_SECRET
+  if (!secret || !expected || !safeCompare(secret, expected)) {
     return new Response('Unauthorized', { status: 401 })
   }
 
