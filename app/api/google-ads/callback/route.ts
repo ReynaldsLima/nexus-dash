@@ -89,10 +89,14 @@ export async function GET(req: NextRequest) {
     return settingsRedirect('token_exchange_failed')
   }
   if (!tokenRes.ok) return settingsRedirect('token_exchange_failed') // never log the body (Pitfall 5)
-  const tokens = (await tokenRes.json()) as {
-    access_token?: string
-    refresh_token?: string
-    expires_in?: number
+  // WR-02: .json() can throw on a non-JSON/truncated ok:true body — wrap it so the
+  // route always redirects back to Settings (its own stated design goal) instead
+  // of crashing with an unhandled 500.
+  let tokens: { access_token?: string; refresh_token?: string; expires_in?: number }
+  try {
+    tokens = await tokenRes.json()
+  } catch {
+    return settingsRedirect('token_exchange_failed')
   }
 
   // ── 6. Missing refresh_token is a HARD error (Pitfall 2 / T-07-05 — never
