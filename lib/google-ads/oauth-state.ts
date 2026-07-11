@@ -16,6 +16,19 @@ function base64url(input: Buffer | string): string {
   return Buffer.from(input).toString('base64url')
 }
 
+// Mirrors the DB CHECK constraint on tenants.slug (migration 0002_create_tenants.sql:
+// `slug ~ '^[a-z0-9-]+$' AND char_length(slug) BETWEEN 2 AND 50`). Any tenantSlug value
+// coming from a query string or a signed state MUST pass this check before it's ever
+// embedded in a redirect Location header — otherwise a value like `/evil.com` (which
+// contains no dot/slash-breaking chars once restricted to this charset) could turn
+// `new URL('/' + slug + '/settings', origin)` into a protocol-relative open redirect
+// (CWE-601, CR-01).
+const TENANT_SLUG_RE = /^[a-z0-9-]{2,50}$/
+
+export function safeTenantSlug(raw: string | null | undefined): string | null {
+  return raw && TENANT_SLUG_RE.test(raw) ? raw : null
+}
+
 function secret(): string {
   const s = process.env.GOOGLE_OAUTH_STATE_SECRET
   if (!s) throw new Error('GOOGLE_OAUTH_STATE_SECRET is not set')

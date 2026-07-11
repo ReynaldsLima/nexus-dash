@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyState } from '@/lib/google-ads/oauth-state'
+import { verifyState, safeTenantSlug } from '@/lib/google-ads/oauth-state'
 import { createServiceClient } from '@/lib/supabase/service'
 
 // Node runtime required: service role client uses 'server-only', and Vault writes
@@ -23,8 +23,15 @@ export async function GET(req: NextRequest) {
   const { tenantId, tenantSlug, customerId } = payload
 
   // Helper to build the settings redirect used by every subsequent exit.
+  // safeTenantSlug (CR-01) guards against an open redirect (CWE-601): even
+  // though tenantSlug came from an HMAC-verified state, validating its format
+  // before embedding it in a Location header costs nothing and closes the
+  // same class of bug that connect/route.ts had.
   function settingsRedirect(errCode?: string) {
-    const url = new URL(`/${tenantSlug}/settings`, req.nextUrl.origin)
+    const safeSlug = safeTenantSlug(tenantSlug)
+    const url = safeSlug
+      ? new URL(`/${safeSlug}/settings`, req.nextUrl.origin)
+      : new URL('/', req.nextUrl.origin)
     if (errCode) url.searchParams.set('google_error', errCode)
     else url.searchParams.set('google_connected', '1')
     return NextResponse.redirect(url)

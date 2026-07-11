@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod/v4'
 import { createClient } from '@/lib/supabase/server'
-import { signState } from '@/lib/google-ads/oauth-state'
+import { signState, safeTenantSlug } from '@/lib/google-ads/oauth-state'
 
 // Node runtime required: getClaims() needs Node's RS256/crypto, matching the
 // meta-ads/connect route's convention.
@@ -42,7 +42,10 @@ export async function GET(req: NextRequest) {
   // Used ONLY to surface errors inline on that page (D-04) — NEVER for
   // authorization (T-07-02: tenant_admin's authoritative tenant still comes
   // from getClaims() in step 5).
-  const redirectSlug = req.nextUrl.searchParams.get('tenantSlug') ?? ''
+  // Validated with safeTenantSlug (CR-01): an unvalidated tenantSlug (e.g. `/evil.com`)
+  // would let `new URL('/' + slug + '/settings', origin)` resolve as a protocol-relative
+  // open redirect (CWE-601). Only a value matching the tenants.slug charset is used.
+  const redirectSlug = safeTenantSlug(req.nextUrl.searchParams.get('tenantSlug'))
   function errorRedirect(code: string) {
     if (!redirectSlug) return NextResponse.json({ error: code }, { status: 400 }) // no slug → cannot redirect; JSON fallback
     const url = new URL(`/${redirectSlug}/settings`, req.nextUrl.origin)
