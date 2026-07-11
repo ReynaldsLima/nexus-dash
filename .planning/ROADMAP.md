@@ -193,7 +193,13 @@ Plans:
 1. Tenant Admin can initiate a Google Ads OAuth2 flow from the Settings page and, after granting consent, see the connection reflected as active immediately (mirrors SET-02's Meta Ads UX).
 2. The resulting refresh token is stored in Supabase Vault (same pattern as Meta Ads's `create_or_update_vault_secret` RPC), never in `ad_accounts` directly or logged.
 3. `ad_accounts` gets a `google_ads` row per connected tenant, consistent with the existing `meta_ads` row shape.
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Wave 0 test scaffolds (oauth-state, connect route, callback route) — RED specs (SET-01)
+- [ ] 07-02-PLAN.md — Wave 1: lib/google-ads/oauth-state.ts (HMAC state) + GET /api/google-ads/connect (auth/role/claims gate + redirect to Google) + GOOGLE_OAUTH_STATE_SECRET env (SET-01)
+- [ ] 07-03-PLAN.md — Wave 2: GET /api/google-ads/callback (verify state, token exchange, Vault write, ad_accounts upsert) (SET-01)
+- [ ] 07-04-PLAN.md — Wave 2: GoogleAdsForm + Settings page card (Customer ID input, inline error, pre-fill, Connect button) (SET-01)
 
 ---
 
