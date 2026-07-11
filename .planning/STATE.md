@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-07-11T23:06:34.249Z"
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-07-11T23:24:10.943Z"
 progress:
   total_phases: 10
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 46
-  completed_plans: 45
-  percent: 98
+  completed_plans: 46
+  percent: 100
 ---
 
 # Project State
@@ -19,18 +19,18 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-05-10)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Phase 08 — tech-debt-cleanup
+**Current focus:** Phase 08 — tech-debt-cleanup (complete)
 
 ---
 
 ## Status
 
-- Current phase: 08 — Tech Debt Cleanup — 2/3 plans complete (Plan 02: deleted dead migration `0012_add_google_sheets_to_tenants.sql` + created `.planning/OPS-FOLLOWUPS.md` durable ops-tracking doc — non-blocking, closes the v1.0 re-audit's `tech_debt` finding)
-- Overall progress: 45/46 planned plans complete (98%) — 9/9 v1.0 phases fully done at the code level; Phase 08 (tech-debt cleanup, non-blocking) in progress
-- Phases complete: 9/9 (v1.0 milestone phases); Phase 08 in progress (2/3 plans)
+- Current phase: 08 — Tech Debt Cleanup — 3/3 plans complete (Plan 03: deleted 11 fixture `agencies` rows + 1 `agency_users` + 1 `tenant_users` + 2 `@example.com` `auth.users` from live Supabase, FK-safe order, human-approved delete set — non-blocking, closes the v1.0 re-audit's `tech_debt` finding). **Phase 8 done — v1.0 milestone fully complete at the code level, 10/10 phases.**
+- Overall progress: 46/46 planned plans complete (100%) — 10/10 phases done
+- Phases complete: 10/10 (v1.0 milestone phases + Phase 08 tech-debt cleanup)
 
 ```
-[██████████] 98%
+[██████████] 100%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management; retroactive 01-VERIFICATION.md added via Phase 8 Plan 01)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
@@ -39,7 +39,7 @@ Phase 04: AI Insights (6/6 plans complete — lib/ai/ core + on-demand streaming
 Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a phase-blocking bug mid-verification (getUser().app_metadata vs JWT claims), fixed via /gsd-debug, all 7 UAT scripts re-verified live and passed)
 Phase 06: Security & Consistency — Leads Endpoints (4/4 plans complete — AGENCY-08 fully satisfied across GET/PATCH/POST leads endpoints, rate limiter + streamText/insightModel migration, final human-verify checkpoint executed live against Vercel production via Playwright MCP and accepted partial-but-scoped: auth/scope gate + client error-rendering confirmed live, streamed-reply/429-UX pending on a pre-existing missing ANTHROPIC_API_KEY Vercel env var (Phase 4 gap, not a Phase 6 defect))
 Phase 07: Google Ads OAuth2 Connect (gap closure) (4/4 plans complete — SET-01 fully code-complete: state helper + connect route + callback route + Settings UI wiring; live end-to-end verification blocked pending user's Google Cloud OAuth Client, D-03, same class as Phase 2's Developer Token)
-Phase 08: Tech Debt Cleanup (2/3 plans complete — Plan 01: 01-VERIFICATION.md authored + REQUIREMENTS.md 15-checkbox correction + 6-row traceability gap filled; Plan 02: dead migration 0012 deleted + OPS-FOLLOWUPS.md created; Plan 03 pending — live Supabase test-fixture cleanup)
+Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md authored + REQUIREMENTS.md 15-checkbox correction + 6-row traceability gap filled; Plan 02: dead migration 0012 deleted + OPS-FOLLOWUPS.md created; Plan 03: live Supabase test-fixture cleanup — 11 agencies + 1 agency_users + 1 tenant_users + 2 auth.users deleted, FK-safe, human-approved)
 ```
 
 ---
@@ -57,7 +57,7 @@ Phase 08: Tech Debt Cleanup (2/3 plans complete — Plan 01: 01-VERIFICATION.md 
 | 5 | Agência Multi-Cliente | ✅ Concluída — 9/9 plans, UAT completo (achou e corrigiu bug bloqueante via /gsd-debug) | 2026-07-10 |
 | 6 | Security & Consistency — Leads Endpoints (gap closure) | ✅ Concluída — 4/4 plans, AGENCY-08 completo, gate automatizado verde, checkpoint de verificação humana aceito parcial (produção via Playwright, gap externo ANTHROPIC_API_KEY pendente desde Fase 4) | 2026-07-11 |
 | 7 | Google Ads OAuth2 Connect (gap closure) | ✅ Concluída (código) — 4/4 plans, SET-01 completo (state helper + connect route + callback route + Settings UI); verificação manual ao vivo pendente do Google Cloud OAuth Client do usuário (D-03) | 2026-07-11 |
-| 8 | Tech Debt Cleanup (não-bloqueante) | 🔄 Em andamento — 2/3 plans, Plano 01 (01-VERIFICATION.md + REQUIREMENTS.md corrigido) e Plano 02 (migration 0012 apagada + OPS-FOLLOWUPS.md) concluídos | — |
+| 8 | Tech Debt Cleanup (não-bloqueante) | ✅ Concluída — 3/3 plans: Plano 01 (01-VERIFICATION.md + REQUIREMENTS.md corrigido), Plano 02 (migration 0012 apagada + OPS-FOLLOWUPS.md), Plano 03 (limpeza de fixtures de teste no Supabase live) | 2026-07-11 |
 
 ---
 
@@ -67,9 +67,9 @@ Phase 08: Tech Debt Cleanup (2/3 plans complete — Plan 01: 01-VERIFICATION.md 
 |--------|-------|
 | Requirements total | 26 core (v1) + 5 LEADS + 8 AGENCY = 39, + SET-01/AGENCY-08 gap-closure re-scoping (see v1.0-MILESTONE-AUDIT.md) |
 | Requirements complete | 39/39 satisfied (AI-01, AI-03 via Phase 4 Plan 04; AI-02, AI-04 via Phase 4 Plan 06; AGENCY-08 fully satisfied via Phase 6 Plans 02+03; SET-01 fully satisfied via Phase 7 Plan 04) — per `.planning/v1.0-MILESTONE-AUDIT.md` (2026-07-10), updated 2026-07-11 |
-| Plans written | 32 |
-| Plans complete | 32 |
-| Phases complete | 9/9 (0, 1, 03.1, 5, 4, 6, 7 done; 2 code-complete/externally blocked; 3 done) |
+| Plans written | 32 (+3 Phase 8 tech-debt cleanup, non-blocking, added post-milestone) |
+| Plans complete | 32 (+3 Phase 8) |
+| Phases complete | 10/10 (0, 1, 03.1, 5, 4, 6, 7, 8 done; 2 code-complete/externally blocked; 3 done) |
 | Phase 04-ai-insights P01 | 8min | 2 tasks | 5 files |
 | Phase 04-ai-insights P02 | 14min | 2 tasks | 7 files |
 | Phase 04-ai-insights P03 | 12min | 3 tasks | 7 files |
@@ -86,6 +86,7 @@ Phase 08: Tech Debt Cleanup (2/3 plans complete — Plan 01: 01-VERIFICATION.md 
 | Phase 07-google-ads-oauth2-connect P04 | ~12min | 2 tasks | 2 files |
 | Phase 08-tech-debt-cleanup P01 | 8min | 2 tasks | 2 files |
 | Phase 08-tech-debt-cleanup P02 | 1min | 2 tasks | 2 files |
+| Phase 08-tech-debt-cleanup P03 | 6min | 1 tasks | 0 files |
 
 ### Per-Plan Execution Log
 
@@ -214,9 +215,9 @@ Phase 08: Tech Debt Cleanup (2/3 plans complete — Plan 01: 01-VERIFICATION.md 
 
 ## Session Continuity
 
-**Last updated:** 2026-07-11 - Fase 08 (Tech Debt Cleanup) Plano 02 CONCLUÍDO (2/3 plans): migration órfã `0012_add_google_sheets_to_tenants.sql` apagada + `.planning/OPS-FOLLOWUPS.md` criado.
-**Last action:** Executado `08-02-PLAN.md` (2 tasks, repo hygiene apenas — nenhum código de aplicação alterado): Task 1 apagou (delete de arquivo comum, não `git rm`, pois era untracked) `supabase/migrations/0012_add_google_sheets_to_tenants.sql` — confirmado via `git ls-files` que nunca foi versionado nem aplicado a nenhum ambiente Supabase, superado pela abordagem `sheets_service_account` da Fase 03.1; nenhum comando de migration-apply foi executado. Sem commit associado a essa task (deletar arquivo untracked não gera diff no git). Task 2 criou `.planning/OPS-FOLLOWUPS.md`, doc durável consolidando os dois follow-ups de ops pendentes (ativação do workflow N8N diário de insights + verificação de segurança da VPS da Fase 0) mais outros bloqueios externos já conhecidos (ANTHROPIC_API_KEY, Google Ads Developer Token, Google Cloud OAuth Client, tokens Meta System User por tenant) — commit `77e67d3`. Zero desvios; `git show --stat` confirmou que só o novo `.md` mudou, nenhuma ação real foi executada contra N8N/VPS/Vercel. **Fase 8 agora 2/3 plans** (fase de limpeza não-bloqueante; Plano 03 pendente — limpeza de fixtures de teste no Supabase live via checkpoint humano).
-**Stopped at:** Completed 08-02-PLAN.md
-**Next action:** Executar `08-03-PLAN.md` (limpeza de fixtures de teste no Supabase live via checkpoint humano). Itens não bloqueantes remanescentes de fases anteriores (verificação manual/infra externa, não gates de código, não pertencem à Fase 8 — agora também rastreados em `.planning/OPS-FOLLOWUPS.md`): (1) usuário precisa criar o Google Cloud OAuth Client e configurar `GOOGLE_ADS_CLIENT_ID`/`GOOGLE_ADS_CLIENT_SECRET`/`GOOGLE_OAUTH_STATE_SECRET` no Vercel para rodar o round-trip ao vivo da Fase 7 (D-03); (2) `ANTHROPIC_API_KEY` ainda precisa ser adicionada ao Vercel Dashboard (Production/Preview/Development) para chamadas reais à Claude em produção (Fase 4/6); (3) import/ativação do workflow N8N diário de insights pendente (Fase 4, `04-VALIDATION.md`); (4) os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
+**Last updated:** 2026-07-11 - Fase 08 (Tech Debt Cleanup) Plano 03 CONCLUÍDO (3/3 plans — Fase 8 completa): fixtures de teste removidas do Supabase live (rvkkvjitfddtbdpkupok).
+**Last action:** Executado `08-03-PLAN.md` (Task 1 enumeração read-only + Task 2 checkpoint humano em sessão anterior; Task 3 — o DELETE aprovado — nesta sessão de continuação). Deletado, em ordem FK-safe, exatamente o conjunto congelado aprovado pelo usuário: `tenant_users` (1 linha, id `221be5cb-...`), `agency_users` (1 linha, id `17753a87-...`), `agencies` (11 linhas — `Agência Teste`, `rls-test-agency*` x3 duplicadas 3x, `debug-agency` x2), `auth.users` (2 linhas — `agente-teste@example.com`, `cliente-teste@example.com`, via `auth.admin.deleteUser`, cascata automática para `auth.identities`). Nenhuma ferramenta MCP do Supabase (`mcp__supabase__execute_sql`) nem CLI (`supabase`/`psql`) estava disponível neste executor — usado em vez disso um script Node temporário com `@supabase/supabase-js` + `SUPABASE_SERVICE_ROLE_KEY` de `.env.local` (deletado após uso, zero rastro no repo). Verificado pós-delete: 0 linhas remanescentes em todos os filtros de fixture, tabela `agencies` agora com 0 linhas totais, os 2 `auth.users` de teste retornam "User not found", e o tenant real `LUKSEG` (id `9f7e3c67-...`) permanece intacto e `active`. Nenhum arquivo de repositório alterado por esta task (operação somente no Supabase live) — apenas `08-03-SUMMARY.md`/`STATE.md`/`ROADMAP.md` desta finalização. **Fase 8 agora 3/3 plans — CONCLUÍDA.** Milestone v1.0 agora 10/10 fases completas ao nível de código.
+**Stopped at:** Completed 08-03-PLAN.md
+**Next action:** Nenhuma fase planejada pendente — milestone v1.0 completo ao nível de código (10/10 fases). Itens não bloqueantes remanescentes (verificação manual/infra externa, não gates de código, rastreados em `.planning/OPS-FOLLOWUPS.md`): (1) usuário precisa criar o Google Cloud OAuth Client e configurar `GOOGLE_ADS_CLIENT_ID`/`GOOGLE_ADS_CLIENT_SECRET`/`GOOGLE_OAUTH_STATE_SECRET` no Vercel para rodar o round-trip ao vivo da Fase 7 (D-03); (2) `ANTHROPIC_API_KEY` ainda precisa ser adicionada ao Vercel Dashboard (Production/Preview/Development) para chamadas reais à Claude em produção (Fase 4/6); (3) import/ativação do workflow N8N diário de insights pendente (Fase 4, `04-VALIDATION.md`); (4) os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora. Considerar rodar `/gsd-audit-milestone` para uma verificação final de fechamento do v1.0.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
