@@ -173,7 +173,13 @@ Plans:
 1. `app/api/leads/chat/route.ts` either enforces the same explicit tenant/role scoping as `PATCH /api/leads/[id]/status` (plus reasonable rate limiting) and is committed, or is removed entirely if not wanted for v1.
 2. `GET /api/leads` derives its tenant/agency scope explicitly via `getClaims()`, matching the pattern `PATCH /api/leads/[id]/status` already uses, instead of relying solely on implicit RLS.
 3. No untracked files remain under `app/api/leads/` or `app/[tenant-slug]/leads/` that aren't part of a decided, committed feature.
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Wave 0 test scaffolds (rate-limit, leads-get-route, leads-chat-route) (AGENCY-08)
+- [ ] 06-02-PLAN.md — GET /api/leads role gate + getClaims() scope (AGENCY-08, D-07)
+- [ ] 06-03-PLAN.md — Chat hardening: rate limiter + role/scope gate + SDK migration + client + commit untracked (D-01..06, D-08)
+- [ ] 06-04-PLAN.md — Manual verification checkpoint (streamed chat UI + 429 UX + phase gate)
 
 ---
 
