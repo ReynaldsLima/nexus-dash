@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: unknown
 stopped_at: Phase 04 UI-SPEC approved
-last_updated: "2026-07-10T23:31:42.100Z"
+last_updated: "2026-07-11T01:00:36.305Z"
 progress:
   total_phases: 9
   completed_phases: 6
-  total_plans: 29
+  total_plans: 35
   completed_plans: 29
-  percent: 100
+  percent: 83
 ---
 
 # Project State
@@ -49,7 +49,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 | 2 | Data Pipeline | Bloqueada (ver pré-requisitos) | — |
 | 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
 | 3 | Dashboard UI | ✅ Concluída — 6/6 plans, 15/15 must-haves verificados (`03-VERIFICATION.md`) | 2026-06-05 |
-| 4 | AI Insights | Planejamento em andamento — CONTEXT.md + RESEARCH.md + UI-SPEC.md prontos, PLAN.md em geração | — |
+| 4 | AI Insights | Planejada — 6 planos em 4 waves, plan-checker aprovado (1 iteração de revisão), pronta para `/gsd-execute-phase 4` | — |
 | 5 | Agência Multi-Cliente | ✅ Concluída — 9/9 plans, UAT completo (achou e corrigiu bug bloqueante via /gsd-debug) | 2026-07-10 |
 | 6 | Security & Consistency — Leads Endpoints (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
 | 7 | Google Ads OAuth2 Connect (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
