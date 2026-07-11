@@ -1,9 +1,11 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Megaphone, Sparkles, Users2, Bot, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAnomalyAlertsStore } from '@/lib/stores/anomaly-alerts'
 
 const MARKETING_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard', key: 'dashboard' },
@@ -16,7 +18,7 @@ const LEADS_ITEMS = [
   { icon: Bot, label: 'Agente IA', key: 'leads/agente' },
 ]
 
-function NavLink({ href, icon: Icon, label, isActive }: { href: string; icon: React.ElementType; label: string; isActive: boolean }) {
+function NavLink({ href, icon: Icon, label, isActive, badgeCount }: { href: string; icon: React.ElementType; label: string; isActive: boolean; badgeCount?: number }) {
   return (
     <Link
       href={href}
@@ -29,13 +31,28 @@ function NavLink({ href, icon: Icon, label, isActive }: { href: string; icon: Re
     >
       <Icon className="size-4 shrink-0" aria-hidden="true" />
       {label}
+      {!!badgeCount && badgeCount > 0 && (
+        <span
+          className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+          style={{ background: 'var(--chart-5)', color: 'white' }}
+          aria-label={`${badgeCount} alertas de anomalia não visualizados`}
+        >
+          {badgeCount > 9 ? '9+' : badgeCount}
+        </span>
+      )}
     </Link>
   )
 }
 
 export function SidebarNav({ slug, role }: { slug: string; role?: string | null }) {
   const pathname = usePathname()
+  const unread = useAnomalyAlertsStore((s) => s.unread)
+  const clearUnread = useAnomalyAlertsStore((s) => s.clearUnread)
   const marketingItems = role === 'agency' ? MARKETING_ITEMS.filter((item) => item.key !== 'insights') : MARKETING_ITEMS
+
+  useEffect(() => {
+    if (pathname.startsWith(`/${slug}/insights`)) clearUnread()
+  }, [pathname, slug, clearUnread])
 
   return (
     <div className="flex flex-col h-full py-4 gap-4">
@@ -51,6 +68,7 @@ export function SidebarNav({ slug, role }: { slug: string; role?: string | null 
               icon={icon}
               label={label}
               isActive={pathname.startsWith(`/${slug}/${key}`)}
+              badgeCount={key === 'insights' ? unread : undefined}
             />
           ))}
         </nav>

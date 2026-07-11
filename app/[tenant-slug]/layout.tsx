@@ -5,6 +5,8 @@ import { HeaderActions } from '@/components/layout/header-actions'
 import { SidebarNav } from '@/components/layout/sidebar-nav'
 import { type TenantOption } from '@/components/tenants/tenant-switcher'
 import { createClient } from '@/lib/supabase/server'
+import { Toaster } from '@/components/ui/sonner'
+import { AnomalyListener } from '@/components/insights/anomaly-listener'
 
 interface TenantLayoutProps {
   children: React.ReactNode
@@ -42,6 +44,7 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
   // Live, RLS-scoped existence check — replaces the old JWT string-equality guard, which
   // structurally cannot express "member of a set of tenants" (agency) and never re-verified
   // `active` status for a Cliente whose tenant was deactivated after login.
+  let tenantId: string | null = null
   if (role !== 'super_admin') {
     const { data: tenantRow } = await supabase
       .from('tenants')
@@ -50,6 +53,16 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
       .eq('active', true)
       .maybeSingle()
     if (!tenantRow) redirect('/')
+    tenantId = tenantRow.id
+  } else {
+    // anomaly_alerts is super_admin-only (RLS); resolve the active tenant's id for the
+    // Realtime filter used by AnomalyListener.
+    const { data: tenantRow2 } = await supabase
+      .from('tenants')
+      .select('id')
+      .eq('slug', urlSlug)
+      .maybeSingle()
+    tenantId = tenantRow2?.id ?? null
   }
 
   const tenants = (role === 'super_admin' || role === 'agency') ? await loadTenantsForSwitcher() : []
@@ -74,6 +87,21 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
           <div className="px-8 py-8">{children}</div>
         </main>
       </div>
+
+      <Toaster
+        theme="dark"
+        position="top-right"
+        richColors={false}
+        closeButton
+        style={{
+          '--normal-bg': 'var(--card)',
+          '--normal-border': 'var(--border)',
+          '--normal-text': 'var(--foreground)',
+        } as React.CSSProperties}
+      />
+      {role === 'super_admin' && tenantId && (
+        <AnomalyListener tenantId={tenantId} tenantSlug={urlSlug} />
+      )}
     </div>
   )
 }
