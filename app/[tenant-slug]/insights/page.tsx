@@ -114,7 +114,7 @@ function InsightCard({ insight }: { insight: AiInsight }) {
             >
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{m.label}</p>
               <p className="text-sm font-semibold tabular-nums mt-0.5">
-                <span dangerouslySetInnerHTML={{ __html: m.value }} />
+                <span>{m.value}</span>
                 {m.delta && (
                   <span className="text-xs font-normal text-muted-foreground ml-1.5">{m.delta}</span>
                 )}
