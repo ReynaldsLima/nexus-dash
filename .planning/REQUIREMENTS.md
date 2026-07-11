@@ -36,9 +36,9 @@
 
 ### AI Insights
 
-- [ ] **AI-01**: Super Admin can trigger on-demand campaign analysis via a button on the dashboard; Claude generates insights and returns results with type, priority, recommended action, and impact estimate
+- [x] **AI-01**: Super Admin can trigger on-demand campaign analysis via a button on the dashboard; Claude generates insights and returns results with type, priority, recommended action, and impact estimate
 - [ ] **AI-02**: N8N runs scheduled daily analysis at 05:00 UTC after both sync workflows complete; results stored to database
-- [ ] **AI-03**: AI Insights history page lists all generated insights with type, priority, recommended action, impact, and generation timestamp
+- [x] **AI-03**: AI Insights history page lists all generated insights with type, priority, recommended action, impact, and generation timestamp
 - [ ] **AI-04**: Anomaly detection alerts appear in-app when ROAS drops more than 20% within a 24-hour window
 
 ### Settings
@@ -122,9 +122,9 @@ These are table stakes or expected features not included in v1 due to complexity
 | CAMP-04 | 3 — Dashboard UI | Pending | TBD |
 | SET-01 | 7 — Google Ads OAuth2 Connect (gap closure) | Pending | TBD |
 | SET-02 | 3 — Dashboard UI | Pending | TBD |
-| AI-01 | 4 — AI Insights | Pending | TBD |
+| AI-01 | 4 — AI Insights | Complete | TBD |
 | AI-02 | 4 — AI Insights | Pending | TBD |
-| AI-03 | 4 — AI Insights | Pending | TBD |
+| AI-03 | 4 — AI Insights | Complete | TBD |
 | AI-04 | 4 — AI Insights | Pending | TBD |
 | AGENCY-01 | 5 — Access Modules | Complete | 05-05, 05-06 |
 | AGENCY-02 | 5 — Access Modules | Complete | 05-05, 05-06 |
