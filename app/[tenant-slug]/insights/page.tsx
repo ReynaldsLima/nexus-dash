@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { AlertTriangle, CheckCircle2, Lightbulb, Loader2, Sparkles, TrendingUp } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { MOCK_INSIGHTS, type AiInsight } from '@/lib/mock-data'
+import type { AiInsight } from '@/lib/mock-data'
+import { useAiInsights } from '@/lib/hooks/use-ai-insights'
+import { StreamingInsightCard } from '@/components/insights/streaming-insight-card'
 
 // ─── Type helpers ─────────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
@@ -145,12 +148,68 @@ function InsightCard({ insight }: { insight: AiInsight }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function InsightsPage() {
-  const [generating, setGenerating] = useState(false)
+  const params = useParams()
+  const tenantSlug = params['tenant-slug'] as string
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
-  const handleGenerate = () => {
-    setGenerating(true)
-    setTimeout(() => setGenerating(false), 2500)
+  const { data: insights, isLoading, isError, refetch } = useAiInsights(tenantSlug)
+
+  const [streamState, setStreamState] = useState<'idle' | 'streaming' | 'completing' | 'error'>('idle')
+  const [streamedText, setStreamedText] = useState('')
+  const hasTriggeredRef = useRef(false)
+
+  const handleGenerate = async () => {
+    if (streamState !== 'idle') return
+
+    setStreamState('streaming')
+    setStreamedText('')
+
+    try {
+      const res = await fetch('/api/insights/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantSlug }),
+      })
+
+      if (!res.ok || !res.body) {
+        setStreamState('error')
+        return
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let full = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const chunk = decoder.decode(value, { stream: true })
+        full += chunk
+        const displayText = full.split('<insight_data>')[0]
+        setStreamedText(displayText)
+      }
+
+      setStreamState('completing')
+      setTimeout(async () => {
+        await refetch()
+        setStreamState('idle')
+        setStreamedText('')
+      }, 600)
+    } catch {
+      setStreamState('error')
+    }
   }
+
+  // Trigger param (D-02): auto-invoke generation when arriving from the dashboard shortcut
+  useEffect(() => {
+    if (searchParams.get('trigger') === '1' && !hasTriggeredRef.current) {
+      hasTriggeredRef.current = true
+      handleGenerate()
+      router.replace(`/${tenantSlug}/insights`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, tenantSlug])
 
   return (
     <section className="flex flex-col gap-6">
@@ -159,13 +218,13 @@ export default function InsightsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">AI Insights</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Recomendações geradas por Claude&nbsp;·&nbsp;{MOCK_INSIGHTS.length} análises
+            Recomendações geradas por Claude&nbsp;·&nbsp;{insights?.length ?? 0} análises
           </p>
         </div>
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={generating}
+          disabled={streamState !== 'idle'}
           className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
           style={{
             background: 'var(--sidebar-primary)',
@@ -173,7 +232,7 @@ export default function InsightsPage() {
           }}
           aria-live="polite"
         >
-          {generating ? (
+          {streamState !== 'idle' ? (
             <>
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               Analisando…
@@ -181,36 +240,45 @@ export default function InsightsPage() {
           ) : (
             <>
               <Sparkles className="size-4" aria-hidden="true" />
-              Gerar Novo Insight
+              Analisar agora
             </>
           )}
         </button>
       </div>
 
-      {/* Generating placeholder */}
-      {generating && (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-            <div
-              className="p-3 rounded-full"
-              style={{ background: 'oklch(0.60 0.22 258 / 0.12)' }}
-            >
-              <Sparkles className="size-6" style={{ color: 'var(--chart-1)' }} aria-hidden="true" />
-            </div>
-            <p className="text-sm font-medium">Claude está analisando as campanhas…</p>
-            <p className="text-xs text-muted-foreground max-w-xs">
-              Avaliando ROAS, frequência, CTR e padrões históricos dos últimos 30 dias.
-            </p>
-          </CardContent>
-        </Card>
+      {/* Streaming card */}
+      {streamState !== 'idle' && (
+        <StreamingInsightCard
+          state={streamState}
+          text={streamedText}
+          onRetry={handleGenerate}
+        />
       )}
 
       {/* Insight list */}
-      <div className="flex flex-col gap-4">
-        {MOCK_INSIGHTS.map((insight) => (
-          <InsightCard key={insight.id} insight={insight} />
-        ))}
-      </div>
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Carregando…</p>
+      ) : isError ? (
+        <Card>
+          <CardContent className="pt-6 pb-6 text-center text-sm text-muted-foreground">
+            Erro ao carregar insights. Tente recarregar a página.
+          </CardContent>
+        </Card>
+      ) : insights && insights.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-2 text-center">
+          <Sparkles className="size-8 text-muted-foreground/40" aria-hidden="true" />
+          <p className="text-sm font-semibold">Nenhuma análise ainda</p>
+          <p className="text-sm text-muted-foreground">
+            Clique em &quot;Analisar agora&quot; para gerar a primeira recomendação de IA para este tenant.
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {insights?.map((insight) => (
+            <InsightCard key={insight.id} insight={insight} />
+          ))}
+        </div>
+      )}
 
       {/* Footer note */}
       <p className="text-xs text-muted-foreground/50 text-center pb-2">
