@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       const parsed = extractStructuredBlock(text)
       const prose = stripStructuredBlock(text)
       // Parse-failure policy (D-03 must always hold): persist a fallback row rather than drop.
-      await service.from('ai_insights').insert({
+      const { error } = await service.from('ai_insights').insert({
         tenant_id: tenantId,
         source: 'on_demand',
         type: parsed?.type ?? 'optimization',
@@ -58,6 +58,7 @@ export async function POST(req: Request) {
         recommendations: parsed?.recommendations ?? [],
         impact: parsed?.impact ?? 'medium',
       })
+      if (error) console.error('[insights/generate] onFinish insert failed', error)
     },
   })
 
