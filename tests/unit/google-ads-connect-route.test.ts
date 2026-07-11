@@ -87,7 +87,9 @@ describe('GET /api/google-ads/connect', () => {
   it('super_admin + valid customerId → 307 redirect to Google with required params', async () => {
     mockState.role = 'super_admin'
     const { GET } = await import('@/app/api/google-ads/connect/route')
-    const res = await GET(makeRequest('customerId=123-456-7890&tenantId=tenant-uuid-1&tenantSlug=acme'))
+    const res = await GET(
+      makeRequest('customerId=123-456-7890&tenantId=aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee&tenantSlug=acme')
+    )
     expect(res.status).toBe(307)
     const loc = res.headers.get('location')!
     expect(loc).toContain('https://accounts.google.com/o/oauth2/v2/auth')
@@ -97,6 +99,16 @@ describe('GET /api/google-ads/connect', () => {
     expect(decodeURIComponent(loc)).toContain('adwords')
     expect(loc).toContain('state=')
     expect(loc).toContain('response_type=code')
+  })
+
+  it('super_admin + malformed tenantId (not a UUID) → redirect ?google_error=missing_tenant (WR-03)', async () => {
+    mockState.role = 'super_admin'
+    const { GET } = await import('@/app/api/google-ads/connect/route')
+    const res = await GET(makeRequest('customerId=123-456-7890&tenantId=not-a-uuid&tenantSlug=acme'))
+    expect([302, 307]).toContain(res.status)
+    const loc = res.headers.get('location')!
+    expect(loc).toContain('google_error=missing_tenant')
+    expect(loc).not.toContain('accounts.google.com')
   })
 
   it('tenant_admin resolves tenantId/tenantSlug from claims, NOT from query', async () => {

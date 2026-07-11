@@ -72,9 +72,14 @@ export async function GET(req: NextRequest) {
   let tenantId: string
   let tenantSlug: string
   if (role === 'super_admin') {
-    tenantId = req.nextUrl.searchParams.get('tenantId') ?? ''
-    tenantSlug = req.nextUrl.searchParams.get('tenantSlug') ?? ''
-    if (!tenantId || !tenantSlug) return errorRedirect('missing_tenant')
+    // WR-03: validate format (UUID / slug charset) rather than a bare truthiness
+    // check — a malformed tenantId would otherwise only fail much later, at the
+    // callback's ad_accounts upsert FK constraint, surfacing an opaque save_failed.
+    const parsedTenantId = z.uuid().safeParse(req.nextUrl.searchParams.get('tenantId'))
+    const parsedTenantSlug = safeTenantSlug(req.nextUrl.searchParams.get('tenantSlug'))
+    if (!parsedTenantId.success || !parsedTenantSlug) return errorRedirect('missing_tenant')
+    tenantId = parsedTenantId.data
+    tenantSlug = parsedTenantSlug
   } else {
     const { data: claimsData } = await supabase.auth.getClaims()
     const claimTenantId = claimsData?.claims?.app_metadata?.tenant_id as string | undefined
