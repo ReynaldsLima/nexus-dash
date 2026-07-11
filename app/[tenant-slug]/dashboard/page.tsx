@@ -39,6 +39,7 @@ import {
 } from '@/lib/dashboard-kpis'
 import { brl, num } from '@/lib/formatters'
 import { ChannelSheet } from '@/components/dashboard/channel-sheet'
+import { AiShortcutCard } from '@/components/dashboard/ai-shortcut-card'
 
 // ─── Chart configs ────────────────────────────────────────────────────────────
 const spendConfig = {
@@ -306,6 +307,9 @@ export default function DashboardPage() {
           sub="total de conversões"
         />
       </div>
+
+      {/* AI on-demand shortcut (D-02) */}
+      <AiShortcutCard tenantSlug={tenantSlug} />
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
