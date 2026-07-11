@@ -1,10 +1,11 @@
 ---
 phase: 07
 slug: google-ads-oauth2-connect
-status: draft
+status: validated
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-07-11
+validated: 2026-07-11
 ---
 
 # Phase 07 — Validation Strategy
@@ -38,15 +39,17 @@ created: 2026-07-11
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 07-01-01 | 01 | 0 | SET-01 | T-07-01 | Write `oauth-state.test.ts` RED — round-trip (`expired:false`), tampered sig/payload/malformed → null, expired-but-validly-signed → `{expired:true}` (payload preserved, NOT null) | unit | `npx vitest run tests/unit/oauth-state.test.ts` | ❌ W0 | ⬜ pending |
-| 07-01-02 | 01 | 0 | SET-01 | T-07-02 | Write `google-ads-connect-route.test.ts` RED — 401 JSON only for no-user; role/validation/missing-tenant failures redirect to `?google_error=forbidden\|invalid_customer_id`; tenant scope from claims; success builds Google URL (`access_type=offline`+`prompt=consent`+signed `state`) | unit | `npx vitest run tests/unit/google-ads-connect-route.test.ts` | ❌ W0 | ⬜ pending |
-| 07-01-03 | 01 | 0 | SET-01 | T-07-04 / T-07-05 | Write `google-ads-callback-route.test.ts` RED — bad-sig state → `/`; expired-but-valid state → `?google_error=state_expired`; success writes Vault + upserts `ad_accounts` (`active:true`); redirects with `google_error=...` on Google error / failed exchange / missing refresh_token | unit | `npx vitest run tests/unit/google-ads-callback-route.test.ts` | ❌ W0 | ⬜ pending |
-| 07-02-01 | 02 | 1 | SET-01 | T-07-01 | Implement `lib/google-ads/oauth-state.ts` — `signState`/`verifyState` (node:crypto HMAC); `verifyState` returns null on bad-sig/malformed, `{payload,expired}` otherwise → turns 07-01-01 GREEN | unit | `npx vitest run tests/unit/oauth-state.test.ts` | ❌ W0 | ⬜ pending |
-| 07-02-02 | 02 | 1 | SET-01 | — | Add `GOOGLE_OAUTH_STATE_SECRET` (+ OAuth client placeholders) to `.env.local` / `.env.test.example` | config | `grep -q GOOGLE_OAUTH_STATE_SECRET .env.local && grep -q GOOGLE_OAUTH_STATE_SECRET .env.test.example` | N/A | ⬜ pending |
-| 07-02-03 | 02 | 1 | SET-01 | T-07-02 | Implement `app/api/google-ads/connect/route.ts` — auth/role/scope gate; failure paths redirect to `/${tenantSlug}/settings?google_error=<code>` (not JSON) when tenant resolvable; success → Google redirect → turns 07-01-02 GREEN | unit | `npx vitest run tests/unit/google-ads-connect-route.test.ts` | ❌ W0 | ⬜ pending |
-| 07-03-01 | 03 | 2 | SET-01 | T-07-01 / T-07-04 / T-07-05 | Implement `app/api/google-ads/callback/route.ts` — verify state (bad-sig → `/`, expired → `state_expired`), exchange code, Vault write, `ad_accounts` upsert (`active:true`), error redirects → turns 07-01-03 GREEN | unit | `npx vitest run tests/unit/google-ads-callback-route.test.ts` | ❌ W0 | ⬜ pending |
-| 07-04-01 | 04 | 2 | SET-01 | T-07-02 / T-07-08 | Create `components/settings/google-ads-form.tsx` — Customer ID input, status badge, inline `google_error` alert (connect + callback codes), top-level Connect navigation | type-check | `npx tsc --noEmit` (filtered for `google-ads-form`) | N/A | ⬜ pending |
-| 07-04-02 | 04 | 2 | SET-01 | — | Wire `GoogleAdsForm` into `app/[tenant-slug]/settings/page.tsx` (replace static placeholder; widen select for D-06 pre-fill) | type-check | `npx tsc --noEmit` (build at wave gate) | N/A | ⬜ pending |
+| 07-01-01 | 01 | 0 | SET-01 | T-07-01 | Write `oauth-state.test.ts` RED — round-trip (`expired:false`), tampered sig/payload/malformed → null, expired-but-validly-signed → `{expired:true}` (payload preserved, NOT null) | unit | `npx vitest run tests/unit/oauth-state.test.ts` | ✅ | ✅ green |
+| 07-01-02 | 01 | 0 | SET-01 | T-07-02 | Write `google-ads-connect-route.test.ts` RED — 401 JSON only for no-user; role/validation/missing-tenant failures redirect to `?google_error=forbidden\|invalid_customer_id`; tenant scope from claims; success builds Google URL (`access_type=offline`+`prompt=consent`+signed `state`) | unit | `npx vitest run tests/unit/google-ads-connect-route.test.ts` | ✅ | ✅ green |
+| 07-01-03 | 01 | 0 | SET-01 | T-07-04 / T-07-05 | Write `google-ads-callback-route.test.ts` RED — bad-sig state → `/`; expired-but-valid state → `?google_error=state_expired`; success writes Vault + upserts `ad_accounts` (`active:true`); redirects with `google_error=...` on Google error / failed exchange / missing refresh_token | unit | `npx vitest run tests/unit/google-ads-callback-route.test.ts` | ✅ | ✅ green |
+| 07-02-01 | 02 | 1 | SET-01 | T-07-01 | Implement `lib/google-ads/oauth-state.ts` — `signState`/`verifyState` (node:crypto HMAC); `verifyState` returns null on bad-sig/malformed, `{payload,expired}` otherwise → turns 07-01-01 GREEN | unit | `npx vitest run tests/unit/oauth-state.test.ts` | ✅ | ✅ green |
+| 07-02-02 | 02 | 1 | SET-01 | — | Add `GOOGLE_OAUTH_STATE_SECRET` (+ OAuth client placeholders) to `.env.local` / `.env.test.example` | config | `grep -q GOOGLE_OAUTH_STATE_SECRET .env.local && grep -q GOOGLE_OAUTH_STATE_SECRET .env.test.example` | N/A | ✅ green |
+| 07-02-03 | 02 | 1 | SET-01 | T-07-02 | Implement `app/api/google-ads/connect/route.ts` — auth/role/scope gate; failure paths redirect to `/${tenantSlug}/settings?google_error=<code>` (not JSON) when tenant resolvable; success → Google redirect → turns 07-01-02 GREEN | unit | `npx vitest run tests/unit/google-ads-connect-route.test.ts` | ✅ | ✅ green |
+| 07-03-01 | 03 | 2 | SET-01 | T-07-01 / T-07-04 / T-07-05 | Implement `app/api/google-ads/callback/route.ts` — verify state (bad-sig → `/`, expired → `state_expired`), exchange code, Vault write, `ad_accounts` upsert (`active:true`), error redirects → turns 07-01-03 GREEN | unit | `npx vitest run tests/unit/google-ads-callback-route.test.ts` | ✅ | ✅ green |
+| 07-04-01 | 04 | 2 | SET-01 | T-07-02 / T-07-08 | Create `components/settings/google-ads-form.tsx` — Customer ID input, status badge, inline `google_error` alert (connect + callback codes), top-level Connect navigation | type-check | `npx tsc --noEmit` (filtered for `google-ads-form`) | N/A | ✅ green |
+| 07-04-02 | 04 | 2 | SET-01 | — | Wire `GoogleAdsForm` into `app/[tenant-slug]/settings/page.tsx` (replace static placeholder; widen select for D-06 pre-fill) | type-check | `npx tsc --noEmit` (build at wave gate) | N/A | ✅ green |
+| CR-fix | — | — | SET-01 | T-07-10 | Code review (07-REVIEW.md CR-01) added an open-redirect regression case to `google-ads-connect-route.test.ts`/`google-ads-callback-route.test.ts` for `safeTenantSlug()` | unit | `npx vitest run tests/unit/google-ads-connect-route.test.ts tests/unit/google-ads-callback-route.test.ts` | ✅ | ✅ green |
+| CR-fix | — | — | SET-01 | T-07-11 | Code review (07-REVIEW.md WR-01) added a session-check regression case to `google-ads-callback-route.test.ts` | unit | `npx vitest run tests/unit/google-ads-callback-route.test.ts` | ✅ | ✅ green |
 | — | — | — | SET-01 | — | Live manual round-trip once the Google Cloud OAuth Client exists | manual-only | — (requires real credentials) | N/A | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
@@ -56,9 +59,9 @@ created: 2026-07-11
 
 ## Wave 0 Requirements
 
-- [ ] `tests/unit/oauth-state.test.ts` — sign/verify correctness for the new `state` HMAC helper, incl. bad-sig→null vs expired→`{expired:true}` (no prior equivalent exists)
-- [ ] `tests/unit/google-ads-connect-route.test.ts` — auth/role/tenant-scope gate + error-redirect paths for `/api/google-ads/connect`, mirrors `tests/unit/leads-status-route.test.ts`'s mock pattern
-- [ ] `tests/unit/google-ads-callback-route.test.ts` — token exchange, Vault write, `ad_accounts` upsert, and error-redirect paths (incl. bad-sig→`/` and expired→`state_expired`)
+- [x] `tests/unit/oauth-state.test.ts` — sign/verify correctness for the new `state` HMAC helper, incl. bad-sig→null vs expired→`{expired:true}` (no prior equivalent exists)
+- [x] `tests/unit/google-ads-connect-route.test.ts` — auth/role/tenant-scope gate + error-redirect paths for `/api/google-ads/connect`, mirrors `tests/unit/leads-status-route.test.ts`'s mock pattern
+- [x] `tests/unit/google-ads-callback-route.test.ts` — token exchange, Vault write, `ad_accounts` upsert, and error-redirect paths (incl. bad-sig→`/` and expired→`state_expired`)
 - Framework install: none — Vitest already configured project-wide
 
 ---
@@ -80,4 +83,16 @@ created: 2026-07-11
 - [x] Feedback latency < 30s (per-task uses single test files / `tsc --noEmit`; `npm run build` moved to the wave gate)
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-07-11
+
+---
+
+## Validation Audit 2026-07-11
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | — |
+| Escalated | 0 |
+
+All 3 Wave 0 test files confirmed present and green (23/23 tests: 6 `oauth-state.test.ts` + 9 `google-ads-connect-route.test.ts` + 8 `google-ads-callback-route.test.ts`, up from 21 pre-code-review — 2 regression tests added during the CR-01/WR-01 fix cycle). SET-01 has automated coverage across every task in all 4 plans. No MISSING or PARTIAL requirements found — document updated to reflect actual post-execution state (was previously left in `draft`/pending status from plan time).
