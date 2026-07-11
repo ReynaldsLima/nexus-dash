@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { NextRequest } from 'next/server'
 
 vi.mock('server-only', () => ({}))
 
@@ -36,7 +37,7 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 function makeRequest(body: unknown) {
-  return new Request('http://localhost/api/leads/chat', {
+  return new NextRequest('http://localhost/api/leads/chat', {
     method: 'POST',
     body: JSON.stringify(body),
     headers: { 'content-type': 'application/json' },
