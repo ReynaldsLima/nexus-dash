@@ -23,6 +23,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [x] Geração de insights de IA sob demanda (botão no dashboard), apenas Super Admin — Validated in Phase 4: AI Insights (streaming via Vercel AI SDK, código completo; ativação N8N/UAT ao vivo pendente em 04-HUMAN-UAT.md)
 - [x] Análise automática de IA diária via N8N, apenas Super Admin visualiza — Validated in Phase 4: AI Insights (rota + workflow N8N completos; import/ativação em produção pendente)
 - [x] Página Insights de IA com histórico de recomendações e alertas de anomalia de ROAS in-app — Validated in Phase 4: AI Insights
+- [x] Endpoints de leads (GET/PATCH/POST chat) verificam autorização server-side via `get_user_role()` + `getClaims()`, nunca confiando em tenant/agency vindo do client — Validated in Phase 6: Security & Consistency — Leads Endpoints (fecha o gap AGENCY-08 e o achado de auditoria F3: chat de IA não comitado e sem rate limit)
 
 ### Active
 
@@ -85,4 +86,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-07-11 after Phase 4: AI Insights*
+*Last updated: 2026-07-11 after Phase 6: Security & Consistency — Leads Endpoints*
