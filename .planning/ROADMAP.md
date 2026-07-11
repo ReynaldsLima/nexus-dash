@@ -177,7 +177,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — Wave 0 test scaffolds (rate-limit, leads-get-route, leads-chat-route) (AGENCY-08)
-- [ ] 06-02-PLAN.md — GET /api/leads role gate + getClaims() scope (AGENCY-08, D-07)
+- [x] 06-02-PLAN.md — GET /api/leads role gate + getClaims() scope (AGENCY-08, D-07)
 - [ ] 06-03-PLAN.md — Chat hardening: rate limiter + role/scope gate + SDK migration + client + commit untracked (D-01..06, D-08)
 - [ ] 06-04-PLAN.md — Manual verification checkpoint (streamed chat UI + 429 UX + phase gate)
 

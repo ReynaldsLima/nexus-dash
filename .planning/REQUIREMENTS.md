@@ -55,7 +55,7 @@
 - [x] **AGENCY-05**: An Agência user can edit lead status for any granted tenant, the same capability as Cliente/Super Admin
 - [x] **AGENCY-06**: RLS enforces Agência access at the database level (`tenants`, `campaign_metrics`, `ad_accounts`, `sync_jobs`, `daily_rollups`) via an `agency_tenants` grant, not just direct `tenant_id` membership
 - [x] **AGENCY-07**: `tenant_users.role` collapses to a single flat Cliente value (`tenant_admin`); existing `viewer` rows are promoted, no tenant loses access
-- [ ] **AGENCY-08**: Tenant/agency-scoped write endpoints (starting with `PATCH /api/leads/[id]/status`) verify the caller's authorization server-side instead of trusting a client-supplied tenant identifier — PARTIAL per v1.0-MILESTONE-AUDIT.md (2026-07-10): `PATCH` route done, `GET /api/leads` still relies on implicit RLS only, not the explicit pattern this requirement establishes. Gap closure: Phase 6.
+- [ ] **AGENCY-08**: Tenant/agency-scoped write endpoints (starting with `PATCH /api/leads/[id]/status`) verify the caller's authorization server-side instead of trusting a client-supplied tenant identifier — PARTIAL per v1.0-MILESTONE-AUDIT.md (2026-07-10): `PATCH` route done, `GET /api/leads` hardened in Phase 6 Plan 02 (`get_user_role()` role gate + `getClaims()`-sourced tenant/agency scope check, mirrors PATCH exactly), `POST /api/leads/chat` still open — Phase 6 Plan 03 closes that remaining gap (also F3 finding).
 
 ---
 
