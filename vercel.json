@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "regions": ["gru1"]
+  "regions": ["gru1"],
+  "functions": {
+    "app/api/insights/generate/route.ts": { "maxDuration": 60 },
+    "app/api/insights/daily/route.ts": { "maxDuration": 60 }
+  }
 }
