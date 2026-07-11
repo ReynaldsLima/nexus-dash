@@ -15,7 +15,19 @@ const mockState = {
   upsertCalls: [] as Array<{ payload: unknown; opts: unknown }>,
   upsertError: null as { message: string } | null,
   tokenResponse: null as { ok: boolean; json: () => Promise<unknown> } | null,
+  // WR-01: callback route now requires an authenticated session before doing
+  // anything else. Defaults to a logged-in user so existing state/token-exchange
+  // scenarios below are unaffected; the dedicated test overrides this to null.
+  user: { id: 'user-1' } as { id: string } | null,
 }
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: async () => ({
+    auth: {
+      getUser: () => Promise.resolve({ data: { user: mockState.user } }),
+    },
+  }),
+}))
 
 vi.mock('@/lib/supabase/service', () => ({
   createServiceClient: () => ({
@@ -59,6 +71,7 @@ beforeEach(() => {
   mockState.upsertCalls = []
   mockState.upsertError = null
   mockState.tokenResponse = validTokenResponse()
+  mockState.user = { id: 'user-1' }
   vi.stubGlobal('fetch', vi.fn(async () => mockState.tokenResponse))
   vi.resetModules()
 })
@@ -69,6 +82,18 @@ afterEach(() => {
 })
 
 describe('GET /api/google-ads/callback', () => {
+  it('no authenticated session (WR-01) → redirect to / (root), NO Vault write, NO upsert', async () => {
+    mockState.user = null
+    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const { GET } = await import('@/app/api/google-ads/callback/route')
+    const res = await GET(makeRequest(`code=auth-code-xyz&state=${encodeURIComponent(state)}`))
+    expect([302, 307]).toContain(res.status)
+    const loc = res.headers.get('location')!
+    expect(new URL(loc).pathname).toBe('/')
+    expect(mockState.upsertCalls.length).toBe(0)
+    expect(mockState.vaultRpcCalls.length).toBe(0)
+  })
+
   it('bad-signature/unverifiable state → 3xx redirect to / (root), NO Vault write, NO upsert', async () => {
     const { GET } = await import('@/app/api/google-ads/callback/route')
     const res = await GET(makeRequest('code=auth-code-xyz&state=garbage'))

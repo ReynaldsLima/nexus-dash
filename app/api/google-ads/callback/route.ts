@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyState, safeTenantSlug } from '@/lib/google-ads/oauth-state'
+import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
 // Node runtime required: service role client uses 'server-only', and Vault writes
@@ -8,6 +9,21 @@ export const runtime = 'nodejs'
 
 // ─── GET /api/google-ads/callback ─────────────────────────────────────────────
 export async function GET(req: NextRequest) {
+  // ── 0. Auth: verify session (WR-01, defense-in-depth) ─────────────────────
+  // The signed state (HMAC-verified, TTL-bound) plus Google's one-time code are
+  // the primary authority, but a leaked state+code pair (browser history, a
+  // shared machine, a referrer leak) should not be redeemable by a fully
+  // unauthenticated party against the service-role Vault write / upsert below.
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    // No trustworthy tenant context to redirect to yet (state isn't verified
+    // below) — mirrors connect/route.ts's no-user handling. Never write anything.
+    return NextResponse.redirect(new URL('/', req.nextUrl.origin))
+  }
+
   // ── 1. Verify state FIRST — it carries the authoritative tenant binding ───
   // (CSRF/replay defense, T-07-01). Distinguish a BAD/tampered signature
   // (untrustworthy → root fallback) from a validly-signed-but-EXPIRED state
