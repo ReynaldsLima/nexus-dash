@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MetaAdsForm } from '@/components/settings/meta-ads-form'
+import { GoogleAdsForm } from '@/components/settings/google-ads-form'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ConnectionStatus = 'connected' | 'not_configured' | 'invalid'
@@ -16,12 +17,14 @@ type ConnectionStatus = 'connected' | 'not_configured' | 'invalid'
 interface AdAccountStatus {
   channel: string
   active: boolean
+  account_id: string | null
 }
 
 interface TenantSettingsData {
   tenantId: string
   metaStatus: ConnectionStatus
   googleStatus: ConnectionStatus
+  googleAccountId?: string
 }
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
@@ -49,18 +52,20 @@ async function fetchTenantSettings(tenantSlug: string): Promise<TenantSettingsDa
   // Read ad_accounts (RLS tenant_select allows the tenant's own rows)
   const { data: accounts, error: accountsErr } = await supabase
     .from('ad_accounts')
-    .select('channel, active')
+    .select('channel, active, account_id')
 
   if (accountsErr) {
     throw new Error('Erro ao carregar contas de anúncios')
   }
 
   const rows = (accounts ?? []) as AdAccountStatus[]
+  const googleAccount = rows.find((a) => a.channel === 'google_ads')
 
   return {
     tenantId: tenant.id,
     metaStatus: deriveStatus(rows, 'meta_ads'),
     googleStatus: deriveStatus(rows, 'google_ads'),
+    googleAccountId: googleAccount?.account_id ?? undefined,
   }
 }
 
@@ -126,7 +131,7 @@ export default function SettingsPage() {
     )
   }
 
-  const { tenantId, metaStatus, googleStatus } = data!
+  const { tenantId, metaStatus, googleStatus, googleAccountId } = data!
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -156,27 +161,26 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* ── Google Ads section (SET-01 — DEFERRED, D-15) ───────────────── */}
+      {/* ── Google Ads section (SET-01) ─────────────────────────────────── */}
       <Card>
         <CardHeader className="border-b">
           <div className="flex items-start justify-between gap-4">
             <div>
               <CardTitle>Google Ads</CardTitle>
               <CardDescription className="mt-0.5">
-                Conexão via OAuth2 com Developer Token.
+                Conecte via OAuth2 para sincronização automática das campanhas.
               </CardDescription>
             </div>
             <ChannelStatusBadge status={googleStatus} />
           </div>
         </CardHeader>
         <CardContent className="pt-4">
-          <p className="text-sm text-muted-foreground">
-            A conexão Google Ads OAuth2 será habilitada após a aprovação do Developer Token.
-            Em v1, configure manualmente via Supabase Dashboard.
-          </p>
-          <p className="text-xs text-muted-foreground mt-2 opacity-70">
-            Status: aguardando aprovação do Developer Token (Basic Access).
-          </p>
+          <GoogleAdsForm
+            tenantId={tenantId}
+            tenantSlug={tenantSlug}
+            initialStatus={googleStatus}
+            initialCustomerId={googleAccountId}
+          />
         </CardContent>
       </Card>
     </div>
