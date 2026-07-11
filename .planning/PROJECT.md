@@ -20,6 +20,9 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [x] Schema de dados de campanha (campaign_metrics, ad_accounts, sync_jobs, daily_rollups) com RLS — Validated in Phase 2: Data Pipeline
 - [x] Último sync timestamp por tenant/channel visível ao Super Admin — Validated in Phase 2: Data Pipeline (SyncStatusSection em /tenants)
 - [x] Gestão de leads com status editável, escrito de volta na planilha Google Sheets de origem (Super Admin/Tenant Admin) — Validated in Phase 03.1: Leads Management via Google Sheets Integration
+- [x] Geração de insights de IA sob demanda (botão no dashboard), apenas Super Admin — Validated in Phase 4: AI Insights (streaming via Vercel AI SDK, código completo; ativação N8N/UAT ao vivo pendente em 04-HUMAN-UAT.md)
+- [x] Análise automática de IA diária via N8N, apenas Super Admin visualiza — Validated in Phase 4: AI Insights (rota + workflow N8N completos; import/ativação em produção pendente)
+- [x] Página Insights de IA com histórico de recomendações e alertas de anomalia de ROAS in-app — Validated in Phase 4: AI Insights
 
 ### Active
 
@@ -27,9 +30,6 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [ ] Dashboard Overview com KPIs consolidados (ROAS, CPA, CTR, Spend) de todos os canais
 - [ ] Drill-down por canal e campanha a partir do Overview
 - [ ] Página Campanhas com lista filtrável por período e canal
-- [ ] Geração de insights de IA sob demanda (botão no dashboard) — apenas Super Admin
-- [ ] Análise automática de IA diária via N8N — apenas Super Admin visualiza
-- [ ] Página Insights de IA com histórico de recomendações
 - [ ] Página Configurações do tenant: conexão de contas Google/Meta, tokens, sync
 
 ### Out of Scope
@@ -63,8 +63,9 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 | Claude como AI provider | Melhor raciocínio analítico para dados de campanha; já é o modelo da sessão | — Pending |
 | RLS como camada de segurança primária | Isolamento garantido no banco, não apenas na aplicação | — Pending |
 | Google Sheets fora do v1 | Complexidade de sincronização sem benefício claro com base pequena de tenants | Revertida — já em uso em produção pré-GSD; formalizada e estendida (escrita) na Phase 03.1 |
-| Insights de IA apenas para Super Admin | Centraliza custo de API e controle de qualidade das recomendações | — Pending |
+| Insights de IA apenas para Super Admin | Centraliza custo de API e controle de qualidade das recomendações | Validado na Phase 4 — RLS super_admin-only em `ai_insights`/`anomaly_alerts`, UI/nav ocultos para outros papéis |
 | main → prod direto | Projeto interno v1, overhead de PR review não justificado agora | — Pending |
+| Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) em vez de `@anthropic-ai/sdk` direto | Streaming token-a-token (`streamText`) e prompt/tool abstractions prontas, mesma API Messages da Claude por baixo | Adotado na Phase 4 (04-CONTEXT.md D-01) — desvio documentado da tabela de bibliotecas do CLAUDE.md, ambos chamam `claude-sonnet-4-6` |
 
 ## Evolution
 
@@ -84,4 +85,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-07-05 after Phase 03.1: Leads Management via Google Sheets Integration*
+*Last updated: 2026-07-11 after Phase 4: AI Insights*
