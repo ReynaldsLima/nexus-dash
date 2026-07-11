@@ -43,7 +43,7 @@
 
 ### Settings
 
-- [ ] **SET-01**: Tenant Admin can connect a Google Ads account to their tenant via OAuth2 flow
+- [x] **SET-01**: Tenant Admin can connect a Google Ads account to their tenant via OAuth2 flow
 - [ ] **SET-02**: Tenant Admin can connect a Meta Ads account to their tenant via System User token input
 
 ### Access Modules — Multi-Client Agency (Phase 5)
@@ -120,7 +120,7 @@ These are table stakes or expected features not included in v1 due to complexity
 | CAMP-02 | 3 — Dashboard UI | Pending | TBD |
 | CAMP-03 | 3 — Dashboard UI | Pending | TBD |
 | CAMP-04 | 3 — Dashboard UI | Pending | TBD |
-| SET-01 | 7 — Google Ads OAuth2 Connect (gap closure) | Pending | TBD |
+| SET-01 | 7 — Google Ads OAuth2 Connect (gap closure) | Complete | TBD |
 | SET-02 | 3 — Dashboard UI | Pending | TBD |
 | AI-01 | 4 — AI Insights | Complete | TBD |
 | AI-02 | 4 — AI Insights | Complete | TBD |
