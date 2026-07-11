@@ -24,6 +24,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [x] Análise automática de IA diária via N8N, apenas Super Admin visualiza — Validated in Phase 4: AI Insights (rota + workflow N8N completos; import/ativação em produção pendente)
 - [x] Página Insights de IA com histórico de recomendações e alertas de anomalia de ROAS in-app — Validated in Phase 4: AI Insights
 - [x] Endpoints de leads (GET/PATCH/POST chat) verificam autorização server-side via `get_user_role()` + `getClaims()`, nunca confiando em tenant/agency vindo do client — Validated in Phase 6: Security & Consistency — Leads Endpoints (fecha o gap AGENCY-08 e o achado de auditoria F3: chat de IA não comitado e sem rate limit)
+- [x] Página Configurações do tenant: conexão de contas Google/Meta, tokens, sync — Validated in Phase 7: Google Ads OAuth2 Connect (SET-01, gap closure). Meta Ads (SET-02, System User token) já validado na Phase 3; Google Ads via OAuth2 completo — fluxo de conexão e armazenamento de credencial no Vault código-completo e unit-verificado. Verificação manual end-to-end ao vivo ainda pendente da criação do Google Cloud OAuth Client pelo usuário (D-03), mesma classe de bloqueio externo do Developer Token da Phase 2.
 
 ### Active
 
@@ -31,7 +32,6 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [ ] Dashboard Overview com KPIs consolidados (ROAS, CPA, CTR, Spend) de todos os canais
 - [ ] Drill-down por canal e campanha a partir do Overview
 - [ ] Página Campanhas com lista filtrável por período e canal
-- [ ] Página Configurações do tenant: conexão de contas Google/Meta, tokens, sync
 
 ### Out of Scope
 
@@ -86,4 +86,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-07-11 after Phase 6: Security & Consistency — Leads Endpoints*
+*Last updated: 2026-07-11 after Phase 7: Google Ads OAuth2 Connect*
