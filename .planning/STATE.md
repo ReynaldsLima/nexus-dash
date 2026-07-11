@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-07-11T01:05:21.098Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-07-11T01:29:08.150Z"
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 35
-  completed_plans: 30
-  percent: 86
+  completed_plans: 31
+  percent: 89
 ---
 
 # Project State
@@ -25,16 +25,17 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Status
 
-- Current phase: 04 — AI Insights (planning in progress — gap closure per v1.0-MILESTONE-AUDIT.md)
-- Overall progress: 29/29 planned plans complete (100% of what's planned) — 6/9 phases fully done, 3 gap-closure phases (4, 6, 7) in progress/pending
+- Current phase: 04 — AI Insights (2/6 plans complete — gap closure per v1.0-MILESTONE-AUDIT.md)
+- Overall progress: 31/35 planned plans complete (89%) — 6/9 phases fully done, 3 gap-closure phases (4, 6, 7) in progress/pending
 - Phases complete: 6/9
 
 ```
-[██████████] 100%
+[█████████░] 89%
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
 Phase 03.1: Leads Management via Google Sheets Integration (3/3 plans complete — data layer + write-back route + editable status dropdown, verified in production)
+Phase 04: AI Insights (2/6 plans complete — Vercel AI SDK installed, ai_insights/anomaly_alerts live with RLS+Realtime)
 Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a phase-blocking bug mid-verification (getUser().app_metadata vs JWT claims), fixed via /gsd-debug, all 7 UAT scripts re-verified live and passed)
 ```
 
@@ -49,7 +50,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 | 2 | Data Pipeline | Bloqueada (ver pré-requisitos) | — |
 | 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
 | 3 | Dashboard UI | ✅ Concluída — 6/6 plans, 15/15 must-haves verificados (`03-VERIFICATION.md`) | 2026-06-05 |
-| 4 | AI Insights | Em execução — Plano 01/6 concluído (Wave 0 test scaffolds) | — |
+| 4 | AI Insights | Em execução — Plano 02/6 concluído (migrations 0021/0022 live, ai_insights/anomaly_alerts RLS+Realtime, Vercel AI SDK instalado) | — |
 | 5 | Agência Multi-Cliente | ✅ Concluída — 9/9 plans, UAT completo (achou e corrigiu bug bloqueante via /gsd-debug) | 2026-07-10 |
 | 6 | Security & Consistency — Leads Endpoints (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
 | 7 | Google Ads OAuth2 Connect (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
@@ -66,6 +67,8 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 | Plans complete | 29 |
 | Phases complete | 6/9 (0, 1, 03.1, 5 done; 2 code-complete/externally blocked; 3 done; 4/6/7 pending — gap closure in progress) |
 | Phase 04-ai-insights P01 | 8min | 2 tasks | 5 files |
+| Phase 04-ai-insights P02 | 14min | 2 tasks | 7 files |
+| Phase 04-ai-insights P02 | 14min | 2 tasks | 7 files |
 
 ### Per-Plan Execution Log
 
@@ -129,6 +132,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 - Phase 05 Plan 08 (AGENCY-05/AGENCY-08): Closed a pre-existing IDOR/BOLA gap (T-05-13, OWASP API1:2023) in `PATCH /api/leads/[id]/status` — the route checked caller ROLE but never verified the caller was authorized for the SPECIFIC tenant named in the request body, so any `tenant_admin` could PATCH lead status for a tenant they don't belong to. Fixed by inserting a scope check (before the `service_role` credential fetch) that derives allowed tenant from `user.app_metadata.tenant_slug` for `tenant_admin`, or an RLS-scoped `agency_tenants` grant lookup for the new `agency` role (fail-closed if `agency_id` is missing from the JWT); `super_admin` unchanged. Same authorization-before-privileged-read pattern as `app/api/meta-ads/connect/route.ts`. `tests/unit/leads-status-route.test.ts`'s 5 `it.todo()` AGENCY-08 cases converted to real, passing tests (15/15 total, zero regressions). Zero code deviations — plan's provided code executed verbatim.
 - Phase 05 Plan 06 (AGENCY-01/AGENCY-02): Built `/agencies` (list) and `/agencies/[id]` (detail — Informações/Usuários/Clientes vinculados) as one-to-one structural mirrors of `app/tenants/*`, consuming Plan 05's `lib/actions/agencies.ts` verbatim. `app/tenants/layout.tsx`'s manual `decodeRole()` JWT-decode helper removed and standardized on `user.app_metadata.role` (now consistent with `app/agencies/layout.tsx`, `app/[tenant-slug]/layout.tsx`, `proxy.ts`), also dropping the now-unused `supabase.auth.getSession()` call. Both admin layouts gained a two-link header nav (`Tenants` | `Agências`). Installed `components/ui/checkbox.tsx` (shadcn official registry, `@base-ui/react/checkbox`) for `components/agencies/agency-tenant-grants.tsx` — the new optimistic grant/revoke checkbox list (Set-based state, revert-on-failure, no confirmation dialog per UI-SPEC's Interaction Contract). `.planning/PROJECT.md`'s Out of Scope line for "Roles adicionais..." marked superseded by Phase 5's Agência module. Zero deviations — plan's provided code executed verbatim; `npx tsc --noEmit`/`npm run build`/`npx vitest run` (148 passed) all clean.
 - Phase 04-ai-insights Plan 01 (AI-01/AI-02/AI-03/AI-04, Wave 0): Created the 5 `it.todo()` test scaffolds enumerated in `04-VALIDATION.md`'s Wave 0 Requirements — `tests/unit/parse-insight-block.test.ts`, `tests/unit/insights-generate-route.test.ts`, `tests/unit/insights-daily-route.test.ts` (mock-based, mirror `tests/unit/leads-status-route.test.ts`'s pattern), `tests/integration/ai-insights-rls.test.ts`, `tests/unit/anomaly-alerts-schema.test.ts` (skip-if-no-env, mirror `tests/integration/sync-jobs-rls.test.ts`/`tests/unit/daily-rollups-schema.test.ts`). Zero production code — same Wave 0 rollout convention as Phase 5 Plan 01. Each file is the designated verification target for a later Phase 4 plan (02 fills the RLS/schema todos after migrations 0021/0022; 03 fills parser + on-demand route todos; 06 fills daily route todos). `npm test` after: 23 test files, 153 passed, 1 skipped, 33 todo, zero regressions.
+- Phase 04-ai-insights Plan 02 (AI-03/AI-04): Installed `ai@^7.0.22` + `@ai-sdk/anthropic@^4.0.12` (NOT `@anthropic-ai/sdk` — documented deviation from CLAUDE.md's Summary Table, per 04-CONTEXT.md D-01's locked "Vercel AI SDK `streamText`" decision; both still call `claude-sonnet-4-6` via the Anthropic Messages API). Applied migrations `0021_create_ai_insights.sql`/`0022_create_anomaly_alerts.sql` live to `rvkkvjitfddtbdpkupok` via `supabase db push` — both tables super_admin-only RLS (no tenant_select/agency_select policy, by design per AI-03's literal wording), `REVOKE ALL FROM anon`; `anomaly_alerts` additionally added to the `supabase_realtime` publication. Regenerated `types/database.types.ts` (diff-clean, no stray CLI tag). Filled both Plan 01 scaffolds with real, live-passing assertions (7/7 each). **Finding: PostgREST does not expose `pg_catalog` to `supabase-js` clients** (`PGRST106: Invalid schema: pg_catalog`) — the anomaly_alerts Realtime-membership check cannot be done via `.from('pg_publication_tables')` as literally written in the plan; verified instead via `supabase db query` (CLI) for static confirmation AND a behavioral subscribe+insert+receive `postgres_changes` test in the suite (stronger verification of "Realtime delivery works" than a catalog query would be). Any future test needing to inspect Postgres catalog/system views must use the Supabase CLI (`supabase db query`) or a dedicated RPC — not a direct PostgREST `.from()` call. `npm test` after: 23 test files, 165 passed, 1 skipped, 21 todo, zero regressions. `npm run build`/`npx tsc --noEmit` clean (same 2 pre-existing unrelated `vault-rpc.test.ts` errors as before).
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -179,9 +183,9 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 
 ## Session Continuity
 
-**Last updated:** 2026-07-10 - Fase 05 CONCLUÍDA: Plano 09 achou um bug bloqueante no UAT manual, corrigido via /gsd-debug, todos os 7 scripts re-verificados e aprovados
-**Last action:** Fase 05 Plano 09 Task 2 (UAT manual, 7 scripts) executada pelo próprio agente via Playwright MCP contra `npm run dev` (mesmo projeto Supabase real), com autorização e credenciais fornecidas pelo usuário. Primeira passada: Script 1 passou, mas Scripts 2/4 falharam e 3/5 falharam parcialmente — causa raiz: `app/agencia/layout.tsx`, `app/[tenant-slug]/layout.tsx`, `app/api/leads/[id]/status/route.ts`, `app/agencies/layout.tsx`, `app/tenants/layout.tsx` e `app/api/meta-ads/connect/route.ts` liam `role`/`tenant_slug`/`agency_id` de `user.app_metadata` via `supabase.auth.getUser()` (reflete `auth.users.raw_app_meta_data`, nunca setado para `tenant_admin`/`agency`), em vez dos claims reais injetados pelo Custom Access Token Hook no JWT. Roteado para `/gsd-debug` (sessão `agency-app-metadata-getuser-mismatch`, agora em `.planning/debug/resolved/`), que confirmou a causa raiz ao vivo contra o Supabase Auth real e corrigiu os 6 pontos trocando `user.app_metadata` por `supabase.auth.getClaims()` — commits `eec002f` (fix), `2bfd73b`/`b63371e` (docs). Achado importante: o bug também afetava `tenant_admin` (Cliente) e o fluxo de conexão do Meta Ads, não só a Agência — contradizendo a alegação de "verificado em produção" da Fase 03.1 para esse caminho específico. Re-rodei os 7 scripts do UAT ao vivo via Playwright após o fix: todos passaram (Script 7 confirmado diretamente pelo usuário no Supabase Dashboard). Fase 5 marcada como concluída (9/9 planos, 29/29 planos totais, 100%). Anomalia sem explicação, não bloqueante: o lead "James Soares" em `lukseg` reverteu de "Quente" para "Novo Lead" alguns minutos após um PATCH bem-sucedido, sem relação com o fix (confirmado pelo agente de debug que seu script de verificação nunca tocou `/api/leads` nem a API do Sheets) — registrado no arquivo de debug resolvido para investigação futura. Fixtures de teste criadas e não removidas no projeto Supabase real: agência "Agência Teste" (`8ddc4d6e-2af7-4ae2-bf83-ee0eba98a9a4`) + `agente-teste@example.com`, e um `tenant_admin` de teste `cliente-teste@example.com` em `lukseg`. Também notado (não tratado): `/agencies` tem várias linhas de teste remanescentes (`rls-test-agency-*`, `debug-agency`) de execuções de teste anteriores.
-**Stopped at:** Completed 04-01-PLAN.md
-**Next action:** Planejar a próxima fase de fechamento de gap: `/gsd-plan-phase 4` (AI Insights — maior gap, contexto já coletado), depois `/gsd-plan-phase 6` e `/gsd-plan-phase 7`. Após as três fecharem, rodar `/gsd-audit-milestone` de novo para confirmar `status: passed` antes de `/gsd-complete-milestone v1.0`. Pendências não bloqueantes: `app/api/leads/chat/route.ts`/`app/[tenant-slug]/leads/agente/` seguem não commitados (endereçados pela Fase 6); limpar fixtures de teste no Supabase (agência/usuários de teste da sessão de UAT da Fase 5 + `rls-test-agency-*`/`debug-agency` pré-existentes); investigar a reversão inexplicada do lead "James Soares"; formalizar VERIFICATION.md para as Fases 1 e 5 (funcionalmente evidenciadas, mas sem o artefato padrão do gsd-verifier); os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
+**Last updated:** 2026-07-11 - Fase 04 (AI Insights) Plano 02/6 concluído: migrations 0021/0022 aplicadas ao vivo, Vercel AI SDK instalado, testes de RLS/schema preenchidos com asserções reais
+**Last action:** Executado `04-02-PLAN.md` (Wave 2, depends_on 04-01) em duas tasks: (1) instalado `ai@^7.0.22` + `@ai-sdk/anthropic@^4.0.12` (não `@anthropic-ai/sdk` — desvio documentado do CLAUDE.md, per 04-CONTEXT.md D-01) e criadas as migrations `0021_create_ai_insights.sql`/`0022_create_anomaly_alerts.sql`; (2) [BLOCKING] `supabase db push` aplicou ambas ao projeto vivo `rvkkvjitfddtbdpkupok`, `types/database.types.ts` regenerado (diff limpo), e os dois scaffolds Wave 0 da Fase 4 Plano 01 (`tests/integration/ai-insights-rls.test.ts`, `tests/unit/anomaly-alerts-schema.test.ts`) convertidos de `it.todo()` para asserções reais, todas passando ao vivo (7/7 cada). Achado durante execução: PostgREST não expõe `pg_catalog` ao cliente `supabase-js` (`PGRST106`), então a verificação de membership na publicação `supabase_realtime` foi feita via `supabase db query` (CLI) para confirmação estática + um teste comportamental (subscribe + insert + receive `postgres_changes`) no lugar de uma query direta à `pg_publication_tables` como o plano descrevia literalmente — mais forte para validar "Realtime delivery works". `npm test` completo: 23 arquivos, 165 passed, 1 skipped, 21 todo (restantes pertencem aos Planos 03/06), zero regressões. `npm run build`/`tsc --noEmit` limpos (mesmos 2 erros pré-existentes não relacionados em `vault-rpc.test.ts`). Fixtures de teste criadas durante a execução real (tenants/agencies/users com prefixo `ai-insights-rls-`/`test-aa-*`) foram todas limpas nos próprios `afterAll` — confirmado via `supabase db query` que zero linhas remanescem.
+**Stopped at:** Completed 04-02-PLAN.md
+**Next action:** Executar `04-03-PLAN.md` (rota de insights sob demanda) via `/gsd-execute-phase 4`. Pendências não bloqueantes (inalteradas desde a última sessão): `ANTHROPIC_API_KEY` ainda precisa ser adicionada ao Vercel Dashboard (Production+Preview+Development) antes do deploy das rotas de streaming (Planos 03/06) — não bloqueia execução local; `app/api/leads/chat/route.ts`/`app/[tenant-slug]/leads/agente/` seguem não commitados (endereçados pela Fase 6); limpar fixtures de teste remanescentes da Fase 5 (`rls-test-agency-*`/`debug-agency`); investigar a reversão inexplicada do lead "James Soares"; formalizar VERIFICATION.md para as Fases 1 e 5; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
