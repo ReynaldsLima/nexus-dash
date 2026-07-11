@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 06-04-PLAN.md
-last_updated: "2026-07-11T17:45:56.159Z"
+stopped_at: Phase 7 context gathered
+last_updated: "2026-07-11T18:23:56.125Z"
 progress:
   total_phases: 9
   completed_phases: 8
@@ -201,7 +201,7 @@ Phase 06: Security & Consistency — Leads Endpoints (4/4 plans complete — AGE
 
 **Last updated:** 2026-07-11 - Fase 06 (Security & Consistency — Leads Endpoints) CONCLUÍDA (4/4 plans): Plano 04 executou o gate automatizado (verde) e o checkpoint de verificação humana final, aceito como parcial por decisão explícita do usuário — verificado ao vivo em produção via Playwright MCP.
 **Last action:** Executado `06-04-PLAN.md` (último plano da Fase 6) em duas tasks: (1) gate automatizado — `npm test` 207/214 (única falha é o flake pré-existente e já documentado do `anomaly_alerts`, confirmado não-regressão via re-execução isolada), `tsc`/`build` limpos (só os 2 erros pré-existentes de `vault-rpc.test.ts`), os 3 arquivos de teste da Fase 6 24/24 verdes, `git status --porcelain` sob os paths leads vazio (D-08); (2) verificação humana — a pedido do usuário, executada ao vivo contra produção (`https://nexusdash-chi.vercel.app`) via browser Playwright MCP em vez de `npm run dev` local (preferência padrão deste projeto). Confirmado em produção: login super_admin, `/lukseg/leads/agente` carrega "10 leads carregados", e o envio de mensagem no chat atravessa auth → role gate → escopo `getClaims()` sem 401/403, falhando de forma controlada (500) com a mensagem literal `ANTHROPIC_API_KEY não configurada.` — e o cliente renderiza esse erro como texto legível (não `[object Object]`/JSON cru), confirmando a correção do Pitfall 3 do Plano 03 ao vivo em produção. NÃO confirmado (bloqueado pela ausência de uma `ANTHROPIC_API_KEY` real no Vercel Production, gap pré-existente desde a Fase 4, ver `04-HUMAN-UAT.md` item 4): renderização completa da resposta em streaming e a UX de rate-limit 429. Spot-check opcional de escopo entre tenants (`tenant_admin`) não realizado (sem credenciais de teste `tenant_admin` na sessão). Usuário confirmou explicitamente (via AskUserQuestion) aceitar o checkpoint como parcialmente verificado, sem bloquear a fase — adicionar a env var no Vercel é tarefa de infra fora do escopo deste plano/fase. AGENCY-08 permanece totalmente satisfeito (já fechado no Plano 03); nenhum novo requisito fechado neste plano.
-**Stopped at:** Completed 06-04-PLAN.md
+**Stopped at:** Phase 7 context gathered
 **Next action:** Fase 6 concluída (4/4 plans). Próximo item do roadmap é a Fase 7 (Google Ads OAuth2 Connect, gap closure) — ainda não planejada, rodar `/gsd-plan-phase 7` ou `/gsd-discuss-phase 7` primeiro. Pendências não bloqueantes (inalteradas desde a última sessão): limpar fixtures de teste remanescentes da Fase 5 (`rls-test-agency-*`/`debug-agency`); investigar a reversão inexplicada do lead "James Soares"; formalizar VERIFICATION.md para as Fases 1 e 5; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora; verificação manual ao vivo da Fase 4 (import/ativação N8N) ainda pendente per 04-VALIDATION.md; `ANTHROPIC_API_KEY` ainda precisa ser adicionada ao Vercel Dashboard (Production/Preview/Development) para chamadas reais à Claude em produção — bloqueia tanto a Fase 4 (insights) quanto a verificação completa do chat da Fase 6.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
