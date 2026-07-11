@@ -124,7 +124,7 @@ Plans:
 **Plans:** 6 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Wave 0 test scaffolds (parse-insight-block, generate/daily routes, ai_insights RLS, anomaly_alerts schema)
+- [x] 04-01-PLAN.md — Wave 0 test scaffolds (parse-insight-block, generate/daily routes, ai_insights RLS, anomaly_alerts schema)
 - [ ] 04-02-PLAN.md — Foundation: install ai + @ai-sdk/anthropic + ai_insights/anomaly_alerts migrations + [BLOCKING] db push + realtime publication (AI-03/AI-04)
 - [ ] 04-03-PLAN.md — lib/ai core (parser + prompt builders) + on-demand streaming route + vercel.json maxDuration (AI-01)
 - [ ] 04-04-PLAN.md — Insights page real data + streaming card + dashboard shortcut (AI-01/AI-03)

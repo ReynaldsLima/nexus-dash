@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 04 UI-SPEC approved
-last_updated: "2026-07-11T01:00:36.305Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-07-11T01:05:21.098Z"
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 35
-  completed_plans: 29
-  percent: 83
+  completed_plans: 30
+  percent: 86
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-05-10)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Phase 05 — agencia-multi-cliente
+**Current focus:** Phase 04 — ai-insights
 
 ---
 
@@ -49,7 +49,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 | 2 | Data Pipeline | Bloqueada (ver pré-requisitos) | — |
 | 03.1 | Leads Management via Google Sheets Integration | ✅ Concluída — 3/3 plans, verificado em produção | 2026-07-05 |
 | 3 | Dashboard UI | ✅ Concluída — 6/6 plans, 15/15 must-haves verificados (`03-VERIFICATION.md`) | 2026-06-05 |
-| 4 | AI Insights | Planejada — 6 planos em 4 waves, plan-checker aprovado (1 iteração de revisão), pronta para `/gsd-execute-phase 4` | — |
+| 4 | AI Insights | Em execução — Plano 01/6 concluído (Wave 0 test scaffolds) | — |
 | 5 | Agência Multi-Cliente | ✅ Concluída — 9/9 plans, UAT completo (achou e corrigiu bug bloqueante via /gsd-debug) | 2026-07-10 |
 | 6 | Security & Consistency — Leads Endpoints (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
 | 7 | Google Ads OAuth2 Connect (gap closure) | Não planejada — criada via `/gsd-plan-milestone-gaps` | — |
@@ -65,6 +65,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 | Plans written | 29 |
 | Plans complete | 29 |
 | Phases complete | 6/9 (0, 1, 03.1, 5 done; 2 code-complete/externally blocked; 3 done; 4/6/7 pending — gap closure in progress) |
+| Phase 04-ai-insights P01 | 8min | 2 tasks | 5 files |
 
 ### Per-Plan Execution Log
 
@@ -127,6 +128,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 - Phase 05 Plan 07 (AGENCY-03/AGENCY-04): `/agencia` landing page built — `components/agencies/agency-clients-table.tsx` (plain `<span>` for Nome, no `/tenants/{slug}` link, no Slug column), `app/agencia/layout.tsx` (minimal shell, agency-only guard via `user.app_metadata.role` directly — not the manual `decodeRole()` helper `app/tenants/layout.tsx` still uses), `app/agencia/page.tsx` (RLS-scoped `createClient()` query, zero application-level filtering — `tenants_agency_select` policy from Plan 02 is the sole scoping mechanism). Closes the 404 left by Plan 04's `proxy.ts` redirect target. Executed out-of-wave-order relative to Plan 06 (agency management UI) since 05-07 only depends on 05-02, not 05-06. Zero code deviations; one noted false-positive in the plan's own automated verify grep pattern (matched the legitimate `@/components/tenants/tenant-status-badge` import path, not an actual Super-Admin link) — documented in the plan's SUMMARY, no code change needed.
 - Phase 05 Plan 08 (AGENCY-05/AGENCY-08): Closed a pre-existing IDOR/BOLA gap (T-05-13, OWASP API1:2023) in `PATCH /api/leads/[id]/status` — the route checked caller ROLE but never verified the caller was authorized for the SPECIFIC tenant named in the request body, so any `tenant_admin` could PATCH lead status for a tenant they don't belong to. Fixed by inserting a scope check (before the `service_role` credential fetch) that derives allowed tenant from `user.app_metadata.tenant_slug` for `tenant_admin`, or an RLS-scoped `agency_tenants` grant lookup for the new `agency` role (fail-closed if `agency_id` is missing from the JWT); `super_admin` unchanged. Same authorization-before-privileged-read pattern as `app/api/meta-ads/connect/route.ts`. `tests/unit/leads-status-route.test.ts`'s 5 `it.todo()` AGENCY-08 cases converted to real, passing tests (15/15 total, zero regressions). Zero code deviations — plan's provided code executed verbatim.
 - Phase 05 Plan 06 (AGENCY-01/AGENCY-02): Built `/agencies` (list) and `/agencies/[id]` (detail — Informações/Usuários/Clientes vinculados) as one-to-one structural mirrors of `app/tenants/*`, consuming Plan 05's `lib/actions/agencies.ts` verbatim. `app/tenants/layout.tsx`'s manual `decodeRole()` JWT-decode helper removed and standardized on `user.app_metadata.role` (now consistent with `app/agencies/layout.tsx`, `app/[tenant-slug]/layout.tsx`, `proxy.ts`), also dropping the now-unused `supabase.auth.getSession()` call. Both admin layouts gained a two-link header nav (`Tenants` | `Agências`). Installed `components/ui/checkbox.tsx` (shadcn official registry, `@base-ui/react/checkbox`) for `components/agencies/agency-tenant-grants.tsx` — the new optimistic grant/revoke checkbox list (Set-based state, revert-on-failure, no confirmation dialog per UI-SPEC's Interaction Contract). `.planning/PROJECT.md`'s Out of Scope line for "Roles adicionais..." marked superseded by Phase 5's Agência module. Zero deviations — plan's provided code executed verbatim; `npx tsc --noEmit`/`npm run build`/`npx vitest run` (148 passed) all clean.
+- Phase 04-ai-insights Plan 01 (AI-01/AI-02/AI-03/AI-04, Wave 0): Created the 5 `it.todo()` test scaffolds enumerated in `04-VALIDATION.md`'s Wave 0 Requirements — `tests/unit/parse-insight-block.test.ts`, `tests/unit/insights-generate-route.test.ts`, `tests/unit/insights-daily-route.test.ts` (mock-based, mirror `tests/unit/leads-status-route.test.ts`'s pattern), `tests/integration/ai-insights-rls.test.ts`, `tests/unit/anomaly-alerts-schema.test.ts` (skip-if-no-env, mirror `tests/integration/sync-jobs-rls.test.ts`/`tests/unit/daily-rollups-schema.test.ts`). Zero production code — same Wave 0 rollout convention as Phase 5 Plan 01. Each file is the designated verification target for a later Phase 4 plan (02 fills the RLS/schema todos after migrations 0021/0022; 03 fills parser + on-demand route todos; 06 fills daily route todos). `npm test` after: 23 test files, 153 passed, 1 skipped, 33 todo, zero regressions.
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -179,7 +181,7 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 
 **Last updated:** 2026-07-10 - Fase 05 CONCLUÍDA: Plano 09 achou um bug bloqueante no UAT manual, corrigido via /gsd-debug, todos os 7 scripts re-verificados e aprovados
 **Last action:** Fase 05 Plano 09 Task 2 (UAT manual, 7 scripts) executada pelo próprio agente via Playwright MCP contra `npm run dev` (mesmo projeto Supabase real), com autorização e credenciais fornecidas pelo usuário. Primeira passada: Script 1 passou, mas Scripts 2/4 falharam e 3/5 falharam parcialmente — causa raiz: `app/agencia/layout.tsx`, `app/[tenant-slug]/layout.tsx`, `app/api/leads/[id]/status/route.ts`, `app/agencies/layout.tsx`, `app/tenants/layout.tsx` e `app/api/meta-ads/connect/route.ts` liam `role`/`tenant_slug`/`agency_id` de `user.app_metadata` via `supabase.auth.getUser()` (reflete `auth.users.raw_app_meta_data`, nunca setado para `tenant_admin`/`agency`), em vez dos claims reais injetados pelo Custom Access Token Hook no JWT. Roteado para `/gsd-debug` (sessão `agency-app-metadata-getuser-mismatch`, agora em `.planning/debug/resolved/`), que confirmou a causa raiz ao vivo contra o Supabase Auth real e corrigiu os 6 pontos trocando `user.app_metadata` por `supabase.auth.getClaims()` — commits `eec002f` (fix), `2bfd73b`/`b63371e` (docs). Achado importante: o bug também afetava `tenant_admin` (Cliente) e o fluxo de conexão do Meta Ads, não só a Agência — contradizendo a alegação de "verificado em produção" da Fase 03.1 para esse caminho específico. Re-rodei os 7 scripts do UAT ao vivo via Playwright após o fix: todos passaram (Script 7 confirmado diretamente pelo usuário no Supabase Dashboard). Fase 5 marcada como concluída (9/9 planos, 29/29 planos totais, 100%). Anomalia sem explicação, não bloqueante: o lead "James Soares" em `lukseg` reverteu de "Quente" para "Novo Lead" alguns minutos após um PATCH bem-sucedido, sem relação com o fix (confirmado pelo agente de debug que seu script de verificação nunca tocou `/api/leads` nem a API do Sheets) — registrado no arquivo de debug resolvido para investigação futura. Fixtures de teste criadas e não removidas no projeto Supabase real: agência "Agência Teste" (`8ddc4d6e-2af7-4ae2-bf83-ee0eba98a9a4`) + `agente-teste@example.com`, e um `tenant_admin` de teste `cliente-teste@example.com` em `lukseg`. Também notado (não tratado): `/agencies` tem várias linhas de teste remanescentes (`rls-test-agency-*`, `debug-agency`) de execuções de teste anteriores.
-**Stopped at:** Phase 04 UI-SPEC approved
+**Stopped at:** Completed 04-01-PLAN.md
 **Next action:** Planejar a próxima fase de fechamento de gap: `/gsd-plan-phase 4` (AI Insights — maior gap, contexto já coletado), depois `/gsd-plan-phase 6` e `/gsd-plan-phase 7`. Após as três fecharem, rodar `/gsd-audit-milestone` de novo para confirmar `status: passed` antes de `/gsd-complete-milestone v1.0`. Pendências não bloqueantes: `app/api/leads/chat/route.ts`/`app/[tenant-slug]/leads/agente/` seguem não commitados (endereçados pela Fase 6); limpar fixtures de teste no Supabase (agência/usuários de teste da sessão de UAT da Fase 5 + `rls-test-agency-*`/`debug-agency` pré-existentes); investigar a reversão inexplicada do lead "James Soares"; formalizar VERIFICATION.md para as Fases 1 e 5 (funcionalmente evidenciadas, mas sem o artefato padrão do gsd-verifier); os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
