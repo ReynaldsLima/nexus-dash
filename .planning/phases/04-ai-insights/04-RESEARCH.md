@@ -438,14 +438,16 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.anomaly_alerts;
 | A4 | One Claude call per tenant (not per campaign) is the correct reading of D-09's "concise aggregated JSON... per channel and per campaign" | Pitfall 4 | Low — if wrong, it's a token-cost/scale issue, not a correctness break, and cheap to fix (batch size = 3 tenants max in v1 either way) |
 | A5 | Parse-failure fallback behavior (persist with defaulted `type`/`impact` vs. drop vs. retry) is not specified by CONTEXT.md and needs a planner/user decision | Pitfall 3 | Low-medium — affects whether D-03's "insight appears automatically" holds up under a malformed generation; currently undefined behavior |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the daily N8N job call the Route Handler once per tenant (3 separate HTTP calls) or once total with all eligible tenants in a loop inside the route?**
+   - **RESOLVED (Plan 06):** Plan 06 implements the per-tenant `splitInBatches` loop — N8N calls the Route Handler once per eligible tenant (`google-ads-sync.json` convention), keeping each Vercel invocation small. Recommendation adopted.
    - What we know: D-07 defines eligibility (tenants with ≥1 `ad_accounts` row); D-08 wants a single N8N workflow.
    - What's unclear: whether "single workflow" means N8N's `splitInBatches`/loop node calls the route N times (mirroring the existing `google-ads-sync.json` per-tenant loop pattern), or the route itself loops over all eligible tenants in one invocation.
    - Recommendation: Follow the existing `google-ads-sync.json` convention — N8N loops (`splitInBatches`) and calls the Route Handler once per tenant, keeping each Vercel invocation small and within `maxDuration`. Confirm with planner.
 
 2. **Toast/badge library — does this project have a toast primitive installed yet?**
+   - **RESOLVED (Plan 05):** Plan 05 installs shadcn's official Sonner-based toast via `npx shadcn@latest add sonner` and fires anomaly alerts with `toast.custom()`. Recommendation adopted.
    - What we know: `deferred-items.md`/STATE.md mention "no sonner" was a deliberate choice in Phase 03.1 (native `<select>`, no toast dependency added for that feature).
    - What's unclear: whether D-06's "toast immediately" implies installing a toast library now (e.g., shadcn's `sonner`-based `Toast`/`Toaster` component) or building a minimal custom one.
    - Recommendation: shadcn/ui's official Toast/Sonner component is the path of least friction (same CLI-based, zero-new-dependency-family approach as every other UI primitive in this project) — install via `npx shadcn@latest add sonner` when this phase is planned. Not verified against the current shadcn registry in this research pass — planner should confirm the component still exists under that name at plan time.
