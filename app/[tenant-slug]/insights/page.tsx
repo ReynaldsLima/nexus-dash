@@ -160,6 +160,19 @@ export default function InsightsPage() {
   const [streamState, setStreamState] = useState<'idle' | 'streaming' | 'completing' | 'error'>('idle')
   const [streamedText, setStreamedText] = useState('')
   const hasTriggeredRef = useRef(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const isMountedRef = useRef(true)
+
+  // WR-05: tie the streaming fetch/reader loop and the completion timeout to component
+  // lifecycle so navigating away mid-stream doesn't call setState on an unmounted component
+  // or race a stale refetch() against a query no longer observed.
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      abortControllerRef.current?.abort()
+    }
+  }, [])
 
   const handleGenerate = async () => {
     if (streamState !== 'idle') return
@@ -167,15 +180,19 @@ export default function InsightsPage() {
     setStreamState('streaming')
     setStreamedText('')
 
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     try {
       const res = await fetch('/api/insights/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tenantSlug }),
+        signal: controller.signal,
       })
 
       if (!res.ok || !res.body) {
-        setStreamState('error')
+        if (isMountedRef.current) setStreamState('error')
         return
       }
 
@@ -186,20 +203,28 @@ export default function InsightsPage() {
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
+        if (!isMountedRef.current) {
+          await reader.cancel()
+          return
+        }
         const chunk = decoder.decode(value, { stream: true })
         full += chunk
         const displayText = full.split('<insight_data>')[0]
         setStreamedText(displayText)
       }
 
+      if (!isMountedRef.current) return
       setStreamState('completing')
       setTimeout(async () => {
+        if (!isMountedRef.current) return
         await refetch()
+        if (!isMountedRef.current) return
         setStreamState('idle')
         setStreamedText('')
       }, 600)
-    } catch {
-      setStreamState('error')
+    } catch (err) {
+      const isAbort = err instanceof DOMException && err.name === 'AbortError'
+      if (isMountedRef.current && !isAbort) setStreamState('error')
     }
   }
 
