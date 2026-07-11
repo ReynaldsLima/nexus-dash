@@ -4,12 +4,12 @@
 
 ### Authentication & Access Control
 
-- [ ] **AUTH-01**: User can log in with email + password and stay logged in across sessions
-- [ ] **AUTH-02**: User can log out from any page and session is invalidated
+- [x] **AUTH-01**: User can log in with email + password and stay logged in across sessions
+- [x] **AUTH-02**: User can log out from any page and session is invalidated
 - [x] **AUTH-03**: Super Admin can create, edit, and deactivate tenants from the platform
 - [x] **AUTH-04**: Super Admin can switch between tenants without logging out
 - [x] **AUTH-05**: Three roles exist — `super_admin` (platform-level), `tenant_admin`, `viewer` — with appropriate access gates per role
-- [ ] **AUTH-06**: Row Level Security enforces tenant isolation — cross-tenant data reads at the database level must fail
+- [x] **AUTH-06**: Row Level Security enforces tenant isolation — cross-tenant data reads at the database level must fail
 
 ### Data Sync (N8N Integration)
 
@@ -22,17 +22,17 @@
 
 ### Dashboard — Overview
 
-- [ ] **DASH-01**: Dashboard displays KPI cards for ROAS, CPA, CTR, Spend, Impressions, Clicks, and Conversions with period-over-period delta (absolute + %, color-coded by metric polarity)
-- [ ] **DASH-02**: Dashboard displays trend charts (line, time-series) per KPI for the selected period
-- [ ] **DASH-03**: Dashboard displays channel breakdown showing Google Ads vs. Meta Ads in absolute values and percentage contribution
-- [ ] **DASH-04**: Global date range picker with presets — Last 7, 14, 30 days; This Month; Last Month; Custom — defaults to Last 30 days and persists across page navigation
+- [x] **DASH-01**: Dashboard displays KPI cards for ROAS, CPA, CTR, Spend, Impressions, Clicks, and Conversions with period-over-period delta (absolute + %, color-coded by metric polarity)
+- [x] **DASH-02**: Dashboard displays trend charts (line, time-series) per KPI for the selected period
+- [x] **DASH-03**: Dashboard displays channel breakdown showing Google Ads vs. Meta Ads in absolute values and percentage contribution
+- [x] **DASH-04**: Global date range picker with presets — Last 7, 14, 30 days; This Month; Last Month; Custom — defaults to Last 30 days and persists across page navigation
 
 ### Campaigns
 
-- [ ] **CAMP-01**: Campaigns list table showing Campaign Name, Channel, Status, Spend, ROAS, CPA, CTR, Clicks, Conversions
-- [ ] **CAMP-02**: Campaigns list can be filtered by channel (Google Ads / Meta / All)
-- [ ] **CAMP-03**: Campaigns list respects the global date range picker
-- [ ] **CAMP-04**: Clicking a campaign opens a drill-down view with detailed metrics over time (trend lines for the selected period)
+- [x] **CAMP-01**: Campaigns list table showing Campaign Name, Channel, Status, Spend, ROAS, CPA, CTR, Clicks, Conversions
+- [x] **CAMP-02**: Campaigns list can be filtered by channel (Google Ads / Meta / All)
+- [x] **CAMP-03**: Campaigns list respects the global date range picker
+- [x] **CAMP-04**: Clicking a campaign opens a drill-down view with detailed metrics over time (trend lines for the selected period)
 
 ### AI Insights
 
@@ -44,7 +44,15 @@
 ### Settings
 
 - [x] **SET-01**: Tenant Admin can connect a Google Ads account to their tenant via OAuth2 flow
-- [ ] **SET-02**: Tenant Admin can connect a Meta Ads account to their tenant via System User token input
+- [x] **SET-02**: Tenant Admin can connect a Meta Ads account to their tenant via System User token input
+
+### Leads Management (Phase 03.1)
+
+- [x] **LEADS-01**: Lead status write-back to the source Google Sheet via a Service Account
+- [x] **LEADS-02**: sheets_service_account credential storage (per-tenant JSONB column)
+- [x] **LEADS-03**: Inline editable lead status dropdown in the leads table
+- [x] **LEADS-04**: Optimistic status write with revert-on-failure (no auto-retry)
+- [x] **LEADS-05**: Error mapping for Sheets failures (rate limit / permission)
 
 ### Access Modules — Multi-Client Agency (Phase 5)
 
@@ -100,28 +108,28 @@ These are table stakes or expected features not included in v1 due to complexity
 
 | REQ-ID | Phase | Status | Plan |
 |--------|-------|--------|------|
-| AUTH-01 | 1 — Foundation | Pending | TBD |
-| AUTH-02 | 1 — Foundation | Pending | TBD |
+| AUTH-01 | 1 — Foundation | Complete | 01-03, 01-04 |
+| AUTH-02 | 1 — Foundation | Complete | 01-03, 01-04 |
 | AUTH-03 | 1 — Foundation | Complete | TBD |
 | AUTH-04 | 1 — Foundation | Complete | TBD |
 | AUTH-05 | 1 — Foundation | Complete | TBD |
-| AUTH-06 | 1 — Foundation | Pending | TBD |
+| AUTH-06 | 1 — Foundation | Complete | 01-02 |
 | SYNC-01 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-02 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-03 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-04 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-05 | 2 — Data Pipeline | Complete | TBD |
 | SYNC-06 | 2 — Data Pipeline | Complete | TBD |
-| DASH-01 | 3 — Dashboard UI | Pending | TBD |
-| DASH-02 | 3 — Dashboard UI | Pending | TBD |
-| DASH-03 | 3 — Dashboard UI | Pending | TBD |
-| DASH-04 | 3 — Dashboard UI | Pending | TBD |
-| CAMP-01 | 3 — Dashboard UI | Pending | TBD |
-| CAMP-02 | 3 — Dashboard UI | Pending | TBD |
-| CAMP-03 | 3 — Dashboard UI | Pending | TBD |
-| CAMP-04 | 3 — Dashboard UI | Pending | TBD |
+| DASH-01 | 3 — Dashboard UI | Complete | 03-03 |
+| DASH-02 | 3 — Dashboard UI | Complete | 03-03 |
+| DASH-03 | 3 — Dashboard UI | Complete | 03-03 |
+| DASH-04 | 3 — Dashboard UI | Complete | 03-02 |
+| CAMP-01 | 3 — Dashboard UI | Complete | 03-04 |
+| CAMP-02 | 3 — Dashboard UI | Complete | 03-04 |
+| CAMP-03 | 3 — Dashboard UI | Complete | 03-04 |
+| CAMP-04 | 3 — Dashboard UI | Complete | 03-04 |
 | SET-01 | 7 — Google Ads OAuth2 Connect (gap closure) | Complete | TBD |
-| SET-02 | 3 — Dashboard UI | Pending | TBD |
+| SET-02 | 3 — Dashboard UI | Complete | 03-05 |
 | AI-01 | 4 — AI Insights | Complete | TBD |
 | AI-02 | 4 — AI Insights | Complete | TBD |
 | AI-03 | 4 — AI Insights | Complete | TBD |
@@ -134,3 +142,9 @@ These are table stakes or expected features not included in v1 due to complexity
 | AGENCY-06 | 5 — Access Modules | Complete | 05-02 |
 | AGENCY-07 | 5 — Access Modules | Complete | 05-03 |
 | AGENCY-08 | 5 — Access Modules, 6 — Security & Consistency (gap closure) | Complete | 05-08, 06-02, 06-03 |
+| LEADS-01 | 03.1 — Leads Management | Complete | 03.1-02 |
+| LEADS-02 | 03.1 — Leads Management | Complete | 03.1-01, 03.1-02 |
+| LEADS-03 | 03.1 — Leads Management | Complete | 03.1-03 |
+| LEADS-04 | 03.1 — Leads Management | Complete | 03.1-02, 03.1-03 |
+| LEADS-05 | 03.1 — Leads Management | Complete | 03.1-02 |
+| DASH-03-ext | 3 — Dashboard UI | Complete | 03-06 |
