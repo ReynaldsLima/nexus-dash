@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
   const parsed = extractStructuredBlock(text)
   const prose = stripStructuredBlock(text)
-  await service.from('ai_insights').insert({
+  const { error: insertError } = await service.from('ai_insights').insert({
     tenant_id: body.tenantId,
     source: 'daily',
     type: parsed?.type ?? 'optimization',
@@ -55,6 +55,13 @@ export async function POST(req: Request) {
     recommendations: parsed?.recommendations ?? [],
     impact: parsed?.impact ?? 'medium',
   })
+  if (insertError) {
+    console.error('[insights/daily] insert failed', insertError)
+    return new Response(JSON.stringify({ ok: false, error: insertError.message }), {
+      status: 500,
+      headers: { 'content-type': 'application/json' },
+    })
+  }
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
