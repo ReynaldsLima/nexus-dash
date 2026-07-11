@@ -335,17 +335,19 @@ Not applicable in the traditional sense — Google's web-server OAuth2 flow has 
 
 **None of these are HIGH-risk blockers** — A1 and A3 should be confirmed by the user when the Google Cloud OAuth Client is actually created (already tracked as the D-03 infrastructure blocker); A2 should be confirmed via one live manual test once the OAuth Client exists.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Which Vercel domain is the actual stable production URL to register in Google Cloud Console?**
    - What we know: STATE.md's Phase 0 infra section lists `https://nexus-dash-h39vlzi71-riguettilimatech-8948s-projects.vercel.app`; the same file's Phase 6 UAT entries repeatedly reference `https://nexusdash-chi.vercel.app` for live testing.
    - What's unclear: Whether the first is a frozen deployment-specific alias (common with Vercel's auto-generated preview URLs) and the second is the actual assigned production/custom domain, or vice versa.
    - Recommendation: Confirm with the user (or via Vercel dashboard/`vercel domains ls`) before documenting the redirect URI to register — this is purely an infra/documentation question, not a code-blocking one, since the code should read the origin dynamically (`request.nextUrl.origin` or an env var) rather than hardcode a domain.
+   - **RESOLVED:** Both routes compute `redirect_uri` from `req.nextUrl.origin` dynamically (Plan 02 `/connect` step 6, Plan 03 `/callback` step 7), so no domain is hardcoded — this sidesteps the code question entirely. The remaining action (which exact Vercel domain to register in Google Cloud Console) is a pure infra/documentation step under the D-03 OAuth-Client blocker, to be confirmed by the user when the Client is created; it does not block code completion.
 
 2. **Does `google-auth-library`'s `OAuth2Client` reduce risk enough to justify the stylistic inconsistency with Meta's raw-`fetch` pattern?**
    - What we know: Both approaches are functionally equivalent for this phase's 2-call flow; `OAuth2Client` is already an installed dependency.
    - What's unclear: Whether the planner/user prefers absolute consistency with the existing Meta route's style over marginally less boilerplate.
    - Recommendation: Default to raw `fetch` (this research's primary recommendation) unless the planner has a specific reason to prefer `OAuth2Client` — flagged as Claude's Discretion in CONTEXT.md, so either choice is valid; document whichever is chosen in the plan for future consistency.
+   - **RESOLVED:** Both plans use raw `fetch`/`URLSearchParams` — Plan 02 builds the authorization URL with `URLSearchParams`, and Plan 03 exchanges the code via `fetch('https://oauth2.googleapis.com/token', ...)` — matching the Meta route's style per this research's primary recommendation. `google-auth-library`'s `OAuth2Client` is intentionally NOT used, prioritizing consistency with the existing Meta pattern.
 
 ## Environment Availability
 
