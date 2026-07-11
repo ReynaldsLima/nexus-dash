@@ -198,7 +198,7 @@ Plans:
 Plans:
 - [x] 07-01-PLAN.md — Wave 0 test scaffolds (oauth-state, connect route, callback route) — RED specs (SET-01)
 - [x] 07-02-PLAN.md — Wave 1: lib/google-ads/oauth-state.ts (HMAC state) + GET /api/google-ads/connect (auth/role/claims gate + redirect to Google) + GOOGLE_OAUTH_STATE_SECRET env (SET-01)
-- [ ] 07-03-PLAN.md — Wave 2: GET /api/google-ads/callback (verify state, token exchange, Vault write, ad_accounts upsert) (SET-01)
+- [x] 07-03-PLAN.md — Wave 2: GET /api/google-ads/callback (verify state, token exchange, Vault write, ad_accounts upsert) (SET-01)
 - [ ] 07-04-PLAN.md — Wave 2: GoogleAdsForm + Settings page card (Customer ID input, inline error, pre-fill, Connect button) (SET-01)
 
 ---
