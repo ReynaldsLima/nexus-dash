@@ -1,0 +1,379 @@
+{
+  "name": "Daily Insights & Anomaly Detection",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "nexus-dash-daily-insights-and-anomaly-detection-v1"
+  },
+  "active": false,
+  "versionId": "1",
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "nodes": [
+    {
+      "id": "node_schedule_trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 5 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node_set_constants",
+      "name": "Set Constants",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "const_supabase_url",
+              "name": "SUPABASE_URL",
+              "value": "https://rvkkvjitfddtbdpkupok.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "const_vercel_app_url",
+              "name": "VERCEL_APP_URL",
+              "value": "https://nexus-dash.vercel.app",
+              "type": "string"
+            },
+            {
+              "id": "const_anomaly_threshold_pct",
+              "name": "ANOMALY_THRESHOLD_PCT",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "const_window_hours",
+              "name": "WINDOW_HOURS",
+              "value": 24,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "IMPORTANT (user setup): replace VERCEL_APP_URL's placeholder value with the actual production deployment URL after import."
+    },
+    {
+      "id": "node_list_eligible_tenants",
+      "name": "List eligible tenants",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/ad_accounts?active=eq.true&select=tenant_id&limit=1000",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      }
+    },
+    {
+      "id": "node_dedupe_tenants",
+      "name": "Dedupe tenant ids",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "parameters": {
+        "jsCode": "// D-07 eligibility: ad_accounts may have multiple rows per tenant (one per connected\n// account) — dedupe so each tenant is processed exactly once per run.\nconst seen = new Set();\nconst items = [];\nfor (const item of $input.all()) {\n  const tenantId = item.json.tenant_id;\n  if (tenantId && !seen.has(tenantId)) {\n    seen.add(tenantId);\n    items.push({ json: { tenant_id: tenantId } });\n  }\n}\nreturn items;"
+      }
+    },
+    {
+      "id": "node_loop_tenants",
+      "name": "Loop tenants",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 300],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "node_call_insights_daily",
+      "name": "Call insights daily route",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 180],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Constants').item.json.VERCEL_APP_URL }}/api/insights/daily",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "n8n_insights_secret",
+            "name": "N8N Insights Secret"
+          }
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"tenantId\": \"{{ $json.tenant_id }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "n8n_insights_secret",
+          "name": "N8N Insights Secret"
+        }
+      },
+      "notes": "This is the ONLY node in the workflow that reaches the Vercel Route Handler / Claude — keeps ANTHROPIC_API_KEY off the N8N VPS. Requires the 'N8N Insights Secret' Header Auth credential (header name x-n8n-secret) matching the Vercel env var N8N_INSIGHTS_SECRET."
+    },
+    {
+      "id": "node_get_campaign_metrics",
+      "name": "Get recent campaign_metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 420],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/campaign_metrics?tenant_id=eq.{{ $json.tenant_id }}&select=tenant_id,campaign_id,campaign_name,channel,date,spend,conversion_value&order=date.desc&limit=200",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      },
+      "notes": "D-05: ROAS-drop anomaly detection lives entirely in N8N (this + the next Code node), NOT the route/Claude. Pulls the most recent rows per campaign so the Code node can compare the latest 24h window vs the prior one."
+    },
+    {
+      "id": "node_compute_roas_anomalies",
+      "name": "Compute ROAS anomalies",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 420],
+      "parameters": {
+        "jsCode": "// D-05: pure N8N ROAS-drop detection — compares each campaign's most recent 24h window\n// (the latest date row in campaign_metrics) against the prior 24h window (the previous date\n// row), and emits an anomaly item when the drop meets/exceeds ANOMALY_THRESHOLD_PCT.\nconst threshold = $('Set Constants').first().json.ANOMALY_THRESHOLD_PCT;\nconst rows = $input.all().map((i) => i.json);\n\nconst byCampaign = {};\nfor (const row of rows) {\n  const key = row.campaign_id;\n  if (!byCampaign[key]) byCampaign[key] = [];\n  byCampaign[key].push(row);\n}\n\nconst anomalies = [];\nfor (const campaignId of Object.keys(byCampaign)) {\n  const campaignRows = byCampaign[campaignId].sort((a, b) => (a.date < b.date ? 1 : -1));\n  if (campaignRows.length < 2) continue;\n  const current = campaignRows[0];\n  const prior = campaignRows[1];\n  const currentSpend = Number(current.spend);\n  const priorSpend = Number(prior.spend);\n  const currentRoas = currentSpend > 0 ? Number(current.conversion_value) / currentSpend : 0;\n  const priorRoas = priorSpend > 0 ? Number(prior.conversion_value) / priorSpend : 0;\n  if (priorRoas <= 0) continue;\n  const dropPct = ((priorRoas - currentRoas) / priorRoas) * 100;\n  if (dropPct >= threshold) {\n    anomalies.push({\n      tenant_id: current.tenant_id,\n      campaign_id: current.campaign_id,\n      campaign_name: current.campaign_name,\n      channel: current.channel,\n      metric: 'roas',\n      drop_pct: Math.round(dropPct * 100) / 100,\n      window_hours: 24,\n    });\n  }\n}\n\nreturn anomalies.map((a) => ({ json: a }));"
+      }
+    },
+    {
+      "id": "node_insert_anomaly_alerts",
+      "name": "Insert anomaly_alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 420],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/anomaly_alerts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "supabase_service_role",
+            "name": "Supabase Service Role"
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ $('Compute ROAS anomalies').all().map(i => i.json) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "supabase_service_role",
+          "name": "Supabase Service Role"
+        }
+      },
+      "notes": "PostgREST insert — NEVER the native n8n-nodes-base.supabase node (GitHub #17020). Posting an empty array is a harmless no-op when no campaign crossed the threshold this run."
+    },
+    {
+      "id": "node_merge_branches",
+      "name": "Merge branches",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [2000, 300],
+      "parameters": {
+        "mode": "append"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Constants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Constants": {
+      "main": [
+        [
+          {
+            "node": "List eligible tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List eligible tenants": {
+      "main": [
+        [
+          {
+            "node": "Dedupe tenant ids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe tenant ids": {
+      "main": [
+        [
+          {
+            "node": "Loop tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop tenants": {
+      "main": [
+        [
+          {
+            "node": "Call insights daily route",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get recent campaign_metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call insights daily route": {
+      "main": [
+        [
+          {
+            "node": "Merge branches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get recent campaign_metrics": {
+      "main": [
+        [
+          {
+            "node": "Compute ROAS anomalies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute ROAS anomalies": {
+      "main": [
+        [
+          {
+            "node": "Insert anomaly_alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert anomaly_alerts": {
+      "main": [
+        [
+          {
+            "node": "Merge branches",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge branches": {
+      "main": [
+        [
+          {
+            "node": "Loop tenants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
