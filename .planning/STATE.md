@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 7 context gathered
-last_updated: "2026-07-11T19:18:48.816Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-07-11T21:27:56.850Z"
 progress:
   total_phases: 9
   completed_phases: 8
   total_plans: 43
-  completed_plans: 40
-  percent: 93
+  completed_plans: 41
+  percent: 95
 ---
 
 # Project State
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Status
 
-- Current phase: 07 — Google Ads OAuth2 Connect (gap closure) — 1/4 plans complete (Wave 0 RED specs written: oauth-state.test.ts, google-ads-connect-route.test.ts, google-ads-callback-route.test.ts)
-- Overall progress: 40/43 planned plans complete (93%) — 8/9 phases fully done, phase 7 in progress (1/4 plans)
+- Current phase: 07 — Google Ads OAuth2 Connect (gap closure) — 2/4 plans complete (Wave 0 RED specs + `lib/google-ads/oauth-state.ts`/`GET /api/google-ads/connect` now GREEN)
+- Overall progress: 41/43 planned plans complete (95%) — 8/9 phases fully done, phase 7 in progress (2/4 plans)
 - Phases complete: 8/9
 
 ```
@@ -54,7 +54,7 @@ Phase 06: Security & Consistency — Leads Endpoints (4/4 plans complete — AGE
 | 4 | AI Insights | ✅ Concluída (código) — 6/6 plans (lib/ai/ core + POST /api/insights/generate streaming route + ai_insights/anomaly_alerts RLS+Realtime + toast/badge de anomalia in-app + UI de insights sob demanda com dados reais e streaming + POST /api/insights/daily + workflow N8N diário de insights/anomalia, AI-01/02/03/04 completos) — import/ativação N8N + UAT ao vivo pendentes | 2026-07-11 |
 | 5 | Agência Multi-Cliente | ✅ Concluída — 9/9 plans, UAT completo (achou e corrigiu bug bloqueante via /gsd-debug) | 2026-07-10 |
 | 6 | Security & Consistency — Leads Endpoints (gap closure) | ✅ Concluída — 4/4 plans, AGENCY-08 completo, gate automatizado verde, checkpoint de verificação humana aceito parcial (produção via Playwright, gap externo ANTHROPIC_API_KEY pendente desde Fase 4) | 2026-07-11 |
-| 7 | Google Ads OAuth2 Connect (gap closure) | Em progresso — 1/4 plans (Wave 0 RED specs) | — |
+| 7 | Google Ads OAuth2 Connect (gap closure) | Em progresso — 2/4 plans (Wave 0 RED specs + state helper/connect route) | — |
 
 ---
 
@@ -78,6 +78,7 @@ Phase 06: Security & Consistency — Leads Endpoints (4/4 plans complete — AGE
 | Phase 06 P03 | 6min | 3 tasks | 4 files |
 | Phase 06 P04 | ~20min | 2 tasks | 0 files |
 | Phase 07-google-ads-oauth2-connect P01 | 12min | 3 tasks | 3 files |
+| Phase 07-google-ads-oauth2-connect P02 | 10min | 3 tasks | 4 files |
 
 ### Per-Plan Execution Log
 
@@ -203,7 +204,7 @@ Phase 06: Security & Consistency — Leads Endpoints (4/4 plans complete — AGE
 
 **Last updated:** 2026-07-11 - Fase 07 (Google Ads OAuth2 Connect) Plano 01 CONCLUÍDO (1/4 plans): Wave 0 TDD RED — 3 novos arquivos de teste escritos (nenhum código de produção ainda).
 **Last action:** Executado `07-01-PLAN.md` (Wave 0 RED, 3 tasks): criados `tests/unit/oauth-state.test.ts` (6 casos — round-trip, sig/payload adulterados, malformado, expirado-mas-válido `{expired:true}` preservando payload), `tests/unit/google-ads-connect-route.test.ts` (8 casos — 401 sem usuário, falhas de role/validação redirecionam para `/${tenantSlug}/settings?google_error=...`, tenant_admin resolve escopo via `getClaims()` nunca da query — T-07-02, sucesso gera redirect 307 para o Google com `access_type=offline`+`prompt=consent`+`state` assinado) e `tests/unit/google-ads-callback-route.test.ts` (7 casos — state com assinatura inválida redireciona para `/`, state expirado-mas-válido redireciona para `?google_error=state_expired`, erro do Google, happy path com Vault write + upsert `ad_accounts` `active:true`, falha na troca de token, `refresh_token` ausente — Pitfall 2, falha no Vault). Os 3 arquivos são RED por módulo/rota inexistente (nenhum erro de sintaxe/coleta); `npm test` completo confirma 208/208 testes pré-existentes passando (26/26 arquivos antigos verdes), zero regressões. `callback-route.test.ts` importa estaticamente o `signState` real de `lib/google-ads/oauth-state.ts` (Plano 02) para construir states válidos — acoplamento RED intencional documentado no SUMMARY. Zero desvios do plano.
-**Stopped at:** Phase 7 Plan 01 (Wave 0 RED specs) complete
+**Stopped at:** Completed 07-02-PLAN.md
 **Next action:** Rodar Plano 02 da Fase 7 (`07-02-PLAN.md`) — implementa `lib/google-ads/oauth-state.ts` + `GOOGLE_OAUTH_STATE_SECRET` env var + `app/api/google-ads/connect/route.ts`, turnando GREEN os testes `oauth-state.test.ts` e `google-ads-connect-route.test.ts`. Pendências não bloqueantes (inalteradas desde a última sessão): limpar fixtures de teste remanescentes da Fase 5 (`rls-test-agency-*`/`debug-agency`); investigar a reversão inexplicada do lead "James Soares"; formalizar VERIFICATION.md para as Fases 1 e 5; os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora; verificação manual ao vivo da Fase 4 (import/ativação N8N) ainda pendente per 04-VALIDATION.md; `ANTHROPIC_API_KEY` ainda precisa ser adicionada ao Vercel Dashboard (Production/Preview/Development) para chamadas reais à Claude em produção; Fase 7 ainda depende do Google Cloud OAuth Client (`GOOGLE_ADS_CLIENT_ID`/`SECRET`, D-03) ser criado pelo usuário antes de qualquer verificação manual end-to-end — mesmo bloqueio de classe do Developer Token da Fase 2.
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
