@@ -222,7 +222,7 @@ Plans:
 
 Plans:
 - [x] 08-01-PLAN.md — Retroactive Phase 1 verification (01-VERIFICATION.md) + REQUIREMENTS.md checkbox/traceability corrections (AUTH-01/02/06, DASH-01–04, CAMP-01–04, SET-02, LEADS-01..05, DASH-03-ext)
-- [ ] 08-02-PLAN.md — Repo hygiene: delete dead migration 0012 + track N8N-activation/VPS-check ops follow-ups in OPS-FOLLOWUPS.md
+- [x] 08-02-PLAN.md — Repo hygiene: delete dead migration 0012 + track N8N-activation/VPS-check ops follow-ups in OPS-FOLLOWUPS.md
 - [ ] 08-03-PLAN.md — Live Supabase test-fixture cleanup (enumerate → human-verify checkpoint → FK-safe delete)
 
 ---
