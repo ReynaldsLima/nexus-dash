@@ -40,6 +40,7 @@ import {
 import { brl, num } from '@/lib/formatters'
 import { ChannelSheet } from '@/components/dashboard/channel-sheet'
 import { AiShortcutCard } from '@/components/dashboard/ai-shortcut-card'
+import { useUserRole } from '@/lib/hooks/use-user-role'
 
 // ─── Chart configs ────────────────────────────────────────────────────────────
 const spendConfig = {
@@ -159,6 +160,7 @@ export default function DashboardPage() {
   const tenantSlug = params['tenant-slug'] as string
 
   const { data, isLoading, isError } = useDashboardData(tenantSlug)
+  const { data: role } = useUserRole()
   const [selectedChannel, setSelectedChannel] = useState<'Google Ads' | 'Meta Ads' | null>(null)
 
   if (isLoading) return <DashboardSkeleton />
@@ -308,8 +310,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* AI on-demand shortcut (D-02) */}
-      <AiShortcutCard tenantSlug={tenantSlug} />
+      {/* AI on-demand shortcut (D-02) — super_admin only (AI-03) */}
+      {role === 'super_admin' && <AiShortcutCard tenantSlug={tenantSlug} />}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">

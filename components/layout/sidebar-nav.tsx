@@ -48,7 +48,7 @@ export function SidebarNav({ slug, role }: { slug: string; role?: string | null 
   const pathname = usePathname()
   const unread = useAnomalyAlertsStore((s) => s.unread)
   const clearUnread = useAnomalyAlertsStore((s) => s.clearUnread)
-  const marketingItems = role === 'agency' ? MARKETING_ITEMS.filter((item) => item.key !== 'insights') : MARKETING_ITEMS
+  const marketingItems = role !== 'super_admin' ? MARKETING_ITEMS.filter((item) => item.key !== 'insights') : MARKETING_ITEMS
 
   useEffect(() => {
     if (pathname.startsWith(`/${slug}/insights`)) clearUnread()

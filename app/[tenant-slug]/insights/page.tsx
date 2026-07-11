@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import type { AiInsight } from '@/lib/mock-data'
 import { useAiInsights } from '@/lib/hooks/use-ai-insights'
+import { useUserRole } from '@/lib/hooks/use-user-role'
 import { StreamingInsightCard } from '@/components/insights/streaming-insight-card'
 
 // ─── Type helpers ─────────────────────────────────────────────────────────────
@@ -154,6 +155,7 @@ export default function InsightsPage() {
   const searchParams = useSearchParams()
 
   const { data: insights, isLoading, isError, refetch } = useAiInsights(tenantSlug)
+  const { data: role, isLoading: isRoleLoading } = useUserRole()
 
   const [streamState, setStreamState] = useState<'idle' | 'streaming' | 'completing' | 'error'>('idle')
   const [streamedText, setStreamedText] = useState('')
@@ -210,6 +212,16 @@ export default function InsightsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, tenantSlug])
+
+  // AI-03: AI Insights is super_admin-only. RLS/route auth already block data access for other
+  // roles, but the page itself should not be reachable — redirect away once role is resolved.
+  useEffect(() => {
+    if (!isRoleLoading && role !== 'super_admin') {
+      router.replace(`/${tenantSlug}/dashboard`)
+    }
+  }, [isRoleLoading, role, router, tenantSlug])
+
+  if (isRoleLoading || role !== 'super_admin') return null
 
   return (
     <section className="flex flex-col gap-6">
