@@ -121,7 +121,15 @@ Plans:
 2. N8N runs a scheduled daily analysis at 05:00 UTC after both sync workflows complete; results are stored to the database and visible without any manual trigger.
 3. The AI Insights history page lists all generated insights with type, priority, recommended action, impact, and generation timestamp — accessible only to Super Admin.
 4. When ROAS for any campaign drops more than 20% within a 24-hour window, an in-app anomaly alert appears for the Super Admin without requiring a page refresh or manual analysis trigger.
-**Plans:** TBD
+**Plans:** 6 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Wave 0 test scaffolds (parse-insight-block, generate/daily routes, ai_insights RLS, anomaly_alerts schema)
+- [ ] 04-02-PLAN.md — Foundation: install ai + @ai-sdk/anthropic + ai_insights/anomaly_alerts migrations + [BLOCKING] db push + realtime publication (AI-03/AI-04)
+- [ ] 04-03-PLAN.md — lib/ai core (parser + prompt builders) + on-demand streaming route + vercel.json maxDuration (AI-01)
+- [ ] 04-04-PLAN.md — Insights page real data + streaming card + dashboard shortcut (AI-01/AI-03)
+- [ ] 04-05-PLAN.md — Anomaly alerts UI: Sonner toast + Zustand store + Realtime subscription + sidebar badge (AI-04)
+- [ ] 04-06-PLAN.md — N8N daily workflow (05:00 UTC) + daily route + ROAS anomaly detection (AI-02/AI-04)
 
 ---
 
@@ -133,7 +141,7 @@ Plans:
 | 1. Foundation | 0/5 | Planned | — |
 | 2. Data Pipeline | 0/5 | Planned | — |
 | 3. Dashboard UI | 5/6 | Gap closure in progress | — |
-| 4. AI Insights | 0/? | Not started | — |
+| 4. AI Insights | 0/6 | Planned | — |
 
 ### Phase 5: Access Modules — Multi-Client Agency
 
