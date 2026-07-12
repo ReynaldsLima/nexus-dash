@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
-status: planning
-stopped_at: v1.1 scope confirmed — defining requirements
-last_updated: "2026-07-12T00:55:00.000Z"
+status: roadmap_created
+stopped_at: v1.1 roadmap criado (Phases 9-12) — pronto para /gsd-plan-phase 9
+last_updated: "2026-07-12T01:30:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,7 +19,16 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-07-12)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Milestone v1.1 scope confirmed (gestão completa de usuários, limpeza do papel "viewer" morto, janela de histórico retroativo configurável, redesign visual das telas) — defining requirements and roadmap
+**Current focus:** Milestone v1.1 roadmap criado — Phase 9 (Limpeza do Papel Viewer) é a próxima a ser planejada via `/gsd-plan-phase 9`
+
+## Current Position
+
+Phase: 9 of 12 (Limpeza do Papel Viewer) — v1.1 phase count starts at 9, continuing from v1.0's Phase 8
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-07-12 — ROADMAP.md/REQUIREMENTS.md criados para v1.1 (Phases 9-12, 14/14 requirements mapeados)
+
+Progress: [░░░░░░░░░░] 0%
 
 ---
 
@@ -27,11 +36,12 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 
 **v1.0 MVP shipped 2026-07-12** — 10/10 phases, 46/46 plans complete. Tagged `v1.0`, archived to `.planning/milestones/v1.0-ROADMAP.md` / `v1.0-REQUIREMENTS.md` / `v1.0-phases/`. Full v1.0 history below is preserved as historical record; a fresh phase/plan cycle starts with v1.1.
 
-- Next: define REQUIREMENTS.md and roadmap for v1.1. Scope confirmed via `/gsd-new-milestone` (user management, viewer cleanup, retroactive history window, visual redesign — existing `prototipos/*.html` as design starting point).
+- Next: `/gsd-plan-phase 9` (Limpeza do Papel Viewer — AUTH-07). Roadmap v1.1 criado com 4 fases (9-12), ordem derivada de `.planning/research/ARCHITECTURE.md`: Phase 9 (viewer cleanup, zero DB coupling) → Phase 10 (user management) → Phase 11 (backfill window) → Phase 12 (redesign visual, captura a forma final de tudo antes).
 - v1.0 progress (historical, frozen): 46/46 planned plans complete (100%) — 10/10 phases done
+- v1.1 progress: 0/4 phases planned, 14/14 requirements mapped, 0 plans written yet (roadmap only)
 
 ```
-[██████████] 100%
+[██████████] 100%  (v1.0, frozen)
 Phase 0: Infrastructure (done, 3 deferred items)
 Phase 1: Foundation (all 5 plans complete — auth, DB, plumbing, UI, tenant management; retroactive 01-VERIFICATION.md added via Phase 8 Plan 01)
 Phase 2: Data Pipeline (4/5 plans complete — Plans 01-04 done; Plan 05 pending)
@@ -41,6 +51,12 @@ Phase 05: Agência Multi-Cliente (9/9 plans complete — Plan 09 UAT found a pha
 Phase 06: Security & Consistency — Leads Endpoints (4/4 plans complete — AGENCY-08 fully satisfied across GET/PATCH/POST leads endpoints, rate limiter + streamText/insightModel migration, final human-verify checkpoint executed live against Vercel production via Playwright MCP and accepted partial-but-scoped: auth/scope gate + client error-rendering confirmed live, streamed-reply/429-UX pending on a pre-existing missing ANTHROPIC_API_KEY Vercel env var (Phase 4 gap, not a Phase 6 defect))
 Phase 07: Google Ads OAuth2 Connect (gap closure) (4/4 plans complete — SET-01 fully code-complete: state helper + connect route + callback route + Settings UI wiring; live end-to-end verification blocked pending user's Google Cloud OAuth Client, D-03, same class as Phase 2's Developer Token)
 Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md authored + REQUIREMENTS.md 15-checkbox correction + 6-row traceability gap filled; Plan 02: dead migration 0012 deleted + OPS-FOLLOWUPS.md created; Plan 03: live Supabase test-fixture cleanup — 11 agencies + 1 agency_users + 1 tenant_users + 2 auth.users deleted, FK-safe, human-approved)
+
+[░░░░░░░░░░] 0%  (v1.1, just started)
+Phase 09: Limpeza do Papel Viewer (not started — AUTH-07)
+Phase 10: Gestão de Usuários (not started — USER-01..05)
+Phase 11: Janela de Histórico Retroativo (not started — SET-03..05)
+Phase 12: Redesign Visual (not started — DESIGN-01..05)
 ```
 
 ---
@@ -59,6 +75,10 @@ Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md 
 | 6 | Security & Consistency — Leads Endpoints (gap closure) | ✅ Concluída — 4/4 plans, AGENCY-08 completo, gate automatizado verde, checkpoint de verificação humana aceito parcial (produção via Playwright, gap externo ANTHROPIC_API_KEY pendente desde Fase 4) | 2026-07-11 |
 | 7 | Google Ads OAuth2 Connect (gap closure) | ✅ Concluída (código) — 4/4 plans, SET-01 completo (state helper + connect route + callback route + Settings UI); verificação manual ao vivo pendente do Google Cloud OAuth Client do usuário (D-03) | 2026-07-11 |
 | 8 | Tech Debt Cleanup (não-bloqueante) | ✅ Concluída — 3/3 plans: Plano 01 (01-VERIFICATION.md + REQUIREMENTS.md corrigido), Plano 02 (migration 0012 apagada + OPS-FOLLOWUPS.md), Plano 03 (limpeza de fixtures de teste no Supabase live) | 2026-07-11 |
+| 9 | Limpeza do Papel Viewer (AUTH-07) | 📋 Roadmap criado — não planejada | — |
+| 10 | Gestão de Usuários (USER-01..05) | 📋 Roadmap criado — não planejada | — |
+| 11 | Janela de Histórico Retroativo (SET-03..05) | 📋 Roadmap criado — não planejada | — |
+| 12 | Redesign Visual (DESIGN-01..05) | 📋 Roadmap criado — não planejada | — |
 
 ---
 
@@ -66,11 +86,11 @@ Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md 
 
 | Metric | Value |
 |--------|-------|
-| Requirements total | 26 core (v1) + 5 LEADS + 8 AGENCY = 39, + SET-01/AGENCY-08 gap-closure re-scoping (see v1.0-MILESTONE-AUDIT.md) |
-| Requirements complete | 39/39 satisfied (AI-01, AI-03 via Phase 4 Plan 04; AI-02, AI-04 via Phase 4 Plan 06; AGENCY-08 fully satisfied via Phase 6 Plans 02+03; SET-01 fully satisfied via Phase 7 Plan 04) — per `.planning/v1.0-MILESTONE-AUDIT.md` (2026-07-10), updated 2026-07-11 |
-| Plans written | 32 (+3 Phase 8 tech-debt cleanup, non-blocking, added post-milestone) |
-| Plans complete | 32 (+3 Phase 8) |
-| Phases complete | 10/10 (0, 1, 03.1, 5, 4, 6, 7, 8 done; 2 code-complete/externally blocked; 3 done) |
+| Requirements total | 26 core (v1) + 5 LEADS + 8 AGENCY = 39, + SET-01/AGENCY-08 gap-closure re-scoping (see v1.0-MILESTONE-AUDIT.md); v1.1 adds 14 more (AUTH-07, USER-01..05, SET-03..05, DESIGN-01..05) |
+| Requirements complete | v1.0: 39/39 satisfied (per `.planning/v1.0-MILESTONE-AUDIT.md`, updated 2026-07-11). v1.1: 0/14 (roadmap just created) |
+| Plans written | v1.0: 32 (+3 Phase 8 tech-debt cleanup). v1.1: 0 (plan counts TBD per phase) |
+| Plans complete | v1.0: 32 (+3 Phase 8). v1.1: 0 |
+| Phases complete | v1.0: 10/10. v1.1: 0/4 (Phases 9-12 roadmapped, not planned) |
 | Phase 04-ai-insights P01 | 8min | 2 tasks | 5 files |
 | Phase 04-ai-insights P02 | 14min | 2 tasks | 7 files |
 | Phase 04-ai-insights P03 | 12min | 3 tasks | 7 files |
@@ -145,7 +165,7 @@ Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md 
 - **CRITICAL discovery (Phase 05 Plan 02), RESOLVED 2026-07-09:** the live project's Custom Access Token Hook (Supabase Dashboard → Authentication → Hooks) was wired to an HTTP Edge Function (`custom-access-token`), NOT the `public.custom_access_token_hook` Postgres function that migrations 0005/0019 maintain — confirmed via Management API (`hook_custom_access_token_uri` pointed at the Edge Function). That Edge Function never queried `agency_users`/`tenant_users`; it only echoed pre-existing `app_metadata` and wrote the tenant slug under the wrong key (`slug` instead of `tenant_slug`, which `app/[tenant-slug]/layout.tsx` reads). Fixed via `/gsd-debug` session: user switched the Dashboard hook selection to the Postgres function. Verified via Management API + live sign-in test (fresh test user + real `beta-test` tenant_users row → JWT `app_metadata` now correctly populates `role`/`tenant_id`/`tenant_slug`). See `.planning/debug/resolved/auth-hook-wired-to-wrong-function.md` and `.planning/phases/05-agencia-multi-cliente/deferred-items.md`.
 - Phase 05 Plan 02: `tests/agency-rls.test.ts`'s RLS fixtures preset `app_metadata: { role: 'agency', agency_id }` directly at `admin.createUser()` time (mirrors `tests/integration/sync-jobs-rls.test.ts`'s existing tenant_admin pattern) rather than relying on the Custom Access Token Hook — necessary given the hook-wiring bug above, and sufficient to verify the `_agency_select` RLS policies themselves (AGENCY-06)
 - Phase 05 Plan 03 (AGENCY-07): `tenant_users.role` collapsed to a single surviving value `tenant_admin` via live migration `0020` — pre-migration check (`SELECT role, count(*) FROM tenant_users GROUP BY role`) found only `{tenant_admin: 1}` live, zero `viewer` rows, so the promotive `UPDATE viewer->tenant_admin` was a documented no-op on current data but the `CHECK (role = 'tenant_admin')` constraint tightening still applied and is now live. `createTenantUser` and `components/tenants/add-user-modal.tsx` no longer accept/offer a role choice (D-03 "Cliente" = full access, including lead status edits). Removing the now-impossible "rejects role super_admin" test in `tests/tenants.test.ts` also resolved 2 of the 4 pre-existing `tsc --noEmit` errors flagged in `deferred-items.md` (Plan 05-01) as a natural side effect.
-- Phase 05 Plan 04 (AGENCY-03/AGENCY-04): `proxy.ts` redirects `role === 'agency'` to `/agencia` post-login and blocks non-`super_admin` from `/agencies`; `app/[tenant-slug]/layout.tsx`'s tenant guard replaced with a live RLS-scoped `tenants` existence query (`.eq('active', true).maybeSingle()`) instead of JWT string-equality — closes a latent bug where a deactivated tenant was never re-verified after login, and works identically for Cliente/Agencia/Super Admin. Switcher/sidebar/header/store all recognize `role === 'agency'`: switcher gains `manageHref`/`manageLabel` props, sidebar hides `AI Insights` and the entire `Conta` section for agency. `'viewer'` deliberately kept in `proxy.ts`'s `AppMetadata.role` and `tenant-store.tsx`'s `Role` type as a rollout-safety net even after Plan 03's live role collapse, in case a stale/cached JWT with `role=viewer` is still in circulation at deploy time.
+- Phase 05 Plan 04 (AGENCY-03/AGENCY-04): `proxy.ts` redirects `role === 'agency'` to `/agencia` post-login and blocks non-`super_admin` from `/agencies`; `app/[tenant-slug]/layout.tsx`'s tenant guard replaced with a live RLS-scoped `tenants` existence query (`.eq('active', true).maybeSingle()`) instead of JWT string-equality — closes a latent bug where a deactivated tenant was never re-verified after login, and works identically for Cliente/Agencia/Super Admin. Switcher/sidebar/header/store all recognize `role === 'agency'`: switcher gains `manageHref`/`manageLabel` props, sidebar hides `AI Insights` and the entire `Conta` section for agency. `'viewer'` deliberately kept in `proxy.ts`'s `AppMetadata.role` and `tenant-store.tsx`'s `Role` type as a rollout-safety net even after Plan 03's live role collapse, in case a stale/cached JWT with `role=viewer` is still in circulation at deploy time. **v1.1 Phase 9 removes this rollout-safety net now that the deploy window has long closed — see `.planning/research/ARCHITECTURE.md` Feature 2.**
 - Phase 05 Plan 05 (AGENCY-01/AGENCY-02): `lib/actions/agencies.ts` implements the 6 Super-Admin agency Server Actions (createAgency, deactivateAgency, reactivateAgency, createAgencyUser, grantTenant, revokeTenant), mirroring `lib/actions/tenants.ts`'s pattern exactly (Zod validation, `createServiceClient()`, `generateTempPassword()`, `revalidatePath`). `createAgencyUser` inserts exclusively into `agency_users`, never `tenant_users` (D-04) — verified by grep. `grantTenant`/`revokeTenant` are idempotent (`upsert(..., ignoreDuplicates: true)` / plain delete, both no-op on repeat calls) rather than erroring on duplicate/missing `agency_tenants` rows. `tests/agencies.test.ts` converted from Plan 01's `it.todo()` scaffold to 12 real, passing mock-based tests. Zero deviations — plan's provided code executed verbatim.
 - Phase 05 Plan 07 (AGENCY-03/AGENCY-04): `/agencia` landing page built — `components/agencies/agency-clients-table.tsx` (plain `<span>` for Nome, no `/tenants/{slug}` link, no Slug column), `app/agencia/layout.tsx` (minimal shell, agency-only guard via `user.app_metadata.role` directly — not the manual `decodeRole()` helper `app/tenants/layout.tsx` still uses), `app/agencia/page.tsx` (RLS-scoped `createClient()` query, zero application-level filtering — `tenants_agency_select` policy from Plan 02 is the sole scoping mechanism). Closes the 404 left by Plan 04's `proxy.ts` redirect target. Executed out-of-wave-order relative to Plan 06 (agency management UI) since 05-07 only depends on 05-02, not 05-06. Zero code deviations; one noted false-positive in the plan's own automated verify grep pattern (matched the legitimate `@/components/tenants/tenant-status-badge` import path, not an actual Super-Admin link) — documented in the plan's SUMMARY, no code change needed.
 - Phase 05 Plan 08 (AGENCY-05/AGENCY-08): Closed a pre-existing IDOR/BOLA gap (T-05-13, OWASP API1:2023) in `PATCH /api/leads/[id]/status` — the route checked caller ROLE but never verified the caller was authorized for the SPECIFIC tenant named in the request body, so any `tenant_admin` could PATCH lead status for a tenant they don't belong to. Fixed by inserting a scope check (before the `service_role` credential fetch) that derives allowed tenant from `user.app_metadata.tenant_slug` for `tenant_admin`, or an RLS-scoped `agency_tenants` grant lookup for the new `agency` role (fail-closed if `agency_id` is missing from the JWT); `super_admin` unchanged. Same authorization-before-privileged-read pattern as `app/api/meta-ads/connect/route.ts`. `tests/unit/leads-status-route.test.ts`'s 5 `it.todo()` AGENCY-08 cases converted to real, passing tests (15/15 total, zero regressions). Zero code deviations — plan's provided code executed verbatim.
@@ -165,6 +185,15 @@ Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md 
 - Phase 07-google-ads-oauth2-connect Plan 04 (SET-01, now fully satisfied — closes Phase 7, 4/4 plans): Created `components/settings/google-ads-form.tsx` (`GoogleAdsForm`), mirroring `MetaAdsForm`'s structure (StatusBadge, RHF+`zodResolver`+`zod/v4`, the exact `role="alert"` `bg-destructive/10` error block) but with a single Customer ID field (no token textarea — the OAuth credential comes from Google, not a paste field) pre-filled with `initialCustomerId` when connected (D-06). On submit, does a top-level `window.location.href` navigation (never `fetch`) to `/api/google-ads/connect?customerId=...&tenantId=...&tenantSlug=...`, since the browser must follow Google's cross-site consent redirect. Reads `?google_error=` via `useSearchParams()` and renders it inline via a single `ERROR_MESSAGES` map covering all 7 callback-route codes (Plan 03) plus all 3 connect-route codes (Plan 02), with a generic pt-BR fallback for unknown codes (T-07-09). Replaced the static "aguardando Developer Token" placeholder Google Ads card in `app/[tenant-slug]/settings/page.tsx` with `<GoogleAdsForm>`; `fetchTenantSettings`'s `ad_accounts` select widened from `channel, active` to `channel, active, account_id` to source the D-06 pre-fill; Meta Ads card left untouched. Zero deviations — plan's provided code executed verbatim. `npx tsc --noEmit` clean apart from the 2 pre-existing unrelated `vault-rpc.test.ts` errors; `npm run build` succeeds (`/[tenant-slug]/settings` compiles alongside both Google Ads API routes); full suite 29/29 test files, 229 passed/1 skipped/5 todo, zero regressions (this plan touches no test files). **SET-01 now marked complete in `.planning/REQUIREMENTS.md`** — code-complete end-to-end across Plans 02-04; the live manual round-trip (Connect button → Google consent → callback → Settings shows "Conectado" pre-filled) remains blocked pending the user's Google Cloud OAuth Client creation (D-03), same class as Phase 2's Developer Token and Phase 4's `ANTHROPIC_API_KEY` — tracked in `07-VALIDATION.md`'s Manual-Only row, does not gate this completion. Phase 7 (Google Ads OAuth2 Connect) is now 4/4 plans complete.
 - Phase 08-tech-debt-cleanup Plan 01 (documentation-only, no application code touched — closes the v1.0 re-audit's `tech_debt` finding): Task 1 created `.planning/phases/01-foundation/01-VERIFICATION.md`, Phase 1's first-ever formal verification report, authored directly (no nested `gsd-verifier` agent, per plan instruction) by reading Phase 1's PLAN/SUMMARY files plus live code (`lib/actions/auth.ts`, `lib/supabase/server.ts`, `app/[tenant-slug]/layout.tsx`, `supabase/migrations/0004_create_rls_policies.sql`, `supabase/migrations/0005_custom_access_token_hook.sql`) — gives AUTH-01/AUTH-02/AUTH-06 (the three the audit flagged as "partial — no formal artifact") an explicit ✓ VERIFIED verdict with concrete evidence; AUTH-03/04/05 cited briefly since they were already accepted. Task 2 corrected `.planning/REQUIREMENTS.md`: flipped 15 stale `[ ]` checkboxes to `[x]` (AUTH-01/02/06, DASH-01–04, CAMP-01–04, SET-02 — all already functionally satisfied, pure bookkeeping drift), added the entirely-missing "Leads Management (Phase 03.1)" checkbox subsection (LEADS-01..05), filled the traceability table's `Status`/`Plan` columns for those 12 requirements (was `Pending`/`TBD`), and appended 6 new traceability rows (LEADS-01..05, DASH-03-ext) that had zero prior coverage. Zero deviations — both tasks' automated verification greps and acceptance criteria passed on the first attempt. `git diff --stat HEAD~2 HEAD` confirmed only the two expected files changed, matching the plan's `<verification>` section exactly. Phase 8 is now 1/3 plans complete (non-blocking cleanup phase; Plans 02/03 pending — dead migration 0012 deletion + OPS-FOLLOWUPS.md, and live Supabase test-fixture cleanup).
 - Phase 08-tech-debt-cleanup Plan 02 (repo hygiene, no application code touched): Task 1 deleted `supabase/migrations/0012_add_google_sheets_to_tenants.sql` via a plain filesystem delete (confirmed untracked via `git ls-files` before deleting — `git rm` doesn't apply to untracked files) — the file only ever added the superseded `sheet_id`/`sheets_api_key` columns, was never applied to any Supabase environment, and no schema-push/migration-apply command was run. This task produced no git commit, since deleting an untracked file is a zero-diff operation for git — verified by comparing `git status --short` before/after. Task 2 created `.planning/OPS-FOLLOWUPS.md`, a durable checklist consolidating the two required ops follow-ups (N8N daily-insights workflow activation — needs `ANTHROPIC_API_KEY`/`N8N_INSIGHTS_SECRET` in Vercel Prod plus manual N8N import/credential wiring; Phase 0 VPS security check — SSH verification of N8N version/CVE-2025-68613/encryption-key persistence) plus the other already-known external blockers (Google Ads Developer Token, Google Cloud OAuth Client, per-tenant Meta System User tokens) previously scattered across STATE.md prose — commit `77e67d3`. `git show --stat` on that commit confirmed only the new markdown file changed, no ops action was actually performed. Zero deviations — plan executed exactly as written. Phase 8 is now 2/3 plans complete; Plan 03 (live Supabase test-fixture cleanup, human checkpoint) remains.
+- **v1.1 roadmap created (2026-07-12):** `.planning/ROADMAP.md`/`REQUIREMENTS.md` updated with Phases 9-12, continuing numbering from v1.0's Phase 8. Order follows `.planning/research/ARCHITECTURE.md`'s recommended build order: Phase 9 (AUTH-07, viewer cleanup — zero DB coupling, DB already terminal since migration `0020`) → Phase 10 (USER-01..05, user management — establishes new `admin.updateUserById`/`admin.signOut('global')` patterns not used anywhere else in the codebase) → Phase 11 (SET-03..05, backfill window — independent of Phase 10 but sequenced before the redesign so Settings is only restyled once) → Phase 12 (DESIGN-01..05, visual redesign — last, captures the final shape of the user-management UI and the new backfill field in one pass). All 14 v1.1 requirements mapped 1:1 to a phase, zero orphans.
+
+### Pending Todos
+
+None yet.
+
+### Blockers/Concerns
+
+None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates, tracked in `.planning/OPS-FOLLOWUPS.md`): Google Ads Developer Token pending approval, `ANTHROPIC_API_KEY`/`N8N_INSIGHTS_SECRET` missing from Vercel Prod + daily-insights N8N workflow import/activation, Google Cloud OAuth Client creation pending (user), VPS security check (CVE-2025-68613/encryption key/process manager) unverified.
 
 ### Infrastructure Provisioned (Phase 00)
 
@@ -175,7 +204,7 @@ Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md 
 ### Open Questions (Unresolved)
 
 1. Revenue data for ROAS — how to handle tenants without conversion value tracking configured?
-2. Default retroactive history window — 90 days fixed or configurable (30/60/90)?
+2. Default retroactive history window — 90 days fixed or configurable (30/60/90)? **Resolved for v1.1:** configurable per account, 7-365 days, default 90 — see SET-03/04/05, Phase 11.
 
 ### Resolved Questions
 
@@ -203,6 +232,7 @@ Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md 
 - Phase 5 added (2026-07-05): Access Modules — Multi-Client Agency. Origem: exploração via `/gsd-explore` após fechamento da fase 03.1 — usuário pediu divisão em 3 módulos (Super Admin / Agência / Cliente). Não planejado ainda — rodar `/gsd-discuss-phase 5` antes de `/gsd-plan-phase 5` dado o tamanho da mudança estrutural (nova entidade Agência, grant N:N, extensão de RLS).
 - Phases 6 e 7 adicionadas (2026-07-10) via `/gsd-audit-milestone` → `/gsd-plan-milestone-gaps`, após o audit do milestone v1.0 retornar `gaps_found`: **Phase 6 — Security & Consistency: Leads Endpoints** (fecha AGENCY-08 parcial + achado F3 do audit: `app/api/leads/chat/route.ts`/página "Agente IA" não commitados e sem escopo de tenant/papel/rate-limit) e **Phase 7 — Google Ads OAuth2 Connect** (fecha SET-01, nunca implementado, só placeholder). O gap de AI-01..04 não gerou fase nova — é fechado simplesmente planejando/executando a Fase 4 (AI Insights) já existente no roadmap, que tinha CONTEXT.md mas nenhum plano ainda. Relatório completo: `.planning/v1.0-MILESTONE-AUDIT.md`.
 - Phase 8 adicionada (2026-07-11) via `/gsd-add-phase`, após o re-audit do milestone v1.0 retornar `tech_debt` (0 requisitos insatisfeitos, 7/7 integração limpa, 3/3 fluxos ok — SET-01 fechado pela Fase 7). **Phase 8 — Tech Debt Cleanup** (não-bloqueante): corrige checkboxes desatualizados do REQUIREMENTS.md (SET-02, DASH-01–04, CAMP-01–04 já satisfeitos), adiciona linhas LEADS-01..05/DASH-03-ext faltantes na tabela de rastreabilidade, verifica retroativamente a Fase 1 (formaliza AUTH-01/02/06), remove fixtures de teste do Supabase live, e apaga a migration órfã `0012_add_google_sheets_to_tenants.sql` (nunca aplicada, superada pela abordagem `sheets_service_account` da Fase 03.1). Relatório completo: `.planning/v1.0-MILESTONE-AUDIT.md`.
+- **Phases 9-12 criadas (2026-07-12) via roadmapper agent** (fluxo `/gsd-new-project`/milestone init) para o milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Visual): **Phase 9 — Limpeza do Papel Viewer** (AUTH-07), **Phase 10 — Gestão de Usuários** (USER-01..05), **Phase 11 — Janela de Histórico Retroativo** (SET-03..05), **Phase 12 — Redesign Visual** (DESIGN-01..05). Ordem de dependência derivada de `.planning/research/ARCHITECTURE.md`'s "Build Order Across the 4 Features". Coverage: 14/14 requirements mapeados, 0 órfãos. Nenhuma fase planejada ainda — próximo passo é `/gsd-plan-phase 9`.
 
 ### Deferred Items from Phase 00 Plan 01
 
@@ -216,9 +246,11 @@ Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md 
 
 ## Session Continuity
 
-**Last updated:** 2026-07-11 - Fase 08 (Tech Debt Cleanup) Plano 03 CONCLUÍDO (3/3 plans — Fase 8 completa): fixtures de teste removidas do Supabase live (rvkkvjitfddtbdpkupok).
-**Last action:** Executado `08-03-PLAN.md` (Task 1 enumeração read-only + Task 2 checkpoint humano em sessão anterior; Task 3 — o DELETE aprovado — nesta sessão de continuação). Deletado, em ordem FK-safe, exatamente o conjunto congelado aprovado pelo usuário: `tenant_users` (1 linha, id `221be5cb-...`), `agency_users` (1 linha, id `17753a87-...`), `agencies` (11 linhas — `Agência Teste`, `rls-test-agency*` x3 duplicadas 3x, `debug-agency` x2), `auth.users` (2 linhas — `agente-teste@example.com`, `cliente-teste@example.com`, via `auth.admin.deleteUser`, cascata automática para `auth.identities`). Nenhuma ferramenta MCP do Supabase (`mcp__supabase__execute_sql`) nem CLI (`supabase`/`psql`) estava disponível neste executor — usado em vez disso um script Node temporário com `@supabase/supabase-js` + `SUPABASE_SERVICE_ROLE_KEY` de `.env.local` (deletado após uso, zero rastro no repo). Verificado pós-delete: 0 linhas remanescentes em todos os filtros de fixture, tabela `agencies` agora com 0 linhas totais, os 2 `auth.users` de teste retornam "User not found", e o tenant real `LUKSEG` (id `9f7e3c67-...`) permanece intacto e `active`. Nenhum arquivo de repositório alterado por esta task (operação somente no Supabase live) — apenas `08-03-SUMMARY.md`/`STATE.md`/`ROADMAP.md` desta finalização. **Fase 8 agora 3/3 plans — CONCLUÍDA.** Milestone v1.0 agora 10/10 fases completas ao nível de código.
-**Stopped at:** Completed 08-03-PLAN.md
-**Next action:** Nenhuma fase planejada pendente — milestone v1.0 completo ao nível de código (10/10 fases). Itens não bloqueantes remanescentes (verificação manual/infra externa, não gates de código, rastreados em `.planning/OPS-FOLLOWUPS.md`): (1) usuário precisa criar o Google Cloud OAuth Client e configurar `GOOGLE_ADS_CLIENT_ID`/`GOOGLE_ADS_CLIENT_SECRET`/`GOOGLE_OAUTH_STATE_SECRET` no Vercel para rodar o round-trip ao vivo da Fase 7 (D-03); (2) `ANTHROPIC_API_KEY` ainda precisa ser adicionada ao Vercel Dashboard (Production/Preview/Development) para chamadas reais à Claude em produção (Fase 4/6); (3) import/ativação do workflow N8N diário de insights pendente (Fase 4, `04-VALIDATION.md`); (4) os 2 erros de `tsc` pré-existentes em `tests/integration/vault-rpc.test.ts` (linhas 124, 135) permanecem, não relacionados a nenhum plano executado até agora. Considerar rodar `/gsd-audit-milestone` para uma verificação final de fechamento do v1.0.
+**Last updated:** 2026-07-12 - Milestone v1.1 ROADMAP.md/REQUIREMENTS.md criados: Phases 9-12 definidas (Limpeza do Papel Viewer → Gestão de Usuários → Janela de Histórico Retroativo → Redesign Visual), 14/14 requirements mapeados, 0 órfãos.
+**Last action:** Roadmapper agent leu PROJECT.md, REQUIREMENTS.md, research/ARCHITECTURE.md, config.json e MILESTONES.md; derivou 4 fases seguindo a ordem de build recomendada pela pesquisa de arquitetura; escreveu `.planning/ROADMAP.md` (seções `## Phases`, `## Phase Details` com goals/success criteria/dependencies, `## Progress`) e atualizou a tabela de rastreabilidade em `.planning/REQUIREMENTS.md` (todas as 14 linhas de `TBD/Pending` para `Phase N/Pending`).
+**Stopped at:** ROADMAP.md e REQUIREMENTS.md escritos para v1.1; nenhuma fase planejada ainda (plan count = TBD em todas).
+**Next action:** `/gsd-plan-phase 9` (Limpeza do Papel Viewer — AUTH-07, zero DB coupling, menor risco do milestone).
+**Resume file:** None
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
+</content>

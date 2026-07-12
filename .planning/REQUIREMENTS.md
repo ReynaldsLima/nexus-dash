@@ -54,30 +54,29 @@ Explicitamente excluído do v1.1. Documentado para prevenir scope creep.
 
 ## Traceability
 
-Preenchido durante a criação do roadmap.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-07 | TBD | Pending |
-| USER-01 | TBD | Pending |
-| USER-02 | TBD | Pending |
-| USER-03 | TBD | Pending |
-| USER-04 | TBD | Pending |
-| USER-05 | TBD | Pending |
-| SET-03 | TBD | Pending |
-| SET-04 | TBD | Pending |
-| SET-05 | TBD | Pending |
-| DESIGN-01 | TBD | Pending |
-| DESIGN-02 | TBD | Pending |
-| DESIGN-03 | TBD | Pending |
-| DESIGN-04 | TBD | Pending |
-| DESIGN-05 | TBD | Pending |
+| AUTH-07 | Phase 9 | Pending |
+| USER-01 | Phase 10 | Pending |
+| USER-02 | Phase 10 | Pending |
+| USER-03 | Phase 10 | Pending |
+| USER-04 | Phase 10 | Pending |
+| USER-05 | Phase 10 | Pending |
+| SET-03 | Phase 11 | Pending |
+| SET-04 | Phase 11 | Pending |
+| SET-05 | Phase 11 | Pending |
+| DESIGN-01 | Phase 12 | Pending |
+| DESIGN-02 | Phase 12 | Pending |
+| DESIGN-03 | Phase 12 | Pending |
+| DESIGN-04 | Phase 12 | Pending |
+| DESIGN-05 | Phase 12 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14 ⚠️ (aguardando roadmap)
+- Mapped to phases: 14
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-12*
-*Last updated: 2026-07-12 after initial v1.1 definition*
+*Last updated: 2026-07-12 after roadmap creation (Phases 9-12, `/gsd-new-project` roadmapper agent)*
+</content>
