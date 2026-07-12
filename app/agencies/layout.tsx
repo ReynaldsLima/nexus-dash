@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { LogoutButton } from '@/components/auth/logout-button'
 import { createClient } from '@/lib/supabase/server'
+import { Toaster } from '@/components/ui/sonner'
 
 export default async function AgenciesLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -28,6 +29,17 @@ export default async function AgenciesLayout({ children }: { children: React.Rea
         <LogoutButton />
       </header>
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">{children}</main>
+      <Toaster
+        theme="dark"
+        position="top-right"
+        richColors={false}
+        closeButton
+        style={{
+          '--normal-bg': 'var(--card)',
+          '--normal-border': 'var(--border)',
+          '--normal-text': 'var(--foreground)',
+        } as React.CSSProperties}
+      />
     </div>
   )
 }

@@ -4,8 +4,10 @@ import { AddAgencyUserModal } from '@/components/agencies/add-agency-user-modal'
 import { DeactivateAgencyButton } from '@/components/agencies/deactivate-agency-button'
 import { AgencyTenantGrants } from '@/components/agencies/agency-tenant-grants'
 import { TenantStatusBadge } from '@/components/tenants/tenant-status-badge'
+import { UsersTable } from '@/components/users/users-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
+import { listAgencyUsers } from '@/lib/users'
 
 interface AgencyDetailProps {
   params: Promise<{ id: string }>
@@ -22,6 +24,8 @@ export default async function AgencyDetailPage({ params }: AgencyDetailProps) {
     .maybeSingle()
 
   if (error || !agency) notFound()
+
+  const users = await listAgencyUsers(agency.id)
 
   const { data: allTenants } = await supabase
     .from('tenants')
@@ -66,9 +70,7 @@ export default async function AgencyDetailPage({ params }: AgencyDetailProps) {
           <AddAgencyUserModal agencyId={agency.id} agencyName={agency.name} />
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            A listagem de usuários é gerenciada via Supabase Dashboard em v1.
-          </p>
+          <UsersTable users={users} scope={{ type: 'agency', agencyId: agency.id, label: agency.name }} />
         </CardContent>
       </Card>
 

@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation'
 import { AddUserModal } from '@/components/tenants/add-user-modal'
 import { DeactivateTenantButton } from '@/components/tenants/deactivate-tenant-button'
 import { TenantStatusBadge } from '@/components/tenants/tenant-status-badge'
+import { UsersTable } from '@/components/users/users-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
+import { listTenantUsers } from '@/lib/users'
 
 interface TenantDetailProps {
   params: Promise<{ slug: string }>
@@ -21,6 +23,8 @@ export default async function TenantDetailPage({ params }: TenantDetailProps) {
     .maybeSingle()
 
   if (error || !tenant) notFound()
+
+  const users = await listTenantUsers(tenant.id)
 
   return (
     <section className="flex flex-col gap-8">
@@ -64,9 +68,7 @@ export default async function TenantDetailPage({ params }: TenantDetailProps) {
           <AddUserModal tenantId={tenant.id} tenantName={tenant.name} />
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            A listagem de usuários é gerenciada via Supabase Dashboard em v1.
-          </p>
+          <UsersTable users={users} scope={{ type: 'tenant', tenantId: tenant.id, label: tenant.name }} />
         </CardContent>
       </Card>
     </section>
