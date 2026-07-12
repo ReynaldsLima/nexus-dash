@@ -38,12 +38,12 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [x] Dashboard Overview com KPIs consolidados (ROAS, CPA, CTR, Spend) de todos os canais — Validated in Phase 3: Dashboard UI (DASH-01/02/03, `03-VERIFICATION.md`); bookkeeping corrigido na Phase 8 (estava marcado como Active por atraso de documentação, não por trabalho pendente)
 - [x] Drill-down por canal e campanha a partir do Overview — Validated in Phase 3: Dashboard UI (DASH-03-ext via ChannelSheet + CAMP-04 via CampaignSheet, `03-VERIFICATION.md`); bookkeeping corrigido na Phase 8
 - [x] Página Campanhas com lista filtrável por período e canal — Validated in Phase 3: Dashboard UI (CAMP-01/02/03, `03-VERIFICATION.md`); bookkeeping corrigido na Phase 8
+- [x] Limpar o papel "viewer" morto do código (`Role` type, `proxy.ts`) — Validated in Phase 9: Limpeza do Papel Viewer (AUTH-07). Removido de `Role` type, `proxy.ts`, `tenant-switcher.tsx` e 6 arquivos de teste (sentinel `'invalid_role'`); `tests/integration/tenant-role-migration.test.ts` mantido intocado de propósito (prova a CHECK constraint da migration 0020).
 
 ### Active
 
 - [ ] Janela de histórico retroativo configurável por tenant ao conectar conta
 - [ ] Gestão completa de usuários (listar, editar, remover) para tenants e agências — hoje só existe criação; edição/remoção de usuário só é possível via Supabase Dashboard direto
-- [ ] Limpar o papel "viewer" morto do código (`Role` type, `proxy.ts`) — banco não aceita mais esse valor desde a migration `0020` (Phase 5), mantido hoje só como fallback de rollout-safety
 - [ ] Redesign visual das telas (dashboard, campanhas, insights, settings) — usuário vai fornecer referências visuais (prints) e há protótipos HTML soltos em `prototipos/` como ponto de partida
 
 ### Out of Scope
@@ -83,7 +83,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 | Insights de IA apenas para Super Admin | Centraliza custo de API e controle de qualidade das recomendações | ✓ Bom — RLS super_admin-only em `ai_insights`/`anomaly_alerts`, UI/nav ocultos para outros papéis, validado na Phase 4 |
 | main → prod direto | Projeto interno v1, overhead de PR review não justificado agora | ✓ Bom — sem incidentes de deploy ao longo das 10 fases; mantido no v1.1 |
 | Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) em vez de `@anthropic-ai/sdk` direto | Streaming token-a-token (`streamText`) e prompt/tool abstractions prontas, mesma API Messages da Claude por baixo | ✓ Bom — adotado na Phase 4 (04-CONTEXT.md D-01), reutilizado no rate-limited chat da Phase 6 sem atrito |
-| Papéis Tenant Admin/Viewer colapsados em "Cliente" único; novo papel "Agência" (grant N:N) | Fase 5 revelou que múltiplos clientes precisavam de um gerente externo com acesso a N tenants, e que Viewer nunca era usado | ✓ Bom, mas com débito — RLS/roteamento colapsados corretamente; código ainda tem referências residuais ao "viewer" morto, cleanup planejado pro v1.1 |
+| Papéis Tenant Admin/Viewer colapsados em "Cliente" único; novo papel "Agência" (grant N:N) | Fase 5 revelou que múltiplos clientes precisavam de um gerente externo com acesso a N tenants, e que Viewer nunca era usado | ✓ Bom — RLS/roteamento colapsados corretamente na Phase 5; referências residuais ao "viewer" morto removidas da camada de aplicação na Phase 9 |
 
 ## Evolution
 
@@ -103,4 +103,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-07-12 — Milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Visual) iniciado, escopo confirmado*
+*Last updated: 2026-07-12 — Phase 9 (Limpeza do Papel Viewer, AUTH-07) concluída*
