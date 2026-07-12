@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 type AppMetadata = {
-  role?: 'super_admin' | 'tenant_admin' | 'viewer' | 'agency' | 'none' | null
+  role?: 'super_admin' | 'tenant_admin' | 'agency' | 'none' | null
   tenant_id?: string | null
   tenant_slug?: string | null
 }
@@ -65,7 +65,7 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     if (role === 'super_admin') {
       url.pathname = '/tenants'
-    } else if ((role === 'tenant_admin' || role === 'viewer') && tenantSlug) {
+    } else if (role === 'tenant_admin' && tenantSlug) {
       url.pathname = `/${tenantSlug}/dashboard`
     } else if (role === 'agency') {
       url.pathname = '/agencia'

@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 2. Role check: only super_admin or tenant_admin may connect accounts ──
-  // Uses get_user_role() RPC (returns 'super_admin' | 'tenant_admin' | 'viewer')
+  // Uses get_user_role() RPC (returns 'super_admin' | 'tenant_admin')
   const { data: role, error: roleErr } = await supabase.rpc('get_user_role')
 
   if (roleErr || !role) {

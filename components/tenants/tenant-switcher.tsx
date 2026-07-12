@@ -10,7 +10,7 @@ export interface TenantOption {
 }
 
 interface TenantSwitcherProps {
-  role: 'super_admin' | 'tenant_admin' | 'viewer' | 'agency' | string | null
+  role: 'super_admin' | 'tenant_admin' | 'agency' | string | null
   tenants: TenantOption[]
   activeSlug: string
   manageHref?: string
