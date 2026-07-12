@@ -56,8 +56,8 @@ describe('GET /api/google-ads/connect', () => {
     expect(loc).toContain('google_error=forbidden')
   })
 
-  it("role 'viewer' → redirect ?google_error=forbidden", async () => {
-    mockState.role = 'viewer'
+  it("role 'invalid_role' → redirect ?google_error=forbidden", async () => {
+    mockState.role = 'invalid_role'
     const { GET } = await import('@/app/api/google-ads/connect/route')
     const res = await GET(makeRequest('customerId=123-456-7890&tenantId=tenant-uuid-1&tenantSlug=acme'))
     expect([302, 307]).toContain(res.status)

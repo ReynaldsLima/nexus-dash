@@ -40,8 +40,8 @@ describe('middleware route guards (AUTH-05)', () => {
     expect(claims?.role).not.toBe('super_admin')
   })
 
-  it('blocks viewer from /tenants (returns 307 redirect to /)', () => {
-    const token = makeToken({ role: 'viewer', tenant_id: 't-1', tenant_slug: 'acme' })
+  it('blocks invalid_role from /tenants (returns 307 redirect to /)', () => {
+    const token = makeToken({ role: 'invalid_role', tenant_id: 't-1', tenant_slug: 'acme' })
     const claims = decodeAppMetadata(token)
     expect(claims?.role).not.toBe('super_admin')
   })
@@ -56,10 +56,10 @@ describe('middleware route guards (AUTH-05)', () => {
 describe('JWT claim extraction (AUTH-05 prereq)', () => {
   it('decodes a sample JWT payload base64-url segment without throwing', () => {
     const samplePayload = Buffer.from(
-      JSON.stringify({ app_metadata: { role: 'viewer', tenant_id: 't1', tenant_slug: 'acme' } })
+      JSON.stringify({ app_metadata: { role: 'invalid_role', tenant_id: 't1', tenant_slug: 'acme' } })
     ).toString('base64')
     const decoded = JSON.parse(Buffer.from(samplePayload, 'base64').toString('utf8'))
-    expect(decoded.app_metadata.role).toBe('viewer')
+    expect(decoded.app_metadata.role).toBe('invalid_role')
     expect(decoded.app_metadata.tenant_slug).toBe('acme')
   })
 })

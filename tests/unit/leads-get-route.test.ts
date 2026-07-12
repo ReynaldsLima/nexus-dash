@@ -64,8 +64,8 @@ describe('GET /api/leads — auth/role/scope gate (AGENCY-08)', () => {
     expect(res.status).toBe(401)
   })
 
-  it("role 'viewer' → 403", async () => {
-    mockState.role = 'viewer'
+  it("role 'invalid_role' → 403", async () => {
+    mockState.role = 'invalid_role'
     const { GET } = await import('@/app/api/leads/route')
     const res = await GET(makeRequest('acme'))
     expect(res.status).toBe(403)

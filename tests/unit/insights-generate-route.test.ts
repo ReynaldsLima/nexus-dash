@@ -78,8 +78,8 @@ describe('POST /api/insights/generate — auth/role gate (AI-01)', () => {
     expect(res.status).toBe(403)
   })
 
-  it("role 'viewer' → 403", async () => {
-    mockState.role = 'viewer'
+  it("role 'invalid_role' → 403", async () => {
+    mockState.role = 'invalid_role'
     const { POST } = await import('@/app/api/insights/generate/route')
     const res = await POST(makeRequest({ tenantSlug: 'acme' }))
     expect(res.status).toBe(403)
