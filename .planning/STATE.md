@@ -2,9 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
-status: roadmap_created
-stopped_at: v1.1 roadmap criado (Phases 9-12) — pronto para /gsd-plan-phase 9
-last_updated: "2026-07-12T01:30:00.000Z"
+status: planning
+stopped_at: Phase 9 context gathered
+last_updated: "2026-07-12T01:26:00.214Z"
+last_activity: 2026-07-12 — ROADMAP.md/REQUIREMENTS.md criados para v1.1 (Phases 9-12, 14/14 requirements mapeados)
 progress:
   total_phases: 4
   completed_phases: 0
@@ -248,9 +249,9 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 
 **Last updated:** 2026-07-12 - Milestone v1.1 ROADMAP.md/REQUIREMENTS.md criados: Phases 9-12 definidas (Limpeza do Papel Viewer → Gestão de Usuários → Janela de Histórico Retroativo → Redesign Visual), 14/14 requirements mapeados, 0 órfãos.
 **Last action:** Roadmapper agent leu PROJECT.md, REQUIREMENTS.md, research/ARCHITECTURE.md, config.json e MILESTONES.md; derivou 4 fases seguindo a ordem de build recomendada pela pesquisa de arquitetura; escreveu `.planning/ROADMAP.md` (seções `## Phases`, `## Phase Details` com goals/success criteria/dependencies, `## Progress`) e atualizou a tabela de rastreabilidade em `.planning/REQUIREMENTS.md` (todas as 14 linhas de `TBD/Pending` para `Phase N/Pending`).
-**Stopped at:** ROADMAP.md e REQUIREMENTS.md escritos para v1.1; nenhuma fase planejada ainda (plan count = TBD em todas).
+**Stopped at:** Phase 9 context gathered
 **Next action:** `/gsd-plan-phase 9` (Limpeza do Papel Viewer — AUTH-07, zero DB coupling, menor risco do milestone).
-**Resume file:** None
+**Resume file:** .planning/phases/09-limpeza-do-papel-viewer/09-CONTEXT.md
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
 </content>
