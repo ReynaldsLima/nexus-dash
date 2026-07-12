@@ -484,6 +484,10 @@ export type Database = {
         Args: { p_date_from: string; p_date_to: string; p_tenant_id: string }
         Returns: undefined
       }
+      revoke_user_sessions: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
