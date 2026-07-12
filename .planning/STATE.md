@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: planning
+milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
 status: planning
-stopped_at: v1.0 shipped and archived — planning v1.1
-last_updated: "2026-07-12T00:50:00.000Z"
+stopped_at: v1.1 scope confirmed — defining requirements
+last_updated: "2026-07-12T00:55:00.000Z"
 progress:
   total_phases: 0
   completed_phases: 0
@@ -19,7 +19,7 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-07-12)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Planning v1.1 (gestão completa de usuários, limpeza do papel "viewer" morto, redesign visual das telas)
+**Current focus:** Milestone v1.1 scope confirmed (gestão completa de usuários, limpeza do papel "viewer" morto, janela de histórico retroativo configurável, redesign visual das telas) — defining requirements and roadmap
 
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 
 **v1.0 MVP shipped 2026-07-12** — 10/10 phases, 46/46 plans complete. Tagged `v1.0`, archived to `.planning/milestones/v1.0-ROADMAP.md` / `v1.0-REQUIREMENTS.md` / `v1.0-phases/`. Full v1.0 history below is preserved as historical record; a fresh phase/plan cycle starts with v1.1.
 
-- Next: run `/gsd-new-milestone` to define v1.1 requirements and generate phases. Seed scope already captured in `PROJECT.md`'s Active requirements (user management, viewer cleanup, visual redesign — user may supply screenshots as design references, existing `prototipos/*.html` as starting point).
+- Next: define REQUIREMENTS.md and roadmap for v1.1. Scope confirmed via `/gsd-new-milestone` (user management, viewer cleanup, retroactive history window, visual redesign — existing `prototipos/*.html` as design starting point).
 - v1.0 progress (historical, frozen): 46/46 planned plans complete (100%) — 10/10 phases done
 
 ```

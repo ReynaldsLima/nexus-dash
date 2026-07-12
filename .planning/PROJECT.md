@@ -8,6 +8,16 @@ NEXUS-DASH é uma plataforma de marketing analytics multi-tenant construída sob
 
 O Super Admin consegue ver e otimizar campanhas de todos os clientes em um único lugar, com recomendações de IA acionáveis — sem precisar entrar em múltiplas plataformas de anúncios.
 
+## Current Milestone: v1.1 Gestão de Usuários, Limpeza e Redesign Visual
+
+**Goal:** Fechar débitos técnicos deixados do v1.0 (usuários, papel viewer morto, janela de histórico) e redesenhar visualmente as telas do dashboard usando os protótipos existentes como base.
+
+**Target features:**
+- Gestão completa de usuários (listar, editar, remover) para tenants e agências
+- Limpar o papel "viewer" morto do código (Role type, proxy.ts)
+- Janela de histórico retroativo configurável por tenant ao conectar conta
+- Redesign visual das telas (dashboard, campanhas, insights, settings)
+
 ## Requirements
 
 ### Validated
@@ -93,4 +103,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-07-12 after v1.0 MVP milestone shipped (10/10 phases, 46 planos) — planejamento do v1.1 iniciado*
+*Last updated: 2026-07-12 — Milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Visual) iniciado, escopo confirmado*
