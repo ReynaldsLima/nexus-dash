@@ -2,7 +2,7 @@
 
 ## What This Is
 
-NEXUS-DASH é uma plataforma de marketing analytics multi-tenant construída sobre Next.js, Supabase e N8N. Consolida métricas de Google Ads e Meta Ads em um dashboard unificado, com sincronização automática via N8N e recomendações de otimização de campanhas geradas por IA (Claude). Começa como ferramenta interna para gerenciar 1-3 clientes, com arquitetura projetada para evoluir para SaaS público.
+NEXUS-DASH é uma plataforma de marketing analytics multi-tenant construída sobre Next.js, Supabase e N8N. Consolida métricas de Google Ads e Meta Ads em um dashboard unificado, com sincronização automática via N8N, gestão de leads com escrita bidirecional no Google Sheets, e recomendações de otimização de campanhas geradas por IA (Claude). Suporta hoje três perfis de acesso — Super Admin, Cliente (tenant) e Agência (gerencia N clientes via grant) — com RLS garantindo isolamento total entre tenants. Começou como ferramenta interna para gerenciar 1-3 clientes, com arquitetura projetada para evoluir para SaaS público.
 
 ## Core Value
 
@@ -13,7 +13,7 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 ### Validated
 
 - [x] Autenticação com isolamento total por tenant (Supabase Auth + RLS) — Validated in Phase 1: Foundation
-- [x] Três roles: Super Admin (plataforma), Tenant Admin, Viewer — Validated in Phase 1: Foundation
+- [x] Três roles: Super Admin (plataforma), Tenant Admin, Viewer — Validated in Phase 1: Foundation. Superado na Phase 5: "Viewer" foi descontinuado (banco não aceita mais esse valor desde a migration 0020) e um novo papel "Agência" foi introduzido — o conjunto real hoje é Super Admin / Cliente (ex-Tenant Admin) / Agência.
 - [x] Super Admin cria tenants manualmente, sem self-service no v1 — Validated in Phase 1: Foundation
 - [x] Sincronização automática de métricas Google Ads via N8N (agendado) — Validated in Phase 2: Data Pipeline (workflow pronto; ativação aguarda Developer Token)
 - [x] Sincronização automática de métricas Meta Ads via N8N (agendado) — Validated in Phase 2: Data Pipeline (workflow pronto; ativação aguarda System User tokens)
@@ -32,6 +32,9 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 ### Active
 
 - [ ] Janela de histórico retroativo configurável por tenant ao conectar conta
+- [ ] Gestão completa de usuários (listar, editar, remover) para tenants e agências — hoje só existe criação; edição/remoção de usuário só é possível via Supabase Dashboard direto
+- [ ] Limpar o papel "viewer" morto do código (`Role` type, `proxy.ts`) — banco não aceita mais esse valor desde a migration `0020` (Phase 5), mantido hoje só como fallback de rollout-safety
+- [ ] Redesign visual das telas (dashboard, campanhas, insights, settings) — usuário vai fornecer referências visuais (prints) e há protótipos HTML soltos em `prototipos/` como ponto de partida
 
 ### Out of Scope
 
@@ -43,9 +46,12 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 ## Context
 
 - Arquivos de estratégia existentes no diretório: `estrategia-seo-ads.html`, `estrategia_trafego_completa.xlsx`, `n8n_flows_importaveis.json` — podem alimentar contexto inicial de campanhas ou servir como referência para flows N8N
-- N8N será self-hosted em VPS (não N8N Cloud) — flexibilidade total de execuções e webhooks
+- N8N self-hosted em VPS (não N8N Cloud) — flexibilidade total de execuções e webhooks; rodando em Queue Mode, checagem de segurança da VPS (CVE-2025-68613, encryption key, process manager) ainda pendente — ver `.planning/OPS-FOLLOWUPS.md`
 - Deploy na Vercel com branch strategy simples: push em `main` → deploy automático em produção
 - Plataforma começa como uso interno, roadmap considera evolução para SaaS público futuro
+- **Estado pós-v1.0 (2026-07-12):** ~14.500 linhas TypeScript/TSX, 10 fases/46 planos entregues, 231 testes automatizados passando. Protótipos HTML soltos em `prototipos/` (dashboard/campanhas/insights, pré-GSD) servem de referência para o redesign visual planejado no v1.1.
+- **Feedback do usuário (início v1.1):** dois pontos levantados antes de qualquer trabalho de design — (1) falta gestão completa de usuários no app (só criação existe, edição/remoção é manual via Supabase Dashboard), (2) papel "viewer" morto no código deve ser removido. Ambos priorizados para entrar antes ou junto do redesign visual de telas.
+- **Bloqueios externos/ops carregados do v1.0** (não são gaps de código, rastreados em `.planning/OPS-FOLLOWUPS.md`): Google Ads Developer Token (aprovação pendente), `ANTHROPIC_API_KEY`/`N8N_INSIGHTS_SECRET` na Vercel Prod + import/ativação do workflow N8N de insights diários, Google Cloud OAuth Client do usuário (verificação end-to-end do SET-01)
 
 ## Constraints
 
@@ -60,13 +66,14 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| N8N self-hosted em VPS | Execuções ilimitadas vs limitação do free tier N8N Cloud (2.500/mês) | — Pending |
-| Claude como AI provider | Melhor raciocínio analítico para dados de campanha; já é o modelo da sessão | — Pending |
-| RLS como camada de segurança primária | Isolamento garantido no banco, não apenas na aplicação | — Pending |
+| N8N self-hosted em VPS | Execuções ilimitadas vs limitação do free tier N8N Cloud (2.500/mês) | ✓ Bom — Queue Mode rodando desde a Phase 0; checagem de segurança da VPS ainda pendente (ops, não código) |
+| Claude como AI provider | Melhor raciocínio analítico para dados de campanha; já é o modelo da sessão | ✓ Bom — Phase 4 implementou insights sob demanda + diários + detecção de anomalias sem retrabalho de provider |
+| RLS como camada de segurança primária | Isolamento garantido no banco, não apenas na aplicação | ✓ Bom — comprovado em Foundation, Agência (grant N:N) e no hardening dos endpoints de leads; nenhum vazamento cross-tenant encontrado nas auditorias |
 | Google Sheets fora do v1 | Complexidade de sincronização sem benefício claro com base pequena de tenants | Revertida — já em uso em produção pré-GSD; formalizada e estendida (escrita) na Phase 03.1 |
-| Insights de IA apenas para Super Admin | Centraliza custo de API e controle de qualidade das recomendações | Validado na Phase 4 — RLS super_admin-only em `ai_insights`/`anomaly_alerts`, UI/nav ocultos para outros papéis |
-| main → prod direto | Projeto interno v1, overhead de PR review não justificado agora | — Pending |
-| Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) em vez de `@anthropic-ai/sdk` direto | Streaming token-a-token (`streamText`) e prompt/tool abstractions prontas, mesma API Messages da Claude por baixo | Adotado na Phase 4 (04-CONTEXT.md D-01) — desvio documentado da tabela de bibliotecas do CLAUDE.md, ambos chamam `claude-sonnet-4-6` |
+| Insights de IA apenas para Super Admin | Centraliza custo de API e controle de qualidade das recomendações | ✓ Bom — RLS super_admin-only em `ai_insights`/`anomaly_alerts`, UI/nav ocultos para outros papéis, validado na Phase 4 |
+| main → prod direto | Projeto interno v1, overhead de PR review não justificado agora | ✓ Bom — sem incidentes de deploy ao longo das 10 fases; mantido no v1.1 |
+| Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) em vez de `@anthropic-ai/sdk` direto | Streaming token-a-token (`streamText`) e prompt/tool abstractions prontas, mesma API Messages da Claude por baixo | ✓ Bom — adotado na Phase 4 (04-CONTEXT.md D-01), reutilizado no rate-limited chat da Phase 6 sem atrito |
+| Papéis Tenant Admin/Viewer colapsados em "Cliente" único; novo papel "Agência" (grant N:N) | Fase 5 revelou que múltiplos clientes precisavam de um gerente externo com acesso a N tenants, e que Viewer nunca era usado | ✓ Bom, mas com débito — RLS/roteamento colapsados corretamente; código ainda tem referências residuais ao "viewer" morto, cleanup planejado pro v1.1 |
 
 ## Evolution
 
@@ -86,4 +93,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-07-11 after Phase 8: Tech Debt Cleanup — v1.0 milestone code-complete (10/10 phases)*
+*Last updated: 2026-07-12 after v1.0 MVP milestone shipped (10/10 phases, 46 planos) — planejamento do v1.1 iniciado*

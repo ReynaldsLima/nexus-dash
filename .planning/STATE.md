@@ -1,33 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: unknown
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-07-11T23:33:02.802Z"
+milestone: v1.1
+milestone_name: planning
+status: planning
+stopped_at: v1.0 shipped and archived — planning v1.1
+last_updated: "2026-07-12T00:50:00.000Z"
 progress:
-  total_phases: 10
-  completed_phases: 10
-  total_plans: 46
-  completed_plans: 46
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-10)
+See: .planning/PROJECT.md (updated 2026-07-12)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Phase 08 — tech-debt-cleanup (complete)
+**Current focus:** Planning v1.1 (gestão completa de usuários, limpeza do papel "viewer" morto, redesign visual das telas)
 
 ---
 
 ## Status
 
-- Current phase: 08 — Tech Debt Cleanup — 3/3 plans complete (Plan 03: deleted 11 fixture `agencies` rows + 1 `agency_users` + 1 `tenant_users` + 2 `@example.com` `auth.users` from live Supabase, FK-safe order, human-approved delete set — non-blocking, closes the v1.0 re-audit's `tech_debt` finding). **Phase 8 done — v1.0 milestone fully complete at the code level, 10/10 phases.**
-- Overall progress: 46/46 planned plans complete (100%) — 10/10 phases done
-- Phases complete: 10/10 (v1.0 milestone phases + Phase 08 tech-debt cleanup)
+**v1.0 MVP shipped 2026-07-12** — 10/10 phases, 46/46 plans complete. Tagged `v1.0`, archived to `.planning/milestones/v1.0-ROADMAP.md` / `v1.0-REQUIREMENTS.md` / `v1.0-phases/`. Full v1.0 history below is preserved as historical record; a fresh phase/plan cycle starts with v1.1.
+
+- Next: run `/gsd-new-milestone` to define v1.1 requirements and generate phases. Seed scope already captured in `PROJECT.md`'s Active requirements (user management, viewer cleanup, visual redesign — user may supply screenshots as design references, existing `prototipos/*.html` as starting point).
+- v1.0 progress (historical, frozen): 46/46 planned plans complete (100%) — 10/10 phases done
 
 ```
 [██████████] 100%
