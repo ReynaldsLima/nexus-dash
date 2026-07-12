@@ -64,7 +64,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
   5. Super Admin remove o acesso de um usuário (soft-delete do vínculo tenant/agência, conta Auth preservada) e a sessão desse usuário é revogada imediatamente via `signOut('global')`, sem depender da expiração natural do token
 **Plans**: 4 plans
 - [x] 10-01-PLAN.md — Fundação: migration `0023_revoke_user_sessions` (SECURITY DEFINER RPC) + push + gate `requireSuperAdmin()` + scaffolds de teste (Wave 0)
-- [ ] 10-02-PLAN.md — 6 Server Actions (editar email / resetar senha / remover acesso, tenant + agência) com gate super_admin e revogação de sessão
+- [x] 10-02-PLAN.md — 6 Server Actions (editar email / resetar senha / remover acesso, tenant + agência) com gate super_admin e revogação de sessão
 - [ ] 10-03-PLAN.md — UI: tabela de usuários + dropdown de ações + 3 dialogs (scope tenant/agência) e wiring das duas páginas
 - [ ] 10-04-PLAN.md — Verificação humana ponta-a-ponta (Playwright prod) + observação ao vivo do comportamento D-05
 
@@ -109,7 +109,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 7. Google Ads OAuth2 Connect | v1.0 | 4/4 | Complete | 2026-07-11 |
 | 8. Tech Debt Cleanup | v1.0 | 3/3 | Complete | 2026-07-11 |
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
-| 10. Gestão de Usuários | v1.1 | 1/4 | In Progress|  |
+| 10. Gestão de Usuários | v1.1 | 2/4 | In Progress|  |
 | 11. Janela de Histórico Retroativo | v1.1 | 0/TBD | Not started | - |
 | 12. Redesign Visual | v1.1 | 0/TBD | Not started | - |
 

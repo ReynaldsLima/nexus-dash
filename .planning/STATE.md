@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
 status: executing
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-07-12T13:57:51.399Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-07-12T14:16:03.567Z"
 last_activity: 2026-07-12
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 5
-  completed_plans: 2
-  percent: 40
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 ## Current Position
 
 Phase: 10 (gest-o-de-usu-rios) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-12
 
@@ -111,6 +111,7 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 | Phase 08-tech-debt-cleanup P03 | 6min | 1 tasks | 0 files |
 | Phase 09-limpeza-do-papel-viewer P01 | 10min | 2 tasks | 10 files |
 | Phase 10-gest-o-de-usu-rios P01 | 16min | 3 tasks | 5 files |
+| Phase 10 P02 | 16min | 2 tasks | 5 files |
 
 ### Per-Plan Execution Log
 
@@ -252,7 +253,7 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 
 **Last updated:** 2026-07-12 - Phase 10 Plan 01 (revoke_user_sessions RPC + Super-Admin guard) executado e concluído: 10-01-PLAN.md, 1/4 plans do phase 10.
 **Last action:** Executor agent aplicou os 3 tasks do plano 10-01 — migration 0023 (`revoke_user_sessions` SECURITY DEFINER RPC, pushed live, service_role-only) (Task 1, commit `0adc619`), live integration test provando a revogação (Task 2, commit `406b5ce`), `lib/actions/auth-guard.ts` + 2 RED scaffolds `it.todo()` (Task 3, commit `cc2b944`); criou `10-01-SUMMARY.md`; atualizou STATE.md/ROADMAP.md via gsd-tools. USER-05 NÃO marcado completo ainda (apenas a fundação RPC está pronta — as Server Actions `removeTenantUserAccess`/`removeAgencyUserAccess` que a chamam são escopo do Plan 02), mesmo precedente de julgamento usado em AI-01/SET-01.
-**Stopped at:** Completed 10-01-PLAN.md
+**Stopped at:** Completed 10-02-PLAN.md
 **Next action:** Execute 10-02-PLAN.md (tenant/agency user-management Server Actions).
 **Resume file:** None
 **Roadmap:** .planning/ROADMAP.md

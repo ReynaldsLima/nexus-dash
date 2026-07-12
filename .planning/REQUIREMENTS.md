@@ -11,9 +11,9 @@ Requirements para o milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Vis
 
 - [ ] **USER-01**: Super Admin pode listar os usuários de um tenant na tela `/tenants/[slug]` (substitui o placeholder "gerenciado via Supabase Dashboard")
 - [ ] **USER-02**: Super Admin pode listar os usuários de uma agência na tela `/agencies/[id]` (substitui o mesmo placeholder)
-- [ ] **USER-03**: Super Admin pode editar o email de um usuário existente
-- [ ] **USER-04**: Super Admin pode resetar a senha de um usuário existente
-- [ ] **USER-05**: Super Admin pode remover o acesso de um usuário (soft-delete — remove o vínculo com o tenant/agência, mantém a conta Auth) com revogação de sessão imediata via `signOut('global')`, evitando o gap de JWT desatualizado (claims só são re-emitidas no login/refresh) — Plan 01 built and live-verified the underlying `revoke_user_sessions` RPC; the `removeTenantUserAccess`/`removeAgencyUserAccess` Server Actions that call it are Plan 02's scope
+- [x] **USER-03**: Super Admin pode editar o email de um usuário existente
+- [x] **USER-04**: Super Admin pode resetar a senha de um usuário existente
+- [x] **USER-05**: Super Admin pode remover o acesso de um usuário (soft-delete — remove o vínculo com o tenant/agência, mantém a conta Auth) com revogação de sessão imediata via `signOut('global')`, evitando o gap de JWT desatualizado (claims só são re-emitidas no login/refresh) — Plan 01 built and live-verified the underlying `revoke_user_sessions` RPC; the `removeTenantUserAccess`/`removeAgencyUserAccess` Server Actions that call it are Plan 02's scope
 
 ### Limpeza de Papel Morto
 
@@ -59,8 +59,8 @@ Explicitamente excluído do v1.1. Documentado para prevenir scope creep.
 | AUTH-07 | Phase 9 | Complete |
 | USER-01 | Phase 10 | Pending |
 | USER-02 | Phase 10 | Pending |
-| USER-03 | Phase 10 | Pending |
-| USER-04 | Phase 10 | Pending |
+| USER-03 | Phase 10 | Complete |
+| USER-04 | Phase 10 | Complete |
 | USER-05 | Phase 10 | Pending (RPC foundation done in Plan 01, Server Action in Plan 02) |
 | SET-03 | Phase 11 | Pending |
 | SET-04 | Phase 11 | Pending |
