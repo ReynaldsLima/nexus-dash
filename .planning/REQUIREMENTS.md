@@ -17,7 +17,7 @@ Requirements para o milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Vis
 
 ### Limpeza de Papel Morto
 
-- [ ] **AUTH-07**: Nenhuma referência ao valor `"viewer"` permanece em tipos TypeScript (`Role` em `lib/stores/tenant-store.tsx`), middleware (`proxy.ts`), componentes (`tenant-switcher.tsx`) ou testes — apenas `super_admin`/`tenant_admin`/`agency` existem no sistema
+- [x] **AUTH-07**: Nenhuma referência ao valor `"viewer"` permanece em tipos TypeScript (`Role` em `lib/stores/tenant-store.tsx`), middleware (`proxy.ts`), componentes (`tenant-switcher.tsx`) ou testes — apenas `super_admin`/`tenant_admin`/`agency` existem no sistema
 
 ### Janela de Histórico Retroativo
 
@@ -56,7 +56,7 @@ Explicitamente excluído do v1.1. Documentado para prevenir scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-07 | Phase 9 | Pending |
+| AUTH-07 | Phase 9 | Complete |
 | USER-01 | Phase 10 | Pending |
 | USER-02 | Phase 10 | Pending |
 | USER-03 | Phase 10 | Pending |

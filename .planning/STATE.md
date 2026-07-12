@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
-status: planning
-stopped_at: Phase 9 context gathered
-last_updated: "2026-07-12T01:26:00.214Z"
-last_activity: 2026-07-12 — ROADMAP.md/REQUIREMENTS.md criados para v1.1 (Phases 9-12, 14/14 requirements mapeados)
+status: verifying
+stopped_at: Completed 09-01-PLAN.md (AUTH-07, Phase 9 complete)
+last_updated: "2026-07-12T02:50:52.205Z"
+last_activity: 2026-07-12
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 100
 ---
 
 # Project State
@@ -20,16 +20,16 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-07-12)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Milestone v1.1 roadmap criado — Phase 9 (Limpeza do Papel Viewer) é a próxima a ser planejada via `/gsd-plan-phase 9`
+**Current focus:** Phase 09 — limpeza-do-papel-viewer
 
 ## Current Position
 
-Phase: 9 of 12 (Limpeza do Papel Viewer) — v1.1 phase count starts at 9, continuing from v1.0's Phase 8
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-07-12 — ROADMAP.md/REQUIREMENTS.md criados para v1.1 (Phases 9-12, 14/14 requirements mapeados)
+Phase: 09 (limpeza-do-papel-viewer) — COMPLETE (1/1 plans)
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-07-12
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ---
 
@@ -37,9 +37,9 @@ Progress: [░░░░░░░░░░] 0%
 
 **v1.0 MVP shipped 2026-07-12** — 10/10 phases, 46/46 plans complete. Tagged `v1.0`, archived to `.planning/milestones/v1.0-ROADMAP.md` / `v1.0-REQUIREMENTS.md` / `v1.0-phases/`. Full v1.0 history below is preserved as historical record; a fresh phase/plan cycle starts with v1.1.
 
-- Next: `/gsd-plan-phase 9` (Limpeza do Papel Viewer — AUTH-07). Roadmap v1.1 criado com 4 fases (9-12), ordem derivada de `.planning/research/ARCHITECTURE.md`: Phase 9 (viewer cleanup, zero DB coupling) → Phase 10 (user management) → Phase 11 (backfill window) → Phase 12 (redesign visual, captura a forma final de tudo antes).
+- Next: `/gsd-plan-phase 10` (Gestão de Usuários — USER-01..05). Phase 9 (Limpeza do Papel Viewer — AUTH-07) concluída, 1/1 plan.
 - v1.0 progress (historical, frozen): 46/46 planned plans complete (100%) — 10/10 phases done
-- v1.1 progress: 0/4 phases planned, 14/14 requirements mapped, 0 plans written yet (roadmap only)
+- v1.1 progress: 1/4 phases complete (Phase 9), 1/14 requirements satisfied (AUTH-07), 1 plan written and complete
 
 ```
 [██████████] 100%  (v1.0, frozen)
@@ -53,8 +53,8 @@ Phase 06: Security & Consistency — Leads Endpoints (4/4 plans complete — AGE
 Phase 07: Google Ads OAuth2 Connect (gap closure) (4/4 plans complete — SET-01 fully code-complete: state helper + connect route + callback route + Settings UI wiring; live end-to-end verification blocked pending user's Google Cloud OAuth Client, D-03, same class as Phase 2's Developer Token)
 Phase 08: Tech Debt Cleanup (3/3 plans complete — Plan 01: 01-VERIFICATION.md authored + REQUIREMENTS.md 15-checkbox correction + 6-row traceability gap filled; Plan 02: dead migration 0012 deleted + OPS-FOLLOWUPS.md created; Plan 03: live Supabase test-fixture cleanup — 11 agencies + 1 agency_users + 1 tenant_users + 2 auth.users deleted, FK-safe, human-approved)
 
-[░░░░░░░░░░] 0%  (v1.1, just started)
-Phase 09: Limpeza do Papel Viewer (not started — AUTH-07)
+[███░░░░░░░] 25%  (v1.1, 1/4 phases complete)
+Phase 09: Limpeza do Papel Viewer (done — AUTH-07, 1/1 plans)
 Phase 10: Gestão de Usuários (not started — USER-01..05)
 Phase 11: Janela de Histórico Retroativo (not started — SET-03..05)
 Phase 12: Redesign Visual (not started — DESIGN-01..05)
@@ -76,7 +76,7 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 | 6 | Security & Consistency — Leads Endpoints (gap closure) | ✅ Concluída — 4/4 plans, AGENCY-08 completo, gate automatizado verde, checkpoint de verificação humana aceito parcial (produção via Playwright, gap externo ANTHROPIC_API_KEY pendente desde Fase 4) | 2026-07-11 |
 | 7 | Google Ads OAuth2 Connect (gap closure) | ✅ Concluída (código) — 4/4 plans, SET-01 completo (state helper + connect route + callback route + Settings UI); verificação manual ao vivo pendente do Google Cloud OAuth Client do usuário (D-03) | 2026-07-11 |
 | 8 | Tech Debt Cleanup (não-bloqueante) | ✅ Concluída — 3/3 plans: Plano 01 (01-VERIFICATION.md + REQUIREMENTS.md corrigido), Plano 02 (migration 0012 apagada + OPS-FOLLOWUPS.md), Plano 03 (limpeza de fixtures de teste no Supabase live) | 2026-07-11 |
-| 9 | Limpeza do Papel Viewer (AUTH-07) | 📋 Roadmap criado — não planejada | — |
+| 9 | Limpeza do Papel Viewer (AUTH-07) | ✅ Concluída — 1/1 plan, AUTH-07 satisfeito | 2026-07-12 |
 | 10 | Gestão de Usuários (USER-01..05) | 📋 Roadmap criado — não planejada | — |
 | 11 | Janela de Histórico Retroativo (SET-03..05) | 📋 Roadmap criado — não planejada | — |
 | 12 | Redesign Visual (DESIGN-01..05) | 📋 Roadmap criado — não planejada | — |
@@ -88,10 +88,10 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 | Metric | Value |
 |--------|-------|
 | Requirements total | 26 core (v1) + 5 LEADS + 8 AGENCY = 39, + SET-01/AGENCY-08 gap-closure re-scoping (see v1.0-MILESTONE-AUDIT.md); v1.1 adds 14 more (AUTH-07, USER-01..05, SET-03..05, DESIGN-01..05) |
-| Requirements complete | v1.0: 39/39 satisfied (per `.planning/v1.0-MILESTONE-AUDIT.md`, updated 2026-07-11). v1.1: 0/14 (roadmap just created) |
-| Plans written | v1.0: 32 (+3 Phase 8 tech-debt cleanup). v1.1: 0 (plan counts TBD per phase) |
-| Plans complete | v1.0: 32 (+3 Phase 8). v1.1: 0 |
-| Phases complete | v1.0: 10/10. v1.1: 0/4 (Phases 9-12 roadmapped, not planned) |
+| Requirements complete | v1.0: 39/39 satisfied (per `.planning/v1.0-MILESTONE-AUDIT.md`, updated 2026-07-11). v1.1: 1/14 (AUTH-07, Phase 9) |
+| Plans written | v1.0: 32 (+3 Phase 8 tech-debt cleanup). v1.1: 1 (Phase 9 Plan 01) |
+| Plans complete | v1.0: 32 (+3 Phase 8). v1.1: 1 (Phase 9 Plan 01) |
+| Phases complete | v1.0: 10/10. v1.1: 1/4 (Phase 9 done; Phases 10-12 roadmapped, not planned) |
 | Phase 04-ai-insights P01 | 8min | 2 tasks | 5 files |
 | Phase 04-ai-insights P02 | 14min | 2 tasks | 7 files |
 | Phase 04-ai-insights P03 | 12min | 3 tasks | 7 files |
@@ -109,6 +109,7 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 | Phase 08-tech-debt-cleanup P01 | 8min | 2 tasks | 2 files |
 | Phase 08-tech-debt-cleanup P02 | 1min | 2 tasks | 2 files |
 | Phase 08-tech-debt-cleanup P03 | 6min | 1 tasks | 0 files |
+| Phase 09-limpeza-do-papel-viewer P01 | 10min | 2 tasks | 10 files |
 
 ### Per-Plan Execution Log
 
@@ -187,6 +188,7 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 - Phase 08-tech-debt-cleanup Plan 01 (documentation-only, no application code touched — closes the v1.0 re-audit's `tech_debt` finding): Task 1 created `.planning/phases/01-foundation/01-VERIFICATION.md`, Phase 1's first-ever formal verification report, authored directly (no nested `gsd-verifier` agent, per plan instruction) by reading Phase 1's PLAN/SUMMARY files plus live code (`lib/actions/auth.ts`, `lib/supabase/server.ts`, `app/[tenant-slug]/layout.tsx`, `supabase/migrations/0004_create_rls_policies.sql`, `supabase/migrations/0005_custom_access_token_hook.sql`) — gives AUTH-01/AUTH-02/AUTH-06 (the three the audit flagged as "partial — no formal artifact") an explicit ✓ VERIFIED verdict with concrete evidence; AUTH-03/04/05 cited briefly since they were already accepted. Task 2 corrected `.planning/REQUIREMENTS.md`: flipped 15 stale `[ ]` checkboxes to `[x]` (AUTH-01/02/06, DASH-01–04, CAMP-01–04, SET-02 — all already functionally satisfied, pure bookkeeping drift), added the entirely-missing "Leads Management (Phase 03.1)" checkbox subsection (LEADS-01..05), filled the traceability table's `Status`/`Plan` columns for those 12 requirements (was `Pending`/`TBD`), and appended 6 new traceability rows (LEADS-01..05, DASH-03-ext) that had zero prior coverage. Zero deviations — both tasks' automated verification greps and acceptance criteria passed on the first attempt. `git diff --stat HEAD~2 HEAD` confirmed only the two expected files changed, matching the plan's `<verification>` section exactly. Phase 8 is now 1/3 plans complete (non-blocking cleanup phase; Plans 02/03 pending — dead migration 0012 deletion + OPS-FOLLOWUPS.md, and live Supabase test-fixture cleanup).
 - Phase 08-tech-debt-cleanup Plan 02 (repo hygiene, no application code touched): Task 1 deleted `supabase/migrations/0012_add_google_sheets_to_tenants.sql` via a plain filesystem delete (confirmed untracked via `git ls-files` before deleting — `git rm` doesn't apply to untracked files) — the file only ever added the superseded `sheet_id`/`sheets_api_key` columns, was never applied to any Supabase environment, and no schema-push/migration-apply command was run. This task produced no git commit, since deleting an untracked file is a zero-diff operation for git — verified by comparing `git status --short` before/after. Task 2 created `.planning/OPS-FOLLOWUPS.md`, a durable checklist consolidating the two required ops follow-ups (N8N daily-insights workflow activation — needs `ANTHROPIC_API_KEY`/`N8N_INSIGHTS_SECRET` in Vercel Prod plus manual N8N import/credential wiring; Phase 0 VPS security check — SSH verification of N8N version/CVE-2025-68613/encryption-key persistence) plus the other already-known external blockers (Google Ads Developer Token, Google Cloud OAuth Client, per-tenant Meta System User tokens) previously scattered across STATE.md prose — commit `77e67d3`. `git show --stat` on that commit confirmed only the new markdown file changed, no ops action was actually performed. Zero deviations — plan executed exactly as written. Phase 8 is now 2/3 plans complete; Plan 03 (live Supabase test-fixture cleanup, human checkpoint) remains.
 - **v1.1 roadmap created (2026-07-12):** `.planning/ROADMAP.md`/`REQUIREMENTS.md` updated with Phases 9-12, continuing numbering from v1.0's Phase 8. Order follows `.planning/research/ARCHITECTURE.md`'s recommended build order: Phase 9 (AUTH-07, viewer cleanup — zero DB coupling, DB already terminal since migration `0020`) → Phase 10 (USER-01..05, user management — establishes new `admin.updateUserById`/`admin.signOut('global')` patterns not used anywhere else in the codebase) → Phase 11 (SET-03..05, backfill window — independent of Phase 10 but sequenced before the redesign so Settings is only restyled once) → Phase 12 (DESIGN-01..05, visual redesign — last, captures the final shape of the user-management UI and the new backfill field in one pass). All 14 v1.1 requirements mapped 1:1 to a phase, zero orphans.
+- **Phase 09-limpeza-do-papel-viewer Plan 01 (AUTH-07, closes Phase 9 entirely — 1/1 plan):** Removed the dead `'viewer'` literal from 4 application-layer files — `lib/stores/tenant-store.tsx`'s `Role` type, `proxy.ts`'s `AppMetadata.role` + redirect branch, `components/tenants/tenant-switcher.tsx`'s `role` prop union, and an obsolete RPC comment in `app/api/meta-ads/connect/route.ts` — and replaced it with the sentinel `'invalid_role'` across 6 test files (`tests/middleware.test.ts` + 5 route unit tests), preserving 100% of the "unknown role is rejected" coverage. `tests/integration/tenant-role-migration.test.ts` deliberately left untouched (proves migration `0020`'s CHECK constraint, would be destroyed by the same edit). No consolidation of the two locally-duplicated `Role` unions (`proxy.ts`, `tenant-switcher.tsx`) into `tenant-store.tsx`'s canonical export — minimal diff by design, pre-existing duplication out of scope for a dead-code cleanup phase. The only behavioral change is strictly more restrictive (fail-closed): a JWT with `role: 'viewer'` — already impossible to issue since migration `0020` — now falls through `proxy.ts`'s `else` branch to `/login?error=no_membership` instead of the tenant dashboard. `npx tsc --noEmit` clean (same 2 pre-existing unrelated `vault-rpc.test.ts` errors); full suite 230 passed/1 skipped/5 todo — the one failure on combined run (`anomaly_alerts` realtime websocket cold-start flake, documented since Phase 4 Plan 02) reconfirmed non-regression via isolated re-run (7/7 passed). Zero deviations from plan. Commits: `e8f6379` (Task 1, app layer), `09a3c96` (Task 2, tests).
 
 ### Pending Todos
 
@@ -247,11 +249,11 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 
 ## Session Continuity
 
-**Last updated:** 2026-07-12 - Milestone v1.1 ROADMAP.md/REQUIREMENTS.md criados: Phases 9-12 definidas (Limpeza do Papel Viewer → Gestão de Usuários → Janela de Histórico Retroativo → Redesign Visual), 14/14 requirements mapeados, 0 órfãos.
-**Last action:** Roadmapper agent leu PROJECT.md, REQUIREMENTS.md, research/ARCHITECTURE.md, config.json e MILESTONES.md; derivou 4 fases seguindo a ordem de build recomendada pela pesquisa de arquitetura; escreveu `.planning/ROADMAP.md` (seções `## Phases`, `## Phase Details` com goals/success criteria/dependencies, `## Progress`) e atualizou a tabela de rastreabilidade em `.planning/REQUIREMENTS.md` (todas as 14 linhas de `TBD/Pending` para `Phase N/Pending`).
-**Stopped at:** Phase 9 context gathered
-**Next action:** `/gsd-plan-phase 9` (Limpeza do Papel Viewer — AUTH-07, zero DB coupling, menor risco do milestone).
-**Resume file:** .planning/phases/09-limpeza-do-papel-viewer/09-CONTEXT.md
+**Last updated:** 2026-07-12 - Phase 09 (Limpeza do Papel Viewer) executada e concluída: 09-01-PLAN.md, 1/1 plan, AUTH-07 satisfeito.
+**Last action:** Executor agent aplicou os 2 tasks do plano 09-01 — remoção do literal `'viewer'` de 4 arquivos de aplicação (Task 1, commit `e8f6379`) e substituição por sentinel `'invalid_role'` em 6 arquivos de teste (Task 2, commit `09a3c96`); criou `09-01-SUMMARY.md`; atualizou STATE.md/ROADMAP.md/REQUIREMENTS.md via gsd-tools.
+**Stopped at:** Completed 09-01-PLAN.md (AUTH-07, Phase 9 complete)
+**Next action:** `/gsd-plan-phase 10` (Gestão de Usuários — USER-01..05).
+**Resume file:** None
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
 </content>

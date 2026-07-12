@@ -33,7 +33,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
 
 **Milestone Goal:** Fechar débitos técnicos deixados do v1.0 (usuários, papel viewer morto, janela de histórico) e redesenhar visualmente as telas do dashboard usando os protótipos existentes como base.
 
-- [ ] **Phase 9: Limpeza do Papel Viewer** - Nenhuma referência ao papel "viewer" morto permanece em tipos, middleware, componentes ou testes
+- [x] **Phase 9: Limpeza do Papel Viewer** - Nenhuma referência ao papel "viewer" morto permanece em tipos, middleware, componentes ou testes (completed 2026-07-12)
 - [ ] **Phase 10: Gestão de Usuários** - Super Admin lista, edita e remove acesso de usuários de tenants e agências direto no app
 - [ ] **Phase 11: Janela de Histórico Retroativo** - Tenant Admin configura os dias de backfill por conta conectada, com opção de ajuste posterior
 - [ ] **Phase 12: Redesign Visual** - Dashboard, Campanhas, Insights, Settings e o chrome compartilhado redesenhados conforme os protótipos de referência
@@ -50,7 +50,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
   3. `components/tenants/tenant-switcher.tsx` não aceita `'viewer'` como valor válido da prop `role`
   4. A suíte de testes (`tests/middleware.test.ts` e os testes de rotas afetados) passa sem nenhum caso de teste que assuma `'viewer'` como um papel válido do sistema
 **Plans**: 1 plan
-- [ ] 09-01-PLAN.md — Remove todas as referências ao papel morto 'viewer' (tipos, middleware, componente, comentário, 6 arquivos de teste via sentinel 'invalid_role')
+- [x] 09-01-PLAN.md — Remove todas as referências ao papel morto 'viewer' (tipos, middleware, componente, comentário, 6 arquivos de teste via sentinel 'invalid_role')
 
 ### Phase 10: Gestão de Usuários
 **Goal**: Super Admin gerencia o ciclo de vida completo de usuários de tenants e agências (listar, editar email, resetar senha, remover acesso) diretamente no app, sem precisar abrir o Supabase Dashboard.
@@ -104,7 +104,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 6. Security & Consistency | v1.0 | 4/4 | Complete | 2026-07-11 |
 | 7. Google Ads OAuth2 Connect | v1.0 | 4/4 | Complete | 2026-07-11 |
 | 8. Tech Debt Cleanup | v1.0 | 3/3 | Complete | 2026-07-11 |
-| 9. Limpeza do Papel Viewer | v1.1 | 0/1 | Planned | - |
+| 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
 | 10. Gestão de Usuários | v1.1 | 0/TBD | Not started | - |
 | 11. Janela de Histórico Retroativo | v1.1 | 0/TBD | Not started | - |
 | 12. Redesign Visual | v1.1 | 0/TBD | Not started | - |
