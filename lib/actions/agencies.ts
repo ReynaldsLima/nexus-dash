@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { createServiceClient } from '@/lib/supabase/service'
+import { requireSuperAdmin } from '@/lib/actions/auth-guard'
+import type { UserActionResult, ResetPasswordResult } from '@/lib/actions/tenants'
 
 const createAgencySchema = z.object({
   name: z.string().min(1, { message: 'Informe o nome da agência' }).max(120),
@@ -21,6 +23,22 @@ const createAgencyUserSchema = z.object({
 const grantSchema = z.object({
   agencyId: z.string().uuid(),
   tenantId: z.string().uuid(),
+})
+
+const editAgencyUserEmailSchema = z.object({
+  userId: z.string().uuid(),
+  email: z.email({ message: 'E-mail inválido' }),
+  agencyId: z.string().uuid(),
+})
+
+const resetAgencyPasswordSchema = z.object({
+  userId: z.string().uuid(),
+  agencyId: z.string().uuid(),
+})
+
+const removeAgencyAccessSchema = z.object({
+  userId: z.string().uuid(),
+  agencyId: z.string().uuid(),
 })
 
 function generateTempPassword(): string {
@@ -154,6 +172,93 @@ export async function revokeTenant(agencyId: string, tenantId: string): Promise<
     .eq('tenant_id', parsed.data.tenantId)
 
   if (error) return { error: error.message }
+
+  revalidatePath(`/agencies/${parsed.data.agencyId}`)
+  return { ok: true }
+}
+
+export async function editAgencyUserEmail(input: {
+  userId: string
+  email: string
+  agencyId: string
+}): Promise<UserActionResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
+  const parsed = editAgencyUserEmailSchema.safeParse(input)
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }
+  }
+
+  const supabase = createServiceClient()
+  const { error } = await supabase.auth.admin.updateUserById(parsed.data.userId, {
+    email: parsed.data.email,
+    email_confirm: true,
+  })
+
+  if (error) {
+    if (error.message?.toLowerCase().includes('already')) {
+      return { error: 'Este e-mail já está cadastrado.' }
+    }
+    return { error: error.message }
+  }
+
+  revalidatePath(`/agencies/${parsed.data.agencyId}`)
+  return { ok: true }
+}
+
+// D-05: whether the user's existing session survives a password reset is platform-dependent
+// (10-RESEARCH.md Critical Finding) — do NOT assert either behavior here; verified manually in Plan 04.
+export async function resetAgencyUserPassword(input: {
+  userId: string
+  agencyId: string
+}): Promise<ResetPasswordResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
+  const parsed = resetAgencyPasswordSchema.safeParse(input)
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }
+  }
+
+  const supabase = createServiceClient()
+  const tempPassword = generateTempPassword()
+  const { error } = await supabase.auth.admin.updateUserById(parsed.data.userId, {
+    password: tempPassword,
+  })
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/agencies/${parsed.data.agencyId}`)
+  return { ok: true, tempPassword }
+}
+
+export async function removeAgencyUserAccess(input: {
+  userId: string
+  agencyId: string
+}): Promise<UserActionResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
+  const parsed = removeAgencyAccessSchema.safeParse(input)
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }
+  }
+
+  const supabase = createServiceClient()
+  const { error } = await supabase
+    .from('agency_users')
+    .delete()
+    .eq('agency_id', parsed.data.agencyId)
+    .eq('user_id', parsed.data.userId)
+
+  if (error) return { error: error.message }
+
+  const { error: rpcError } = await supabase.rpc('revoke_user_sessions', {
+    target_user_id: parsed.data.userId,
+  })
+
+  if (rpcError) return { error: rpcError.message }
 
   revalidatePath(`/agencies/${parsed.data.agencyId}`)
   return { ok: true }
