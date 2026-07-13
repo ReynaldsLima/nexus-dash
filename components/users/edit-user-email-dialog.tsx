@@ -69,11 +69,11 @@ export function EditUserEmailDialog({ open, onOpenChange, user, scope }: EditUse
         <form action={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-user-email" className="text-sm font-semibold">E-mail</Label>
-            <Input id="edit-user-email" name="email" type="email" defaultValue={user.email} required autoComplete="off" />
+            <Input key={open ? user.id : `${user.id}-closed`} id="edit-user-email" name="email" type="email" defaultValue={user.email} required autoComplete="off" />
           </div>
           {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isPending}>
+            <Button type="button" variant="ghost" onClick={() => { setError(null); onOpenChange(false) }} disabled={isPending}>
               Cancelar
             </Button>
             <Button type="submit" disabled={isPending}>

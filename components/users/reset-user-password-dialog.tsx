@@ -37,6 +37,11 @@ export function ResetUserPasswordDialog({ open, onOpenChange, user, scope }: Res
     setCopied(false)
   }
 
+  function handleOpenChange(v: boolean) {
+    onOpenChange(v)
+    if (!v) reset()
+  }
+
   function handleConfirm() {
     setError(null)
     startTransition(async () => {
@@ -65,13 +70,7 @@ export function ResetUserPasswordDialog({ open, onOpenChange, user, scope }: Res
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        onOpenChange(v)
-        if (!v) reset()
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg">
         {tempPassword ? (
           <>
@@ -90,7 +89,7 @@ export function ResetUserPasswordDialog({ open, onOpenChange, user, scope }: Res
               </code>
             </div>
             <DialogFooter>
-              <Button variant="ghost" onClick={() => onOpenChange(false)}>Fechar</Button>
+              <Button variant="ghost" onClick={() => handleOpenChange(false)}>Fechar</Button>
               <Button onClick={handleCopy}>{copied ? 'Copiado!' : 'Copiar senha'}</Button>
             </DialogFooter>
           </>
@@ -104,7 +103,7 @@ export function ResetUserPasswordDialog({ open, onOpenChange, user, scope }: Res
             </DialogHeader>
             {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isPending}>
+              <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)} disabled={isPending}>
                 Cancelar
               </Button>
               <Button type="button" onClick={handleConfirm} disabled={isPending}>

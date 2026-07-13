@@ -31,6 +31,11 @@ export function RemoveUserAccessDialog({ open, onOpenChange, user, scope }: Remo
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  function handleOpenChange(v: boolean) {
+    onOpenChange(v)
+    if (!v) setError(null)
+  }
+
   function handleConfirm() {
     setError(null)
     startTransition(async () => {
@@ -51,7 +56,7 @@ export function RemoveUserAccessDialog({ open, onOpenChange, user, scope }: Remo
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Remover acesso?</AlertDialogTitle>
