@@ -54,6 +54,9 @@ export type CreateTenantResult =
   | { error: string }
 
 export async function createTenant(input: { name: string; slug: string }): Promise<CreateTenantResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = createTenantSchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }
@@ -80,6 +83,9 @@ export async function createTenant(input: { name: string; slug: string }): Promi
 export type ToggleTenantResult = { ok: true } | { error: string }
 
 async function setTenantActive(tenantId: string, active: boolean): Promise<ToggleTenantResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = tenantIdSchema.safeParse({ tenantId })
   if (!parsed.success) return { error: 'tenantId inválido' }
 
@@ -113,6 +119,9 @@ export async function createTenantUser(input: {
   tenantId: string
   password?: string
 }): Promise<CreateUserResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = createUserSchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }

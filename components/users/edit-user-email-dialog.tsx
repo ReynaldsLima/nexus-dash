@@ -33,6 +33,11 @@ export function EditUserEmailDialog({ open, onOpenChange, user, scope }: EditUse
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
+  function handleOpenChange(v: boolean) {
+    onOpenChange(v)
+    if (!v) setError(null)
+  }
+
   async function handleSubmit(formData: FormData) {
     setError(null)
     const email = String(formData.get('email') ?? '')
@@ -48,19 +53,13 @@ export function EditUserEmailDialog({ open, onOpenChange, user, scope }: EditUse
       } else {
         router.refresh()
         toast.success('E-mail atualizado')
-        onOpenChange(false)
+        handleOpenChange(false)
       }
     })
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        onOpenChange(v)
-        if (!v) setError(null)
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Editar e-mail</DialogTitle>
@@ -73,7 +72,7 @@ export function EditUserEmailDialog({ open, onOpenChange, user, scope }: EditUse
           </div>
           {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => { setError(null); onOpenChange(false) }} disabled={isPending}>
+            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)} disabled={isPending}>
               Cancelar
             </Button>
             <Button type="submit" disabled={isPending}>

@@ -11,6 +11,15 @@ const mockState = {
   deleteUserCalls: 0,
 }
 
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: async () => ({
+    auth: {
+      getUser: () => Promise.resolve({ data: { user: { id: 'super-admin-1' } } }),
+    },
+    rpc: () => Promise.resolve({ data: 'super_admin', error: null }),
+  }),
+}))
+
 vi.mock('@/lib/supabase/service', () => ({
   createServiceClient: () => ({
     from: (table: string) => ({

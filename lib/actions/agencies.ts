@@ -48,6 +48,9 @@ function generateTempPassword(): string {
 export type CreateAgencyResult = { ok: true; agencyId: string } | { error: string }
 
 export async function createAgency(input: { name: string }): Promise<CreateAgencyResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = createAgencySchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }
@@ -69,6 +72,9 @@ export async function createAgency(input: { name: string }): Promise<CreateAgenc
 export type ToggleAgencyResult = { ok: true } | { error: string }
 
 async function setAgencyActive(agencyId: string, active: boolean): Promise<ToggleAgencyResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = agencyIdSchema.safeParse({ agencyId })
   if (!parsed.success) return { error: 'agencyId inválido' }
 
@@ -102,6 +108,9 @@ export async function createAgencyUser(input: {
   agencyId: string
   password?: string
 }): Promise<CreateAgencyUserResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = createAgencyUserSchema.safeParse(input)
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Dados inválidos' }
@@ -143,6 +152,9 @@ export async function createAgencyUser(input: {
 export type GrantResult = { ok: true } | { error: string }
 
 export async function grantTenant(agencyId: string, tenantId: string): Promise<GrantResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = grantSchema.safeParse({ agencyId, tenantId })
   if (!parsed.success) return { error: 'Dados inválidos' }
 
@@ -161,6 +173,9 @@ export async function grantTenant(agencyId: string, tenantId: string): Promise<G
 }
 
 export async function revokeTenant(agencyId: string, tenantId: string): Promise<GrantResult> {
+  const gate = await requireSuperAdmin()
+  if ('error' in gate) return gate
+
   const parsed = grantSchema.safeParse({ agencyId, tenantId })
   if (!parsed.success) return { error: 'Dados inválidos' }
 
