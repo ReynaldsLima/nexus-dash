@@ -34,7 +34,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
 **Milestone Goal:** Fechar débitos técnicos deixados do v1.0 (usuários, papel viewer morto, janela de histórico) e redesenhar visualmente as telas do dashboard usando os protótipos existentes como base.
 
 - [x] **Phase 9: Limpeza do Papel Viewer** - Nenhuma referência ao papel "viewer" morto permanece em tipos, middleware, componentes ou testes (completed 2026-07-12)
-- [ ] **Phase 10: Gestão de Usuários** - Super Admin lista, edita e remove acesso de usuários de tenants e agências direto no app
+- [x] **Phase 10: Gestão de Usuários** - Super Admin lista, edita e remove acesso de usuários de tenants e agências direto no app (completed 2026-07-13)
 - [ ] **Phase 11: Janela de Histórico Retroativo** - Tenant Admin configura os dias de backfill por conta conectada, com opção de ajuste posterior
 - [ ] **Phase 12: Redesign Visual** - Dashboard, Campanhas, Insights, Settings e o chrome compartilhado redesenhados conforme os protótipos de referência
 
@@ -66,7 +66,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
 - [x] 10-01-PLAN.md — Fundação: migration `0023_revoke_user_sessions` (SECURITY DEFINER RPC) + push + gate `requireSuperAdmin()` + scaffolds de teste (Wave 0)
 - [x] 10-02-PLAN.md — 6 Server Actions (editar email / resetar senha / remover acesso, tenant + agência) com gate super_admin e revogação de sessão
 - [x] 10-03-PLAN.md — UI: tabela de usuários + dropdown de ações + 3 dialogs (scope tenant/agência) e wiring das duas páginas
-- [ ] 10-04-PLAN.md — Verificação humana ponta-a-ponta (Playwright prod) + observação ao vivo do comportamento D-05
+- [x] 10-04-PLAN.md — Verificação humana ponta-a-ponta (Playwright prod) + observação ao vivo do comportamento D-05
 
 ### Phase 11: Janela de Histórico Retroativo
 **Goal**: Tenant Admin controla quantos dias de histórico são puxados no primeiro sync de cada conta de anúncio conectada, por canal, com a opção de ajustar essa janela depois sem reconectar.
@@ -109,7 +109,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 7. Google Ads OAuth2 Connect | v1.0 | 4/4 | Complete | 2026-07-11 |
 | 8. Tech Debt Cleanup | v1.0 | 3/3 | Complete | 2026-07-11 |
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
-| 10. Gestão de Usuários | v1.1 | 3/4 | In Progress|  |
+| 10. Gestão de Usuários | v1.1 | 4/4 | Complete   | 2026-07-13 |
 | 11. Janela de Histórico Retroativo | v1.1 | 0/TBD | Not started | - |
 | 12. Redesign Visual | v1.1 | 0/TBD | Not started | - |
 

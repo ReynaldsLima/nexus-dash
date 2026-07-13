@@ -13,7 +13,7 @@ Requirements para o milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Vis
 - [x] **USER-02**: Super Admin pode listar os usuários de uma agência na tela `/agencies/[id]` (substitui o mesmo placeholder)
 - [x] **USER-03**: Super Admin pode editar o email de um usuário existente
 - [x] **USER-04**: Super Admin pode resetar a senha de um usuário existente
-- [x] **USER-05**: Super Admin pode remover o acesso de um usuário (soft-delete — remove o vínculo com o tenant/agência, mantém a conta Auth) com revogação de sessão imediata via `signOut('global')`, evitando o gap de JWT desatualizado (claims só são re-emitidas no login/refresh) — Plan 01 built and live-verified the underlying `revoke_user_sessions` RPC; the `removeTenantUserAccess`/`removeAgencyUserAccess` Server Actions that call it are Plan 02's scope
+- [x] **USER-05**: Super Admin pode remover o acesso de um usuário (soft-delete — remove o vínculo com o tenant/agência, mantém a conta Auth) com revogação de sessão imediata via `signOut('global')`, evitando o gap de JWT desatualizado (claims só são re-emitidas no login/refresh) — built across Plan 01 (RPC), Plan 02 (Server Actions), and live-verified end-to-end in Plan 04 against production
 
 ### Limpeza de Papel Morto
 
@@ -61,7 +61,7 @@ Explicitamente excluído do v1.1. Documentado para prevenir scope creep.
 | USER-02 | Phase 10 | Complete |
 | USER-03 | Phase 10 | Complete |
 | USER-04 | Phase 10 | Complete |
-| USER-05 | Phase 10 | Pending (RPC foundation done in Plan 01, Server Action in Plan 02) |
+| USER-05 | Phase 10 | Complete |
 | SET-03 | Phase 11 | Pending |
 | SET-04 | Phase 11 | Pending |
 | SET-05 | Phase 11 | Pending |
