@@ -39,11 +39,11 @@ O Super Admin consegue ver e otimizar campanhas de todos os clientes em um únic
 - [x] Drill-down por canal e campanha a partir do Overview — Validated in Phase 3: Dashboard UI (DASH-03-ext via ChannelSheet + CAMP-04 via CampaignSheet, `03-VERIFICATION.md`); bookkeeping corrigido na Phase 8
 - [x] Página Campanhas com lista filtrável por período e canal — Validated in Phase 3: Dashboard UI (CAMP-01/02/03, `03-VERIFICATION.md`); bookkeeping corrigido na Phase 8
 - [x] Limpar o papel "viewer" morto do código (`Role` type, `proxy.ts`) — Validated in Phase 9: Limpeza do Papel Viewer (AUTH-07). Removido de `Role` type, `proxy.ts`, `tenant-switcher.tsx` e 6 arquivos de teste (sentinel `'invalid_role'`); `tests/integration/tenant-role-migration.test.ts` mantido intocado de propósito (prova a CHECK constraint da migration 0020).
+- [x] Gestão completa de usuários (listar, editar, resetar senha, remover acesso) para tenants e agências — Validated in Phase 10: Gestão de Usuários (USER-01..05). RPC `revoke_user_sessions` (SECURITY DEFINER) + `requireSuperAdmin()` gate compartilhado + tabela de usuários (e-mail + ⋮ ações) em `/tenants/[slug]` e `/agencies/[id]`, substituindo o placeholder "gerenciado via Supabase Dashboard". Live-verificado em produção via Playwright MCP: D-05 respondida empiricamente (reset de senha invalida a sessão imediatamente, não apenas bloqueia tokens futuros); código review encontrou e corrigiu uma vulnerabilidade crítica pré-existente (Server Actions de criação/toggle de tenant/agência sem `requireSuperAdmin()`, explorável via Server Action ID não escopado por rota) no mesmo ciclo.
 
 ### Active
 
 - [ ] Janela de histórico retroativo configurável por tenant ao conectar conta
-- [ ] Gestão completa de usuários (listar, editar, remover) para tenants e agências — hoje só existe criação; edição/remoção de usuário só é possível via Supabase Dashboard direto
 - [ ] Redesign visual das telas (dashboard, campanhas, insights, settings) — usuário vai fornecer referências visuais (prints) e há protótipos HTML soltos em `prototipos/` como ponto de partida
 
 ### Out of Scope
@@ -103,4 +103,4 @@ Este documento evolui em transições de fase e marcos de milestone.
 4. Atualizar Context com estado atual
 
 ---
-*Last updated: 2026-07-12 — Phase 9 (Limpeza do Papel Viewer, AUTH-07) concluída*
+*Last updated: 2026-07-13 — Phase 10 (Gestão de Usuários, USER-01..05) concluída*
