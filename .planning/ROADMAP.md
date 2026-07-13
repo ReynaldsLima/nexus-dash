@@ -109,7 +109,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 7. Google Ads OAuth2 Connect | v1.0 | 4/4 | Complete | 2026-07-11 |
 | 8. Tech Debt Cleanup | v1.0 | 3/3 | Complete | 2026-07-11 |
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
-| 10. Gestão de Usuários | v1.1 | 4/4 | Complete   | 2026-07-13 |
+| 10. Gestão de Usuários | v1.1 | 4/4 | Complete    | 2026-07-13 |
 | 11. Janela de Histórico Retroativo | v1.1 | 0/TBD | Not started | - |
 | 12. Redesign Visual | v1.1 | 0/TBD | Not started | - |
 
