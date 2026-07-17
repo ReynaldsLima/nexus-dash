@@ -21,8 +21,8 @@ Requirements para o milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Vis
 
 ### Janela de Histórico Retroativo
 
-- [ ] **SET-03**: Tenant Admin escolhe a janela de histórico retroativo (7–365 dias, default 90) ao conectar uma conta Google Ads ou Meta Ads
-- [ ] **SET-04**: A janela escolhida é persistida por conta (`ad_accounts.backfill_days`) e usada pelo N8N no primeiro sync daquela conta/canal
+- [x] **SET-03**: Tenant Admin escolhe a janela de histórico retroativo (7–365 dias, default 90) ao conectar uma conta Google Ads ou Meta Ads
+- [x] **SET-04**: A janela escolhida é persistida por conta (`ad_accounts.backfill_days`) e usada pelo N8N no primeiro sync daquela conta/canal
 - [ ] **SET-05**: Tenant Admin pode alterar a janela de histórico depois de já conectado, sem precisar reconectar a conta (afeta apenas futuros primeiros syncs, não é retroativo)
 
 ### Redesign Visual
@@ -62,8 +62,8 @@ Explicitamente excluído do v1.1. Documentado para prevenir scope creep.
 | USER-03 | Phase 10 | Complete |
 | USER-04 | Phase 10 | Complete |
 | USER-05 | Phase 10 | Complete |
-| SET-03 | Phase 11 | Pending |
-| SET-04 | Phase 11 | Pending |
+| SET-03 | Phase 11 | Complete |
+| SET-04 | Phase 11 | Complete |
 | SET-05 | Phase 11 | Pending |
 | DESIGN-01 | Phase 12 | Pending |
 | DESIGN-02 | Phase 12 | Pending |

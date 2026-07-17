@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-07-17T22:39:38.262Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-07-17T23:03:12.333Z"
 last_activity: 2026-07-17
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 10
-  completed_plans: 6
-  percent: 60
+  completed_plans: 7
+  percent: 70
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 ## Current Position
 
 Phase: 11 (janela-de-hist-rico-retroativo) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-07-17
 
@@ -114,6 +114,7 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 | Phase 10 P02 | 16min | 2 tasks | 5 files |
 | Phase 10-gest-o-de-usu-rios P03 | 14min | 3 tasks | 11 files |
 | Phase 11-janela-de-hist-rico-retroativo P01 | 13min | 3 tasks | 4 files |
+| Phase 11-janela-de-hist-rico-retroativo P02 | 18min | 3 tasks | 5 files |
 
 ### Per-Plan Execution Log
 
@@ -259,7 +260,7 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 
 **Last updated:** 2026-07-17 - Sessão retomada via /gsd-resume-work; handoff de 2026-07-14 (HANDOFF.json + .continue-here.md) consumido e limpo.
 **Last action:** Phase 11 (Janela de Histórico Retroativo) planejada de ponta a ponta em 2026-07-14: research e UI-SPEC pulados por escolha do usuário (ARCHITECTURE.md §Feature 3 e CONTEXT.md já cobriam o design), 5 PLAN.md criados pelo gsd-planner, verificados pelo gsd-plan-checker com 0 blockers/0 warnings de primeira. Nenhuma task foi executada ainda. Usuário escolheu retomar direto para execução.
-**Stopped at:** Completed 11-01-PLAN.md
+**Stopped at:** Completed 11-02-PLAN.md
 **Next action:** Execute Phase 11 — 5 plans em 2 waves (11-01 fundação/migration bloqueante; 11-02..11-05 em paralelo). Confirmar antes que a conta Supabase MCP conectada é a correta (Supabase CLI não está disponível neste shell).
 **Resume file:** None
 **Roadmap:** .planning/ROADMAP.md

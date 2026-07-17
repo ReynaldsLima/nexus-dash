@@ -78,8 +78,8 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
   2. A janela escolhida é persistida em `ad_accounts.backfill_days` e é o valor usado pelo N8N no primeiro sync daquela conta/canal
   3. Tenant Admin altera a janela de histórico de uma conta já conectada sem precisar reconectá-la, e essa mudança afeta apenas futuros primeiros syncs (não é retroativa)
 **Plans**: 5 plans
-- [ ] 11-01-PLAN.md — Fundação: migration `0024` (ad_accounts.backfill_days 7–365 default 90) + push + regen types + signState carrega backfillDays
-- [ ] 11-02-PLAN.md — Google Ads: form + connect route (assina backfillDays no state) + callback route (upsert backfill_days)
+- [x] 11-01-PLAN.md — Fundação: migration `0024` (ad_accounts.backfill_days 7–365 default 90) + push + regen types + signState carrega backfillDays
+- [x] 11-02-PLAN.md — Google Ads: form + connect route (assina backfillDays no state) + callback route (upsert backfill_days)
 - [ ] 11-03-PLAN.md — Meta Ads: form + connect route (BodySchema + upsert backfill_days) + spec
 - [ ] 11-04-PLAN.md — Edição pós-conexão: Server Action `updateBackfillWindow` (super_admin/tenant_admin) + controle inline otimístico + wiring na página de Settings (SET-05)
 - [ ] 11-05-PLAN.md — N8N: ambos workflows selecionam backfill_days e usam por conta no primeiro sync (fallback na constante global)
@@ -116,7 +116,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 8. Tech Debt Cleanup | v1.0 | 3/3 | Complete | 2026-07-11 |
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
 | 10. Gestão de Usuários | v1.1 | 4/4 | Complete    | 2026-07-13 |
-| 11. Janela de Histórico Retroativo | v1.1 | 0/5 | Planned | - |
+| 11. Janela de Histórico Retroativo | v1.1 | 2/5 | In Progress|  |
 | 12. Redesign Visual | v1.1 | 0/TBD | Not started | - |
 
 **v1.0 total: 10/10 phases, 46/46 plans complete.**
