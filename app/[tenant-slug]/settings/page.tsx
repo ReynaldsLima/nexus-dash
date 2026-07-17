@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MetaAdsForm } from '@/components/settings/meta-ads-form'
 import { GoogleAdsForm } from '@/components/settings/google-ads-form'
+import { BackfillWindowControl } from '@/components/settings/backfill-window-control'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ConnectionStatus = 'connected' | 'not_configured' | 'invalid'
@@ -18,6 +19,7 @@ interface AdAccountStatus {
   channel: string
   active: boolean
   account_id: string | null
+  backfill_days: number
 }
 
 interface TenantSettingsData {
@@ -25,6 +27,8 @@ interface TenantSettingsData {
   metaStatus: ConnectionStatus
   googleStatus: ConnectionStatus
   googleAccountId?: string
+  metaBackfillDays?: number
+  googleBackfillDays?: number
 }
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
@@ -52,13 +56,14 @@ async function fetchTenantSettings(tenantSlug: string): Promise<TenantSettingsDa
   // Read ad_accounts (RLS tenant_select allows the tenant's own rows)
   const { data: accounts, error: accountsErr } = await supabase
     .from('ad_accounts')
-    .select('channel, active, account_id')
+    .select('channel, active, account_id, backfill_days')
 
   if (accountsErr) {
     throw new Error('Erro ao carregar contas de anúncios')
   }
 
   const rows = (accounts ?? []) as AdAccountStatus[]
+  const metaAccount = rows.find((a) => a.channel === 'meta_ads')
   const googleAccount = rows.find((a) => a.channel === 'google_ads')
 
   return {
@@ -66,6 +71,8 @@ async function fetchTenantSettings(tenantSlug: string): Promise<TenantSettingsDa
     metaStatus: deriveStatus(rows, 'meta_ads'),
     googleStatus: deriveStatus(rows, 'google_ads'),
     googleAccountId: googleAccount?.account_id ?? undefined,
+    metaBackfillDays: metaAccount?.backfill_days,
+    googleBackfillDays: googleAccount?.backfill_days,
   }
 }
 
@@ -131,7 +138,14 @@ export default function SettingsPage() {
     )
   }
 
-  const { tenantId, metaStatus, googleStatus, googleAccountId } = data!
+  const {
+    tenantId,
+    metaStatus,
+    googleStatus,
+    googleAccountId,
+    metaBackfillDays,
+    googleBackfillDays,
+  } = data!
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -158,6 +172,16 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="pt-4">
           <MetaAdsForm tenantId={tenantId} initialStatus={metaStatus} />
+          {metaStatus !== 'not_configured' && (
+            <div className="mt-4 border-t pt-4">
+              <BackfillWindowControl
+                tenantId={tenantId}
+                tenantSlug={tenantSlug}
+                channel="meta_ads"
+                initialDays={metaBackfillDays ?? 90}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -181,6 +205,16 @@ export default function SettingsPage() {
             initialStatus={googleStatus}
             initialCustomerId={googleAccountId}
           />
+          {googleStatus !== 'not_configured' && (
+            <div className="mt-4 border-t pt-4">
+              <BackfillWindowControl
+                tenantId={tenantId}
+                tenantSlug={tenantSlug}
+                channel="google_ads"
+                initialDays={googleBackfillDays ?? 90}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
