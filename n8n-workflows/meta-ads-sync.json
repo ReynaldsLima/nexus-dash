@@ -84,7 +84,7 @@
       "position": [680, 300],
       "parameters": {
         "method": "GET",
-        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/ad_accounts?channel=eq.meta_ads&active=eq.true&select=id,tenant_id,account_id,vault_secret_id,tenants(slug)",
+        "url": "={{ $('Set Constants').item.json.SUPABASE_URL }}/rest/v1/ad_accounts?channel=eq.meta_ads&active=eq.true&select=id,tenant_id,account_id,vault_secret_id,backfill_days,tenants(slug)",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "httpHeaderAuth",
         "credentials": {
@@ -158,7 +158,7 @@
       "typeVersion": 2,
       "position": [1340, 300],
       "parameters": {
-        "jsCode": "const today = new Date();\nconst prevJobs = $('Check first sync').item.json;\nconst isFirstSync = !Array.isArray(prevJobs) || prevJobs.length === 0;\nconst days = isFirstSync ? $('Set Constants').first().json.BACKFILL_DAYS : $('Set Constants').first().json.INCREMENTAL_DAYS;\nconst from = new Date(today);\nfrom.setDate(today.getDate() - days);\n// Meta requer 'act_' prefix em ad_account_id\nconst rawAcc = $('Loop tenants').item.json.account_id;\nconst ad_account_id = String(rawAcc).startsWith('act_') ? rawAcc : `act_${rawAcc}`;\nreturn [{ json: {\n  tenant_id: $('Loop tenants').item.json.tenant_id,\n  ad_account_id,\n  tenant_slug: $('Loop tenants').item.json.tenants?.slug,\n  date_from: from.toISOString().split('T')[0],\n  date_to: today.toISOString().split('T')[0],\n  is_first_sync: isFirstSync\n}}];"
+        "jsCode": "const today = new Date();\nconst prevJobs = $('Check first sync').item.json;\nconst isFirstSync = !Array.isArray(prevJobs) || prevJobs.length === 0;\nconst days = isFirstSync ? ($('Loop tenants').item.json.backfill_days ?? $('Set Constants').first().json.BACKFILL_DAYS) : $('Set Constants').first().json.INCREMENTAL_DAYS;\nconst from = new Date(today);\nfrom.setDate(today.getDate() - days);\n// Meta requer 'act_' prefix em ad_account_id\nconst rawAcc = $('Loop tenants').item.json.account_id;\nconst ad_account_id = String(rawAcc).startsWith('act_') ? rawAcc : `act_${rawAcc}`;\nreturn [{ json: {\n  tenant_id: $('Loop tenants').item.json.tenant_id,\n  ad_account_id,\n  tenant_slug: $('Loop tenants').item.json.tenants?.slug,\n  date_from: from.toISOString().split('T')[0],\n  date_to: today.toISOString().split('T')[0],\n  is_first_sync: isFirstSync\n}}];"
       }
     },
     {
