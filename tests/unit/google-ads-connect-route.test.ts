@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
+import { verifyState } from '@/lib/google-ads/oauth-state'
 
 // server-only lança erro em ambientes não-RSC (como Vitest/Node).
 vi.mock('server-only', () => ({}))
@@ -140,5 +141,53 @@ describe('GET /api/google-ads/connect', () => {
     const loc = res.headers.get('location')!
     expect(loc).toContain('google_error=forbidden')
     expect(loc).not.toContain('accounts.google.com')
+  })
+
+  it('super_admin + backfillDays=30 → signed state round-trips payload.backfillDays === 30', async () => {
+    mockState.role = 'super_admin'
+    const { GET } = await import('@/app/api/google-ads/connect/route')
+    const res = await GET(
+      makeRequest(
+        'customerId=123-456-7890&tenantId=aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee&tenantSlug=acme&backfillDays=30'
+      )
+    )
+    expect(res.status).toBe(307)
+    const loc = res.headers.get('location')!
+    const url = new URL(loc)
+    const state = url.searchParams.get('state')!
+    const verified = verifyState(state)
+    expect(verified?.payload.backfillDays).toBe(30)
+  })
+
+  it('super_admin omitting backfillDays → signed state defaults payload.backfillDays === 90', async () => {
+    mockState.role = 'super_admin'
+    const { GET } = await import('@/app/api/google-ads/connect/route')
+    const res = await GET(
+      makeRequest(
+        'customerId=123-456-7890&tenantId=aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee&tenantSlug=acme'
+      )
+    )
+    expect(res.status).toBe(307)
+    const loc = res.headers.get('location')!
+    const url = new URL(loc)
+    const state = url.searchParams.get('state')!
+    const verified = verifyState(state)
+    expect(verified?.payload.backfillDays).toBe(90)
+  })
+
+  it('super_admin + backfillDays=400 (out of range) → signed state falls back to payload.backfillDays === 90', async () => {
+    mockState.role = 'super_admin'
+    const { GET } = await import('@/app/api/google-ads/connect/route')
+    const res = await GET(
+      makeRequest(
+        'customerId=123-456-7890&tenantId=aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee&tenantSlug=acme&backfillDays=400'
+      )
+    )
+    expect(res.status).toBe(307)
+    const loc = res.headers.get('location')!
+    const url = new URL(loc)
+    const state = url.searchParams.get('state')!
+    const verified = verifyState(state)
+    expect(verified?.payload.backfillDays).toBe(90)
   })
 })

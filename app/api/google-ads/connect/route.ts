@@ -18,6 +18,13 @@ const CustomerIdSchema = z
   .refine((v) => /^\d{3}-?\d{3}-?\d{4}$/.test(v), 'Customer ID inválido')
   .transform((v) => v.replace(/-/g, ''))
 
+// ─── Backfill window schema (SET-03/T-11-03) ───────────────────────────────
+// `.coerce` because the query param arrives as a string; `.catch(90)` makes
+// any missing/malformed/out-of-range value fall back to the default 90 rather
+// than blocking the whole connect flow — the DB CHECK + the callback
+// re-validation are the hard gate.
+const BackfillDaysSchema = z.coerce.number().int().min(7).max(365).catch(90)
+
 // ─── GET /api/google-ads/connect ───────────────────────────────────────────
 // Entered via a top-level browser navigation (window.location.href, Plan 04).
 // Every non-success path (after the no-user case) therefore REDIRECTS back to
@@ -66,6 +73,9 @@ export async function GET(req: NextRequest) {
   if (!parsed.success) return errorRedirect('invalid_customer_id')
   const customerId = parsed.data // digits-only (Pitfall 4)
 
+  // Non-authorization value — never influences tenant scoping (step 5 below).
+  const backfillDays = BackfillDaysSchema.parse(req.nextUrl.searchParams.get('backfillDays'))
+
   // ── 5. Resolve AUTHORITATIVE tenant scope for the signed state ─────────────
   // Elevation-of-Privilege mitigation T-07-02: for tenant_admin, tenantId/tenantSlug
   // come from getClaims() (verified JWT claims) — never from the query string.
@@ -92,7 +102,7 @@ export async function GET(req: NextRequest) {
   // ── 6. Build signed state + redirect to Google ─────────────────────────────
   // redirect_uri computed from a SINGLE source of truth (req.nextUrl.origin) so
   // it matches the callback's byte-for-byte (Pitfall 1).
-  const signedState = signState(tenantId, tenantSlug, customerId)
+  const signedState = signState(tenantId, tenantSlug, customerId, backfillDays)
   const redirectUri = `${req.nextUrl.origin}/api/google-ads/callback`
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_ADS_CLIENT_ID ?? '',
