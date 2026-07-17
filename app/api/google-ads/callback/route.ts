@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.nextUrl.origin))
   }
   const { payload, expired } = verified
-  const { tenantId, tenantSlug, customerId } = payload
+  const { tenantId, tenantSlug, customerId, backfillDays } = payload
 
   // Helper to build the settings redirect used by every subsequent exit.
   // safeTenantSlug (CR-01) guards against an open redirect (CWE-601): even
@@ -122,6 +122,7 @@ export async function GET(req: NextRequest) {
       account_id: customerId,
       vault_secret_id: secretId as string,
       active: true,
+      backfill_days: backfillDays,
     },
     { onConflict: 'tenant_id,channel' }
   )

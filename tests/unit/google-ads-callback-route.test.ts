@@ -84,7 +84,7 @@ afterEach(() => {
 describe('GET /api/google-ads/callback', () => {
   it('no authenticated session (WR-01) → redirect to / (root), NO Vault write, NO upsert', async () => {
     mockState.user = null
-    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const state = signState('tenant-uuid-1', 'acme', '1234567890', 90)
     const { GET } = await import('@/app/api/google-ads/callback/route')
     const res = await GET(makeRequest(`code=auth-code-xyz&state=${encodeURIComponent(state)}`))
     expect([302, 307]).toContain(res.status)
@@ -107,7 +107,7 @@ describe('GET /api/google-ads/callback', () => {
 
   it('expired-but-validly-signed state → redirect to /acme/settings?google_error=state_expired, NO Vault write, NO upsert', async () => {
     vi.useFakeTimers()
-    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const state = signState('tenant-uuid-1', 'acme', '1234567890', 90)
     vi.setSystemTime(Date.now() + 11 * 60 * 1000)
     const { GET } = await import('@/app/api/google-ads/callback/route')
     const res = await GET(makeRequest(`code=auth-code-xyz&state=${encodeURIComponent(state)}`))
@@ -119,7 +119,7 @@ describe('GET /api/google-ads/callback', () => {
   })
 
   it('Google returned error param (?error=access_denied) with a valid state → redirect to /acme/settings with google_error=access_denied', async () => {
-    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const state = signState('tenant-uuid-1', 'acme', '1234567890', 90)
     const { GET } = await import('@/app/api/google-ads/callback/route')
     const res = await GET(makeRequest(`error=access_denied&state=${encodeURIComponent(state)}`))
     const loc = res.headers.get('location')!
@@ -129,7 +129,7 @@ describe('GET /api/google-ads/callback', () => {
   })
 
   it('valid state + successful token exchange with refresh_token → Vault write + ad_accounts upsert (active:true) + redirect to /acme/settings', async () => {
-    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const state = signState('tenant-uuid-1', 'acme', '1234567890', 45)
     mockState.tokenResponse = validTokenResponse()
     mockState.vaultSecretId = 'secret-uuid'
     const { GET } = await import('@/app/api/google-ads/callback/route')
@@ -145,6 +145,7 @@ describe('GET /api/google-ads/callback', () => {
       vault_secret_id: 'secret-uuid',
       active: true,
       tenant_id: 'tenant-uuid-1',
+      backfill_days: 45,
     })
     expect(opts).toEqual({ onConflict: 'tenant_id,channel' })
 
@@ -155,7 +156,7 @@ describe('GET /api/google-ads/callback', () => {
   })
 
   it('token exchange HTTP failure (ok:false) → redirect with google_error=token_exchange_failed, no upsert', async () => {
-    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const state = signState('tenant-uuid-1', 'acme', '1234567890', 90)
     mockState.tokenResponse = { ok: false, json: async () => ({}) }
     const { GET } = await import('@/app/api/google-ads/callback/route')
     const res = await GET(makeRequest(`code=auth-code-xyz&state=${encodeURIComponent(state)}`))
@@ -165,7 +166,7 @@ describe('GET /api/google-ads/callback', () => {
   })
 
   it('token response missing refresh_token → redirect with google_error=no_refresh_token, no upsert', async () => {
-    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const state = signState('tenant-uuid-1', 'acme', '1234567890', 90)
     mockState.tokenResponse = {
       ok: true,
       json: async () => ({
@@ -183,7 +184,7 @@ describe('GET /api/google-ads/callback', () => {
   })
 
   it('Vault write fails → redirect with a google_error, no upsert', async () => {
-    const state = signState('tenant-uuid-1', 'acme', '1234567890')
+    const state = signState('tenant-uuid-1', 'acme', '1234567890', 90)
     mockState.vaultError = { message: 'vault write failed' }
     mockState.vaultSecretId = null
     const { GET } = await import('@/app/api/google-ads/callback/route')
