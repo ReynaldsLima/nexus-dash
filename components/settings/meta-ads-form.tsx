@@ -26,9 +26,18 @@ const MetaAdsSchema = z.object({
     .string()
     .trim()
     .min(20, 'O System User token deve ter pelo menos 20 caracteres'),
+  backfillDays: z.coerce
+    .number()
+    .int()
+    .min(7, 'Mínimo de 7 dias')
+    .max(365, 'Máximo de 365 dias'),
 })
 
-type MetaAdsFormValues = z.infer<typeof MetaAdsSchema>
+// z.coerce.number() makes the schema's INPUT type `unknown` (pre-coercion) and
+// OUTPUT type `number` (post-coercion) — RHF's form state (register/defaultValues)
+// works with the input shape, while onSubmit receives the resolver's parsed output.
+type MetaAdsFormInput = z.input<typeof MetaAdsSchema>
+type MetaAdsFormValues = z.output<typeof MetaAdsSchema>
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface MetaAdsFormProps {
@@ -73,9 +82,9 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<MetaAdsFormValues>({
+  } = useForm<MetaAdsFormInput, unknown, MetaAdsFormValues>({
     resolver: zodResolver(MetaAdsSchema),
-    defaultValues: { accountId: '', token: '' },
+    defaultValues: { accountId: '', token: '', backfillDays: 90 },
   })
 
   const onSubmit = async (values: MetaAdsFormValues) => {
@@ -89,6 +98,7 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
           accountId: values.accountId,
           token: values.token,
           tenantId,
+          backfillDays: values.backfillDays,
         }),
       })
 
@@ -103,7 +113,7 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
       // Success: update badge, clear the token field (never echo token back)
       setConnectionStatus('connected')
       // Reset only the token field; keep accountId visible for confirmation
-      reset({ accountId: values.accountId, token: '' })
+      reset({ accountId: values.accountId, token: '', backfillDays: values.backfillDays })
     } catch {
       setServerError('Erro de rede. Verifique sua conexão e tente novamente.')
       setConnectionStatus('invalid')
@@ -164,6 +174,28 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
           )}
           <p className="text-xs text-muted-foreground">
             Gere o token em Meta Business Manager → System Users → Generate Token (permissão ads_read necessária).
+          </p>
+        </div>
+
+        {/* Backfill window (SET-03, D-01/D-05) */}
+        <div className="space-y-1.5">
+          <Label htmlFor="meta-backfill-days">
+            Janela de histórico (dias)
+            <span className="ml-1 text-muted-foreground font-normal">(7–365, padrão 90)</span>
+          </Label>
+          <Input
+            id="meta-backfill-days"
+            type="number"
+            min={7}
+            max={365}
+            aria-invalid={!!errors.backfillDays}
+            {...register('backfillDays')}
+          />
+          {errors.backfillDays && (
+            <p className="text-xs text-destructive">{errors.backfillDays.message}</p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Define quantos dias de histórico serão puxados no primeiro sync desta conta. Mudanças aqui valem só para o próximo primeiro sync — não reprocessam dados já sincronizados.
           </p>
         </div>
 
