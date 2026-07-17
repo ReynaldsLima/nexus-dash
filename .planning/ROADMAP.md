@@ -36,7 +36,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
 - [x] **Phase 9: Limpeza do Papel Viewer** - Nenhuma referência ao papel "viewer" morto permanece em tipos, middleware, componentes ou testes (completed 2026-07-12)
 - [x] **Phase 10: Gestão de Usuários** - Super Admin lista, edita e remove acesso de usuários de tenants e agências direto no app
  (completed 2026-07-13)
-- [ ] **Phase 11: Janela de Histórico Retroativo** - Tenant Admin configura os dias de backfill por conta conectada, com opção de ajuste posterior
+- [x] **Phase 11: Janela de Histórico Retroativo** - Tenant Admin configura os dias de backfill por conta conectada, com opção de ajuste posterior (completed 2026-07-17)
 - [ ] **Phase 12: Redesign Visual** - Dashboard, Campanhas, Insights, Settings e o chrome compartilhado redesenhados conforme os protótipos de referência
 
 ## Phase Details
@@ -82,7 +82,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
 - [x] 11-02-PLAN.md — Google Ads: form + connect route (assina backfillDays no state) + callback route (upsert backfill_days)
 - [x] 11-03-PLAN.md — Meta Ads: form + connect route (BodySchema + upsert backfill_days) + spec
 - [x] 11-04-PLAN.md — Edição pós-conexão: Server Action `updateBackfillWindow` (super_admin/tenant_admin) + controle inline otimístico + wiring na página de Settings (SET-05)
-- [ ] 11-05-PLAN.md — N8N: ambos workflows selecionam backfill_days e usam por conta no primeiro sync (fallback na constante global)
+- [x] 11-05-PLAN.md — N8N: ambos workflows selecionam backfill_days e usam por conta no primeiro sync (fallback na constante global)
 
 ### Phase 12: Redesign Visual
 **Goal**: As telas principais do dashboard (Overview, Campanhas, Insights, Settings) e o chrome compartilhado (header/sidebar) exibem a nova identidade visual baseada nos protótipos de referência, sem alterar os dados, hooks ou comportamento existentes.
@@ -116,7 +116,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 8. Tech Debt Cleanup | v1.0 | 3/3 | Complete | 2026-07-11 |
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
 | 10. Gestão de Usuários | v1.1 | 4/4 | Complete    | 2026-07-13 |
-| 11. Janela de Histórico Retroativo | v1.1 | 4/5 | In Progress|  |
+| 11. Janela de Histórico Retroativo | v1.1 | 5/5 | Complete   | 2026-07-17 |
 | 12. Redesign Visual | v1.1 | 0/TBD | Not started | - |
 
 **v1.0 total: 10/10 phases, 46/46 plans complete.**
