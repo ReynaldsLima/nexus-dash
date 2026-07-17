@@ -25,6 +25,7 @@ const BodySchema = z.object({
     .trim()
     .min(20, 'O System User token deve ter pelo menos 20 caracteres'),
   tenantId: z.uuid('tenantId deve ser um UUID válido'),
+  backfillDays: z.number().int().min(7).max(365).default(90),
 })
 
 // ─── POST /api/meta-ads/connect ───────────────────────────────────────────────
@@ -171,6 +172,7 @@ export async function POST(req: NextRequest) {
         account_id: accountId,
         vault_secret_id: secretId as string,
         active: true,
+        backfill_days: parsed.data.backfillDays,
       },
       { onConflict: 'tenant_id,channel' }
     )
