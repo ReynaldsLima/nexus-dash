@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           account_id: string
           active: boolean
+          backfill_days: number
           channel: string
           created_at: string
           id: string
@@ -29,6 +30,7 @@ export type Database = {
         Insert: {
           account_id: string
           active?: boolean
+          backfill_days?: number
           channel: string
           created_at?: string
           id?: string
@@ -40,6 +42,7 @@ export type Database = {
         Update: {
           account_id?: string
           active?: boolean
+          backfill_days?: number
           channel?: string
           created_at?: string
           id?: string
