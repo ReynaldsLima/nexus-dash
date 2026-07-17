@@ -8,6 +8,7 @@ export interface StatePayload {
   tenantId: string
   tenantSlug: string
   customerId: string
+  backfillDays: number
   nonce: string
   iat: number
 }
@@ -39,11 +40,17 @@ function secret(): string {
 // node:crypto's HMAC-SHA256 (no JWT library) per RESEARCH's "Don't Hand-Roll"
 // guidance: the HMAC is the correct, minimal primitive for a same-origin
 // round-trip value, not a general-purpose token format.
-export function signState(tenantId: string, tenantSlug: string, customerId: string): string {
+export function signState(
+  tenantId: string,
+  tenantSlug: string,
+  customerId: string,
+  backfillDays: number
+): string {
   const payload: StatePayload = {
     tenantId,
     tenantSlug,
     customerId,
+    backfillDays,
     nonce: randomBytes(16).toString('hex'),
     iat: Date.now(),
   }
