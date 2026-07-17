@@ -14,18 +14,19 @@ afterEach(() => {
 describe('lib/google-ads/oauth-state', () => {
   it('round-trip: signState then verifyState returns expired:false and the same tenantId/tenantSlug/customerId', async () => {
     const { signState, verifyState } = await import('@/lib/google-ads/oauth-state')
-    const s = signState('tenant-uuid-1', 'acme', '1234567890')
+    const s = signState('tenant-uuid-1', 'acme', '1234567890', 30)
     const r = verifyState(s)
     expect(r).not.toBeNull()
     expect(r!.expired).toBe(false)
     expect(r!.payload.tenantId).toBe('tenant-uuid-1')
     expect(r!.payload.tenantSlug).toBe('acme')
     expect(r!.payload.customerId).toBe('1234567890')
+    expect(r!.payload.backfillDays).toBe(30)
   })
 
   it('verifyState returns null for a tampered signature', async () => {
     const { signState, verifyState } = await import('@/lib/google-ads/oauth-state')
-    const s = signState('tenant-uuid-1', 'acme', '1234567890')
+    const s = signState('tenant-uuid-1', 'acme', '1234567890', 30)
     const [payloadB64, signature] = s.split('.')
     // Mutate the last char of the signature segment (after the dot).
     const lastChar = signature.slice(-1)
@@ -36,7 +37,7 @@ describe('lib/google-ads/oauth-state', () => {
 
   it('verifyState returns null for a tampered payload', async () => {
     const { signState, verifyState } = await import('@/lib/google-ads/oauth-state')
-    const s = signState('tenant-uuid-1', 'acme', '1234567890')
+    const s = signState('tenant-uuid-1', 'acme', '1234567890', 30)
     const [payloadB64, signature] = s.split('.')
     // Mutate a char in the payload segment (before the dot).
     const lastChar = payloadB64.slice(-1)
@@ -54,7 +55,7 @@ describe('lib/google-ads/oauth-state', () => {
   it('verifyState returns { expired: true } (NOT null) for an expired-but-validly-signed payload, preserving the payload', async () => {
     vi.useFakeTimers()
     const { signState, verifyState } = await import('@/lib/google-ads/oauth-state')
-    const s = signState('tenant-uuid-1', 'acme', '1234567890')
+    const s = signState('tenant-uuid-1', 'acme', '1234567890', 30)
     // Advance system time past the 10 minute TTL (D-04 recovery case).
     vi.setSystemTime(Date.now() + 11 * 60 * 1000)
     const r = verifyState(s)
@@ -62,11 +63,12 @@ describe('lib/google-ads/oauth-state', () => {
     expect(r!.expired).toBe(true)
     expect(r!.payload.tenantSlug).toBe('acme')
     expect(r!.payload.tenantId).toBe('tenant-uuid-1')
+    expect(r!.payload.backfillDays).toBe(30)
   })
 
   it('signState produces two segments separated by a single dot, both non-empty base64url', async () => {
     const { signState } = await import('@/lib/google-ads/oauth-state')
-    const s = signState('tenant-uuid-1', 'acme', '1234567890')
+    const s = signState('tenant-uuid-1', 'acme', '1234567890', 30)
     const segments = s.split('.')
     expect(segments).toHaveLength(2)
     for (const segment of segments) {
