@@ -23,9 +23,18 @@ const GoogleAdsSchema = z.object({
       (val) => /^\d{3}-?\d{3}-?\d{4}$/.test(val),
       'Customer ID deve ter 10 dígitos (ex: 123-456-7890)'
     ),
+  backfillDays: z.coerce
+    .number()
+    .int()
+    .min(7, 'Mínimo de 7 dias')
+    .max(365, 'Máximo de 365 dias'),
 })
 
-type GoogleAdsFormValues = z.infer<typeof GoogleAdsSchema>
+// z.coerce.number() makes the schema's INPUT type `unknown` (pre-coercion) and
+// OUTPUT type `number` (post-coercion) — RHF's form state (register/defaultValues)
+// works with the input shape, while onSubmit receives the resolver's parsed output.
+type GoogleAdsFormInput = z.input<typeof GoogleAdsSchema>
+type GoogleAdsFormValues = z.output<typeof GoogleAdsSchema>
 
 // ─── Error code map (D-04) ────────────────────────────────────────────────────
 // Covers both the callback route's codes (Plan 03) and the connect route's codes (Plan 02).
@@ -99,9 +108,9 @@ export function GoogleAdsForm({
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<GoogleAdsFormValues>({
+  } = useForm<GoogleAdsFormInput, unknown, GoogleAdsFormValues>({
     resolver: zodResolver(GoogleAdsSchema),
-    defaultValues: { customerId: initialCustomerId ?? '' },
+    defaultValues: { customerId: initialCustomerId ?? '', backfillDays: 90 },
   })
 
   // Top-level browser navigation (NOT fetch) — the browser must follow Google's
@@ -111,6 +120,7 @@ export function GoogleAdsForm({
       customerId: values.customerId.replace(/-/g, ''),
       tenantId,
       tenantSlug,
+      backfillDays: String(values.backfillDays),
     })
     window.location.href = `/api/google-ads/connect?${params.toString()}`
   }
@@ -143,6 +153,29 @@ export function GoogleAdsForm({
           )}
           <p className="text-xs text-muted-foreground">
             Você será redirecionado ao Google para autorizar o acesso à conta.
+          </p>
+        </div>
+
+        {/* Backfill window (SET-03, D-01/D-05) */}
+        <div className="space-y-1.5">
+          <Label htmlFor="google-backfill-days">
+            Janela de histórico (dias)
+            <span className="ml-1 text-muted-foreground font-normal">(7–365, padrão 90)</span>
+          </Label>
+          <Input
+            id="google-backfill-days"
+            type="number"
+            min={7}
+            max={365}
+            aria-invalid={!!errors.backfillDays}
+            {...register('backfillDays')}
+          />
+          {errors.backfillDays && (
+            <p className="text-xs text-destructive">{errors.backfillDays.message}</p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Define quantos dias de histórico serão puxados no primeiro sync desta conta. Mudanças
+            aqui valem só para o próximo primeiro sync — não reprocessam dados já sincronizados.
           </p>
         </div>
 
