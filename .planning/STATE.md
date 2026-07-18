@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
 status: verifying
 stopped_at: Completed 11-05-PLAN.md
-last_updated: "2026-07-17T23:25:33.172Z"
-last_activity: 2026-07-17
+last_updated: "2026-07-18T16:53:25.705Z"
+last_activity: 2026-07-18
 progress:
   total_phases: 4
   completed_phases: 3
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 
 ## Current Position
 
-Phase: 11 (janela-de-hist-rico-retroativo) — EXECUTING
-Plan: 5 of 5
+Phase: 12
+Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-07-17
+Last activity: 2026-07-18
 
 Progress: [██████████] 100%
 
