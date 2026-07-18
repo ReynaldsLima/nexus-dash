@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, Bot } from 'lucide-react'
+import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, Bot, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { type Lead, type LeadCategory, cat, CATEGORY_LABELS, CATEGORY_BG } from '@/lib/leads'
@@ -52,7 +52,7 @@ function StatusDropdown({ lead, disabled, onChange }: {
   onChange: (c: LeadCategory) => void
 }) {
   const current = cat(lead.status)
-  const OPTIONS: LeadCategory[] = ['novo', 'quente', 'negoc', 'fim']
+  const OPTIONS: LeadCategory[] = ['novo', 'quente', 'negoc', 'fechado', 'fim']
   return (
     <select
       value={current}
@@ -107,9 +107,11 @@ export default function LeadsPage() {
     const quente = leads.filter(l => cat(l.status) === 'quente').length
     const negoc  = leads.filter(l => cat(l.status) === 'negoc').length
     const fim    = leads.filter(l => cat(l.status) === 'fim').length
+    const fechado = leads.filter(l => cat(l.status) === 'fechado').length
     const pQuente = total ? Math.round(quente / total * 100) : 0
     const pNegoc  = total ? Math.round(negoc / total * 100) : 0
-    return { total, novo, quente, negoc, fim, pQuente, pNegoc }
+    const pFechado = total ? Math.round(fechado / total * 100) : 0
+    return { total, novo, quente, negoc, fim, fechado, pQuente, pNegoc, pFechado }
   }, [leads])
 
   const filtered = useMemo(() => {
@@ -166,6 +168,7 @@ export default function LeadsPage() {
     { key: 'novo', label: 'Novos' },
     { key: 'quente', label: 'Quentes' },
     { key: 'negoc', label: 'Negociando' },
+    { key: 'fechado', label: 'Fechados' },
     { key: 'fim', label: 'Sem Resposta' },
   ]
 
@@ -223,11 +226,12 @@ export default function LeadsPage() {
       {!loading && !error && configured && (
         <>
           {/* KPI row */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
             <KpiCard label="Total" value={stats.total} icon={Users} color="bg-blue-500/15 text-blue-400" />
             <KpiCard label="Novos" value={stats.novo} icon={TrendingUp} color="bg-sky-500/15 text-sky-400" />
             <KpiCard label="Quentes" value={stats.quente} icon={Flame} color="bg-emerald-500/15 text-emerald-400" />
             <KpiCard label="Negociando" value={stats.negoc} icon={Handshake} color="bg-orange-500/15 text-orange-400" />
+            <KpiCard label="Fechados" value={stats.fechado} icon={CheckCircle2} color="bg-violet-500/15 text-violet-400" />
             <KpiCard label="Sem Resposta" value={stats.fim} icon={PhoneOff} color="bg-muted/60 text-muted-foreground" />
           </div>
 
@@ -322,17 +326,19 @@ export default function LeadsPage() {
               <div className="space-y-4">
                 <FunnelBar label="Leads Quentes" count={stats.quente} pct={stats.pQuente} color="bg-emerald-500" />
                 <FunnelBar label="Em Negociação" count={stats.negoc} pct={stats.pNegoc} color="bg-orange-500" />
+                <FunnelBar label="Fechados" count={stats.fechado} pct={stats.pFechado} color="bg-violet-500" />
               </div>
 
               <div className="border-t border-border pt-4">
                 <h3 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Distribuição</h3>
                 <div className="space-y-0.5">
-                  {(['negoc', 'quente', 'novo', 'fim'] as LeadCategory[]).map(c => {
+                  {(['fechado', 'negoc', 'quente', 'novo', 'fim'] as LeadCategory[]).map(c => {
                     const count = leads.filter(l => cat(l.status) === c).length
                     return (
                       <div key={c} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                         <span className="text-xs text-muted-foreground">{CATEGORY_LABELS[c]}</span>
                         <span className={cn('text-xs font-semibold font-mono', {
+                          'text-violet-400': c === 'fechado',
                           'text-orange-400': c === 'negoc',
                           'text-emerald-400': c === 'quente',
                           'text-blue-400': c === 'novo',
