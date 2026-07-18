@@ -10,11 +10,12 @@ export interface Lead {
   tipo_seguro: string
 }
 
-export type LeadCategory = 'negoc' | 'quente' | 'novo' | 'fim'
+export type LeadCategory = 'negoc' | 'quente' | 'novo' | 'fim' | 'fechado'
 
 export function cat(s: string): LeadCategory {
   if (!s) return 'novo'
   const v = s.toLowerCase().trim()
+  if (['fechado', 'fechada', 'venda fechada', 'convertido', 'ganho'].some(k => v.includes(k))) return 'fechado'
   if (['negociando', 'em negociação', 'negoc', 'proposta'].some(k => v.includes(k))) return 'negoc'
   if (['quente', 'interessado', 'agendado', 'reunião'].some(k => v.includes(k))) return 'quente'
   if (['sem resposta', 'encerrado', 'perdido', 'inativo', 'desistiu', 'não tem interesse', 'fim'].some(k => v.includes(k))) return 'fim'
@@ -26,6 +27,7 @@ export const CATEGORY_LABELS: Record<LeadCategory, string> = {
   quente: 'Quente',
   novo: 'Novo Lead',
   fim: 'Sem Resposta',
+  fechado: 'Fechado',
 }
 
 export const CATEGORY_COLORS: Record<LeadCategory, string> = {
@@ -33,6 +35,7 @@ export const CATEGORY_COLORS: Record<LeadCategory, string> = {
   quente: 'text-emerald-400',
   novo: 'text-blue-400',
   fim: 'text-muted-foreground',
+  fechado: 'text-violet-400',
 }
 
 export const CATEGORY_BG: Record<LeadCategory, string> = {
@@ -40,4 +43,5 @@ export const CATEGORY_BG: Record<LeadCategory, string> = {
   quente: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
   novo: 'bg-blue-500/15 text-blue-400 border-blue-500/25',
   fim: 'bg-muted/40 text-muted-foreground border-border',
+  fechado: 'bg-violet-500/15 text-violet-400 border-violet-500/25',
 }
