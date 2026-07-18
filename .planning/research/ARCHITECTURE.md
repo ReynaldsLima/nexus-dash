@@ -1,911 +1,280 @@
-# Architecture Patterns: NEXUS-DASH
+# Architecture Research — v1.1 Integration
 
-**Domain:** Multi-tenant Marketing Analytics SaaS
-**Researched:** 2026-05-10
-**Overall confidence:** HIGH (stack is well-documented, patterns are established)
+**Domain:** Integration of 4 features into an existing Next.js 16 (App Router) + Supabase (Postgres/Auth/RLS) + N8N self-hosted multi-tenant dashboard
+**Researched:** 2026-07-11
+**Confidence:** HIGH — every finding below is grounded in direct reads of the current repo (migrations, Server Actions, routes, N8N workflow JSON, RLS policies), not training-data assumptions about "how Supabase apps usually work."
+
+**Note:** this file supersedes the previous `ARCHITECTURE.md` in this directory (dated 2026-05-10), which was written before v1.0 was implemented and describes a generic target architecture rather than the actual shipped system. This version documents the verified as-built architecture and the specific integration points for the v1.1 milestone (Gestão de Usuários, Limpeza, Janela de Histórico, Redesign Visual).
+
+## Standard Architecture (current state, verified in repo)
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ Browser                                                              │
+│  app/[tenant-slug]/{dashboard,campanhas,insights,settings}/page.tsx  │
+│  — ALL 'use client', fetch via TanStack Query + lib/supabase/client  │
+│  (createBrowserClient) — RLS enforced at Postgres regardless of      │
+│  client vs server origin of the request.                             │
+├──────────────────────────────────────────────────────────────────────┤
+│ app/[tenant-slug]/layout.tsx  (Server Component)                     │
+│  — createClient() (server) → getUser() → getClaims() → role          │
+│  — resolves tenantId, tenant switcher list, sidebar/header props     │
+│  — THIS is the one RLS-scoped Server Component fetch on the tenant   │
+│    branch of the tree (pages below it are all client-fetched)        │
+├──────────────────────────────────────────────────────────────────────┤
+│ proxy.ts (root, Next middleware, matcher excludes _next/static etc.) │
+│  — decodes JWT app_metadata client-side (no network call)            │
+│  — redirects by role: super_admin→/tenants, tenant_admin/viewer→     │
+│    /{slug}/dashboard, agency→/agencia                                │
+├──────────────────────────────────────────────────────────────────────┤
+│ Server Actions (lib/actions/tenants.ts, agencies.ts)                 │
+│  — 'use server', Zod-validated, createServiceClient() (service_role, │
+│    bypasses RLS by design), revalidatePath() after writes            │
+│  — TODAY: create + activate/deactivate only. No edit/delete of users.│
+├──────────────────────────────────────────────────────────────────────┤
+│ Route Handlers (app/api/google-ads/connect, /callback,                │
+│  app/api/meta-ads/connect)                                            │
+│  — role check via supabase.rpc('get_user_role'), tenant scope via     │
+│    getClaims() (never getUser().app_metadata — stale/empty)           │
+│  — write refresh_token/System User token to Vault, upsert ad_accounts │
+├──────────────────────────────────────────────────────────────────────┤
+│ Postgres (Supabase)                                                  │
+│  — get_tenant_id()/get_user_role()/get_tenant_slug()/get_agency_id() │
+│    STABLE SQL functions reading current_setting('request.jwt.claims')│
+│    — NEVER re-query tenant_users at request time (D-14 perf rule)    │
+│  — Custom Access Token Hook (0005 + 0019) mints role/tenant_id/       │
+│    tenant_slug/agency_id into JWT app_metadata at LOGIN/REFRESH only  │
+│  — tenant_users.role CHECK already collapsed to a single value       │
+│    'tenant_admin' since migration 0020 (Phase 5, shipped 2026-07-09) │
+├──────────────────────────────────────────────────────────────────────┤
+│ N8N self-hosted (VPS, Queue Mode)                                     │
+│  — google-ads-sync.json / meta-ads-sync.json: HTTP Request nodes only │
+│    (PostgREST), never the native Supabase node (n8n#17020 bug)       │
+│  — "Set Constants" node hardcodes BACKFILL_DAYS=90, INCREMENTAL_DAYS=2│
+│    globally for ALL tenants — this is Feature 3's integration point   │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### Component Responsibilities (relevant to this milestone)
+
+| Component | Responsibility | File(s) |
+|-----------|-----------------|---------|
+| Custom Access Token Hook | Mints role/tenant_id/agency_id into JWT at login/refresh, NOT on every request | `supabase/migrations/0005_custom_access_token_hook.sql`, `0019_custom_access_token_hook_agency.sql` |
+| RLS helper functions | Read JWT claims only, never hit tables at request time | `supabase/migrations/0003_create_helper_functions.sql` |
+| tenant_users / agency_users | Membership rows; `ON DELETE CASCADE` from `auth.users(id)` | `supabase/migrations/0002_create_tenants.sql`, `0017_create_agencies_schema.sql` |
+| Admin Server Actions | Only entry point today for creating users (service_role, bypasses RLS by design) | `lib/actions/tenants.ts` (`createTenantUser`), `lib/actions/agencies.ts` (`createAgencyUser`) |
+| Admin UI shells | Tenant/agency detail pages, currently say "listagem gerenciada via Supabase Dashboard" | `app/tenants/[slug]/page.tsx`, `app/agencies/[id]/page.tsx` |
+| N8N sync constants | Single global backfill/incremental window applied to every tenant/channel | `n8n-workflows/google-ads-sync.json`, `n8n-workflows/meta-ads-sync.json` |
+| OAuth connect/callback | Google: signed-state HMAC round trip (`lib/google-ads/oauth-state.ts`). Meta: single POST, no round trip. Both upsert `ad_accounts` via service role. | `app/api/google-ads/connect/route.ts`, `app/api/google-ads/callback/route.ts`, `app/api/meta-ads/connect/route.ts` |
 
 ---
 
-## Component Diagram
+## Feature 1 — Gestão completa de usuários (list/edit/remove)
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        BROWSER (Client)                          │
-│  React Client Components (charts, filters, interactive UI)       │
-│  @supabase/ssr client (cookie-based session, real-time subs)     │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ HTTPS
-┌────────────────────────────▼────────────────────────────────────┐
-│                     VERCEL (Next.js 15)                          │
-│                                                                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │  middleware.ts                                           │    │
-│  │  - Refresh Supabase session cookies                      │    │
-│  │  - Read JWT claims: role, tenant_id                      │    │
-│  │  - Block /dashboard/* if no session                      │    │
-│  │  - Block /admin/* if role != super_admin                 │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                                                                   │
-│  ┌──────────────────────┐  ┌──────────────────────────────┐     │
-│  │  Server Components   │  │  Route Handlers (API)        │     │
-│  │  /app/dashboard/*    │  │  /api/sync/trigger           │     │
-│  │  /app/campaigns/*    │  │  /api/insights/generate      │     │
-│  │  /app/insights/*     │  │  /api/webhooks/n8n           │     │
-│  │  /app/settings/*     │  │  (N8N calls these)           │     │
-│  │  /app/admin/*        │  └──────────────────────────────┘     │
-│  │                      │                                        │
-│  │  Fetches via         │  Route handlers use service_role key   │
-│  │  Supabase SSR client │  to bypass RLS for N8N writes         │
-│  └──────────────────────┘                                        │
-└──────┬─────────────────────────────┬───────────────────────────┘
-       │ Supabase JS (cookie-auth)    │ Supabase JS (service_role)
-       │                              │
-┌──────▼──────────────────────────────▼──────────────────────────┐
-│                        SUPABASE                                   │
-│                                                                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │  Auth (Supabase Auth)                                    │    │
-│  │  - Session management via JWT                            │    │
-│  │  - Custom Access Token Hook → injects tenant_id + role   │    │
-│  │    into JWT app_metadata claims on every token issue     │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                                                                   │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │  PostgreSQL (shared schema, tenant isolation via RLS)    │    │
-│  │                                                          │    │
-│  │  tenants         — one row per client                    │    │
-│  │  users           — mirrors auth.users                    │    │
-│  │  tenant_users    — M:M with role column                  │    │
-│  │  ad_accounts     — Google/Meta account connections       │    │
-│  │  campaigns       — campaign metadata per account         │    │
-│  │  campaign_metrics— time-series daily rows (partitioned)  │    │
-│  │  daily_rollups   — precomputed aggregations per tenant   │    │
-│  │  ai_insights     — stored Claude analysis results        │    │
-│  │  sync_jobs       — N8N job tracking + audit log          │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                                                                   │
-│  Row Level Security enforces tenant isolation on every table     │
-└──────────────────────────────────────────────────────────────────┘
-                    ▲                        ▲
-                    │ Supabase REST API       │ Supabase REST API
-                    │ (anon key + JWT)        │ (service_role key)
-┌───────────────────┴──┐          ┌───────────┴──────────────────┐
-│  ANTHROPIC (Claude)  │          │  N8N (self-hosted VPS)       │
-│                      │          │                               │
-│  /v1/messages        │          │  Scheduled workflows:        │
-│  claude-sonnet-4-6   │          │  - Google Ads sync (daily)   │
-│  Prompt caching for  │          │  - Meta Ads sync (daily)     │
-│  static system prompt│          │  - AI analysis trigger       │
-│                      │          │                               │
-│  Called from:        │          │  Authenticates with:         │
-│  Route Handler       │          │  - Google Ads: OAuth2        │
-│  /api/insights/      │          │    (stored refresh token)    │
-│  generate            │          │  - Meta: System User token   │
-│                      │          │    (stored, never expires)   │
-│                      │          │  - Supabase: service_role    │
-│                      │          │    key (writes bypass RLS)   │
-│                      │          │                              │
-│                      │          │  Error strategy:             │
-│                      │          │  - 3 retries exponential     │
-│                      │          │  - Error workflow → notify   │
-│                      │          │  - sync_jobs audit log       │
-└──────────────────────┘          └──────────────────────────────┘
-                                               │
-                              ┌────────────────┴────────────────┐
-                              │  External Ad Platforms           │
-                              │  Google Ads API (v18+)          │
-                              │  Meta Marketing API (v21+)      │
-                              └──────────────────────────────────┘
-```
+### What already exists (do not rebuild)
+
+- `createTenantUser(email, tenantId, password?)` and `createAgencyUser(email, agencyId, password?)` in `lib/actions/tenants.ts` / `lib/actions/agencies.ts` — the create half is done. Both already call `supabase.auth.admin.deleteUser(authUser.user.id)` as **rollback** if the membership insert fails — i.e. `admin.deleteUser` is an established pattern in this codebase, not a new concept.
+- `AddUserModal` (`components/tenants/add-user-modal.tsx`) and `AddAgencyUserModal` (`components/agencies/add-agency-user-modal.tsx`) are the UI pattern to mirror for edit/delete modals (Dialog + `useTransition` + Server Action + `router.refresh()`).
+- `app/tenants/[slug]/page.tsx` and `app/agencies/[id]/page.tsx` both have a placeholder `<CardContent>` literally stating "A listagem de usuários é gerenciada via Supabase Dashboard em v1." — this exact block is where the new user table renders.
+
+### Delete: verified behavior, no manual cleanup needed
+
+`tenant_users.user_id` and `agency_users.user_id` both have `REFERENCES auth.users(id) ON DELETE CASCADE` (migrations `0002`, `0017`). Calling `supabase.auth.admin.deleteUser(userId)` (service role) is **sufficient by itself** — Postgres cascades the membership row deletion automatically. No separate `.from('tenant_users').delete()` step is required, and none should be added (avoids a race where the membership row is deleted but the auth user isn't, or vice versa, if a manual two-step fails partway).
+
+Deleting a user immediately revokes their Supabase sessions (documented Auth Admin behavior) — this is the one operation that has no "stale JWT" problem.
+
+### Edit: what "edit" can mean given the current schema, and the stale-JWT pitfall
+
+Because `tenant_users.role` is now CHECK-constrained to the single value `'tenant_admin'` (migration `0020`), there is no in-tenant role to change. "Edit" concretely means one of:
+
+| Edit action | Mechanism | New or existing |
+|---|---|---|
+| Change email | `supabase.auth.admin.updateUserById(userId, { email })` | New Server Action |
+| Reset password | `supabase.auth.admin.updateUserById(userId, { password })` (mirror `generateTempPassword()` already in `lib/actions/tenants.ts`) | New Server Action |
+| Move user to a different tenant | Delete/update the `tenant_users` row (service role bypasses the `tenant_users_member_select`-only RLS for non-admins) | New Server Action |
+| Move user to/from an agency | Same, on `agency_users` (respect the existing `UNIQUE(user_id)` and the documented D-04 invariant: a user is never in both `tenant_users` and `agency_users`) | New Server Action |
+
+**Critical finding — RLS/JWT staleness on membership edits (not deletes):** `get_tenant_id()`/`get_user_role()` read `request.jwt.claims`, which is only re-minted by the Custom Access Token Hook at **login or token refresh** — never on-demand. If an admin removes a user from `tenant_users` (without deleting the auth user) or moves them to a different tenant, that user's **currently valid access token still carries the old `tenant_id`/`role` claims** until it naturally expires (Supabase default access-token TTL) or the client refreshes. RLS will keep authorizing requests against the *old* tenant scope for up to that window — this is a real, exploitable-looking gap for a "remove this user's access now" admin action, even though it self-heals within the hour.
+
+**Mitigation to build into the edit/remove Server Actions:** after any membership mutation that isn't a full `admin.deleteUser`, call `supabase.auth.admin.signOut(userId, 'global')` (service role) to revoke the user's refresh tokens immediately, forcing their next request to fail auth and re-login — at which point the hook re-fires with correct claims. Document this in the Server Action itself; it is not automatic and nothing in the current codebase does it today (verified: no existing call to `admin.signOut` anywhere in the repo).
+
+### Where user listing reads from
+
+`tenant_users_member_select` RLS policy already allows a member to `SELECT` rows scoped to `tenant_id = get_tenant_id()`, but the admin UI (`/tenants/[slug]`, `/agencies/[id]`) is Super-Admin-only (gated by `proxy.ts`), so the new list query should go through `createServiceClient()` like every other action in `lib/actions/tenants.ts`/`agencies.ts` — no RLS policy changes needed. To resolve `user_id → email` for display, `auth.users` isn't queryable via PostgREST from the client; use `supabase.auth.admin.listUsers()` (service role). Given the low current volume (Active requirement caps tenants at 1-3), the simplest approach is: fetch the tenant's/agency's membership rows first (service client), then call `admin.listUsers()` and join client-side by `user_id` to resolve emails — no new SQL function needed for v1.1 scale. Flag as scaling debt if tenant/user count grows enough that `listUsers()` pagination becomes a concern (it has no tenant filter).
+
+### New vs Modified — Feature 1
+
+| File | New/Modified | Change |
+|---|---|---|
+| `lib/actions/tenants.ts` | Modified | Add `listTenantUsers`, `updateTenantUserEmail`, `resetTenantUserPassword`, `removeTenantUser`, `moveTenantUser` (or similar) |
+| `lib/actions/agencies.ts` | Modified | Mirror equivalents for agency users |
+| `components/tenants/tenant-users-table.tsx` | New | Replaces the placeholder text in `app/tenants/[slug]/page.tsx` |
+| `components/agencies/agency-users-table.tsx` | New | Replaces the placeholder text in `app/agencies/[id]/page.tsx` |
+| `components/tenants/edit-user-modal.tsx`, `remove-user-button.tsx` | New | Mirror `add-user-modal.tsx` pattern |
+| `app/tenants/[slug]/page.tsx`, `app/agencies/[id]/page.tsx` | Modified | Swap placeholder `CardContent` for the new table components |
 
 ---
 
-## Data Flow Description
+## Feature 2 — Retire the dead "viewer" role
 
-### Flow 1: User Authentication and Tenant Context
+### Verified current state (this changes the risk calculus)
 
-```
-1. User visits /login → Next.js serves login page (Server Component)
-2. User submits credentials → Supabase Auth issues JWT
-3. Custom Access Token Hook fires before JWT is issued:
-   - Queries tenant_users table for this user's tenant_id + role
-   - Injects { tenant_id, role } into JWT app_metadata
-4. @supabase/ssr stores session in HTTP-only cookies
-5. middleware.ts runs on every request:
-   - Calls supabase.auth.getUser() to refresh cookies
-   - Reads decoded JWT claims for tenant_id + role
-   - Enforces route-level access (super_admin vs tenant admin)
-6. Server Components call Supabase with session cookie
-   → RLS automatically filters all queries to current tenant_id
-```
+The database **already cannot produce `'viewer'`**: migration `0020_collapse_tenant_role.sql` (Phase 5, deployed 2026-07-09, part of the already-shipped v1.0 milestone) dropped and re-added `tenant_users_role_check` to `CHECK (role = 'tenant_admin')`. `custom_access_token_hook` (0019) can therefore never mint `role: 'viewer'` into a JWT going forward — the only place `'viewer'` can still appear is:
 
-### Flow 2: N8N Sync — Daily Metrics Ingestion
+1. **TypeScript unions** that are wider than what the backend can emit: `proxy.ts` (`AppMetadata.role` type + the `role === 'tenant_admin' || role === 'viewer'` branch), `lib/stores/tenant-store.tsx` (`export type Role = ... | 'viewer' | ...`), `components/tenants/tenant-switcher.tsx` (prop type union).
+2. **Comments/docs** in migrations `0003`, `0006`, `0016`, `0020` (harmless, historical).
+3. **Test fixtures** asserting `role === 'viewer' → 403/blocked` in `tests/middleware.test.ts`, `tests/unit/google-ads-connect-route.test.ts`, `tests/unit/leads-chat-route.test.ts`, `tests/unit/leads-get-route.test.ts`, `tests/unit/leads-status-route.test.ts`, `tests/unit/insights-generate-route.test.ts`, `tests/integration/tenant-role-migration.test.ts`.
 
-```
-1. N8N schedule triggers (e.g., 03:00 UTC daily)
-2. N8N calls Next.js Route Handler: POST /api/sync/trigger
-   - Request includes X-N8N-Secret header for authentication
-   - Route handler validates secret, returns 200 + job_id
-   (Alternative: N8N runs fully autonomously without Next.js trigger)
-3. N8N reads ad_accounts table via Supabase REST (service_role):
-   - Gets all active tenant ad accounts with stored credentials
-4. N8N calls Google Ads API:
-   - Uses stored OAuth2 refresh token per account
-   - Requests campaign metrics for date range
-   - Handles rate limits with exponential backoff
-5. N8N upserts rows into campaign_metrics:
-   - Uses Supabase REST API (service_role key, bypasses RLS)
-   - UPSERT on (campaign_id, date) to handle reruns
-6. N8N updates sync_jobs table: status, last_sync_at, error_message
-7. Same flow repeats for Meta Ads using System User token
-8. After both complete: N8N triggers daily AI analysis workflow
-```
+**Because 0020 shipped days ago as part of the completed v1.0 milestone, there is no "in-flight session" risk left to protect against** — any JWT minted before 0020 has long since expired (access tokens are short-lived; Phase 5's own migration note confirms zero `'viewer'` rows existed in the DB at migration time). The in-flight-session concern the question anticipates was real *during* Phase 5's rollout window, not now, in v1.1. This significantly simplifies the safe order of operations.
 
-### Flow 3: On-Demand AI Insights (Super Admin)
+### Safe order of operations
 
-```
-1. Super Admin clicks "Generate Insights" button
-2. Next.js Route Handler: POST /api/insights/generate
-   - Verifies JWT role == super_admin (server-side check)
-   - Queries campaign_metrics + daily_rollups for last 30 days
-   - Structures data as compact JSON summary per tenant
-3. Calls Anthropic API with prompt caching:
-   - Cached static system prompt (role description + output format)
-   - Dynamic user message: campaign data JSON + analysis request
-4. Claude returns structured JSON with recommendations
-5. Route Handler stores result in ai_insights table:
-   - tenant_id, generated_at, raw_response (JSONB), summary_text
-6. Returns insight_id to client
-7. Client navigates to /insights page — Server Component fetches
-   ai_insights rows for this tenant, displays with history
-```
+1. **TypeScript types first** (`lib/stores/tenant-store.tsx`: narrow `Role` to `'super_admin' | 'tenant_admin' | 'agency' | 'none' | null`; `components/tenants/tenant-switcher.tsx`: narrow the `role` prop union; `proxy.ts`: narrow `AppMetadata.role` and simplify `role === 'tenant_admin' || role === 'viewer'` → `role === 'tenant_admin'`). Safe immediately — the DB was already incapable of emitting `'viewer'` before this change; removing the TS branch just deletes unreachable code.
+2. **Test fixtures second** — update/remove the `'viewer'` test cases listed above so they assert the *current* behavior (either delete the case entirely if it's now a compile error against the narrowed type, or repurpose it to assert `'none'`/unauthenticated behavior, whichever the original test intent was — several of these tests exist to prove "restricted callers get 403," which `'none'` or omitted-role now covers equally well).
+3. **SQL comments last (optional, cosmetic)** — update the stale `COMMENT ON FUNCTION get_user_role` (0003) and `COMMENT ON POLICY ad_accounts_tenant_select` (0006) text that still says "viewer" if a follow-up migration touches those objects anyway; not worth a migration solely for comment text. Do **not** touch the `CHECK` constraint itself — it is already correct (`0020` is the terminal state, nothing left to migrate at the DB layer).
 
-### Flow 4: Dashboard Data Fetch
+No new migration is required for Feature 2 — this is purely an application-layer (TypeScript + tests) cleanup. This is the cheapest, lowest-risk feature in the milestone and has zero DB coupling, which is why it should be sequenced first (see Build Order below).
 
-```
-1. User navigates to /dashboard
-2. Next.js Server Component runs at request time (force-dynamic):
-   - Fetches daily_rollups for current tenant (last 30 days)
-   - Returns aggregated KPIs: ROAS, CPA, CTR, Spend per channel
-3. Client Component renders charts (client-side interactivity)
-4. User applies date filter → client-side Supabase query
-   - Queries campaign_metrics directly if outside rollup range
-   - RLS ensures only current tenant's data is returned
-5. N8N sync completion triggers revalidatePath via webhook:
-   - POST /api/webhooks/n8n with secret header
-   - Route handler calls revalidateTag('metrics-{tenant_id}')
-   - Next.js background regenerates affected pages
-```
+### New vs Modified — Feature 2
+
+| File | New/Modified | Change |
+|---|---|---|
+| `lib/stores/tenant-store.tsx` | Modified | Narrow `Role` union |
+| `proxy.ts` | Modified | Narrow `AppMetadata.role`, simplify redirect branch |
+| `components/tenants/tenant-switcher.tsx` | Modified | Narrow `role` prop union |
+| `tests/middleware.test.ts`, `tests/unit/*-route.test.ts`, `tests/integration/tenant-role-migration.test.ts` | Modified | Remove/repurpose `'viewer'` test cases |
+| Migrations | None | DB already terminal since `0020` |
 
 ---
 
-## Database Schema
+## Feature 3 — Configurable backfill window per tenant
 
-### Core Tables
+### Verified current mechanism
+
+Both `n8n-workflows/google-ads-sync.json` and `n8n-workflows/meta-ads-sync.json` use an identical shape:
+
+1. `Set Constants` node hardcodes `BACKFILL_DAYS: 90` and `INCREMENTAL_DAYS: 2` **globally**, applied to every tenant/channel.
+2. `List active {Google|Meta} Ads accounts` (HTTP Request → PostgREST) selects `id,tenant_id,account_id,vault_secret_id,tenants(slug)` from `ad_accounts`.
+3. `Check first sync` (HTTP Request → PostgREST) queries `sync_jobs` for any prior `status=eq.success` row for that `tenant_id`+`channel`.
+4. `Compute date range` (Code node) picks `BACKFILL_DAYS` if no prior successful sync exists, else `INCREMENTAL_DAYS`, and computes `date_from`/`date_to`.
+
+This means the backfill window is **not** tenant-aware today at all — it's a single number for the whole N8N instance.
+
+### Recommended home: `ad_accounts.backfill_days`, not `tenants.backfill_days`
+
+`ad_accounts` is already uniquely keyed `(tenant_id, channel)` and is precisely the row the "List active accounts" node already fetches per sync run — adding one column there requires zero new joins in N8N and naturally supports **different windows per channel** (Google Ads and Meta Ads have different historical-data realities/limits), which a single `tenants.backfill_days` column could not express without extra plumbing. This also matches the requirement's own framing ("ao conectar conta" — the window is chosen at the point of connecting a specific channel account, not once per tenant).
 
 ```sql
--- Tenants: one row per client organization
-CREATE TABLE tenants (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name         TEXT NOT NULL,
-  slug         TEXT UNIQUE NOT NULL,       -- URL-safe identifier
-  created_at   TIMESTAMPTZ DEFAULT NOW(),
-  is_active    BOOLEAN DEFAULT TRUE
-);
-
--- Users: mirrors auth.users, application-level profile
-CREATE TABLE users (
-  id           UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email        TEXT NOT NULL,
-  display_name TEXT,
-  created_at   TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Tenant-User membership with role
-CREATE TABLE tenant_users (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  role        TEXT NOT NULL CHECK (role IN ('tenant_admin', 'viewer')),
-  created_at  TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(tenant_id, user_id)
-);
-
--- Super admins are stored separately (platform-level role)
--- Stored as app_metadata in auth.users, NOT in tenant_users
--- Avoids complexity of super_admin appearing in every tenant
-
--- Ad platform account connections (credentials stored encrypted)
-CREATE TABLE ad_accounts (
-  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id          UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  platform           TEXT NOT NULL CHECK (platform IN ('google_ads', 'meta')),
-  account_id         TEXT NOT NULL,              -- platform account ID
-  account_name       TEXT,
-  refresh_token      TEXT,                        -- OAuth2 refresh token (Google)
-  access_token       TEXT,                        -- long-lived token (Meta System User)
-  token_expires_at   TIMESTAMPTZ,                 -- for expiry tracking
-  historical_window  INT DEFAULT 90,              -- days of history to fetch on first sync
-  last_sync_at       TIMESTAMPTZ,
-  is_active          BOOLEAN DEFAULT TRUE,
-  created_at         TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(tenant_id, platform, account_id)
-);
-
--- Campaign metadata (synced from ad platforms, updated on each sync)
-CREATE TABLE campaigns (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  ad_account_id UUID NOT NULL REFERENCES ad_accounts(id) ON DELETE CASCADE,
-  platform     TEXT NOT NULL CHECK (platform IN ('google_ads', 'meta')),
-  campaign_id  TEXT NOT NULL,                     -- platform campaign ID
-  campaign_name TEXT NOT NULL,
-  status       TEXT,                              -- ACTIVE, PAUSED, REMOVED
-  objective    TEXT,                              -- CONVERSIONS, AWARENESS, etc.
-  created_at   TIMESTAMPTZ DEFAULT NOW(),
-  updated_at   TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(ad_account_id, campaign_id)
-);
-CREATE INDEX idx_campaigns_tenant ON campaigns(tenant_id);
-
--- Time-series daily campaign metrics (partitioned by month)
-CREATE TABLE campaign_metrics (
-  id             UUID DEFAULT gen_random_uuid(),
-  tenant_id      UUID NOT NULL,                   -- denormalized for RLS index
-  campaign_id    UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-  date           DATE NOT NULL,
-  impressions    BIGINT DEFAULT 0,
-  clicks         BIGINT DEFAULT 0,
-  spend          NUMERIC(12, 4) DEFAULT 0,
-  conversions    NUMERIC(10, 2) DEFAULT 0,
-  conversion_value NUMERIC(12, 4) DEFAULT 0,
-  ctr            NUMERIC(8, 6),                   -- computed: clicks/impressions
-  cpa            NUMERIC(12, 4),                  -- computed: spend/conversions
-  roas           NUMERIC(10, 4),                  -- computed: value/spend
-  created_at     TIMESTAMPTZ DEFAULT NOW(),
-  updated_at     TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (id, date),
-  UNIQUE(campaign_id, date)
-) PARTITION BY RANGE (date);
-
--- Create monthly partitions (use pg_partman to automate going forward)
-CREATE TABLE campaign_metrics_2025_01 PARTITION OF campaign_metrics
-  FOR VALUES FROM ('2025-01-01') TO ('2025-02-01');
--- (repeat monthly; add automation via pg_cron for future months)
-
--- Composite index for the primary query pattern: tenant + date range
-CREATE INDEX idx_metrics_tenant_date
-  ON campaign_metrics(tenant_id, date DESC);
-
--- Index for campaign-level drill-down
-CREATE INDEX idx_metrics_campaign_date
-  ON campaign_metrics(campaign_id, date DESC);
-
--- Precomputed daily rollups per tenant (avoids full table scan on dashboard)
-CREATE TABLE daily_rollups (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  date         DATE NOT NULL,
-  platform     TEXT,                              -- NULL = all platforms combined
-  total_spend  NUMERIC(14, 4) DEFAULT 0,
-  total_clicks BIGINT DEFAULT 0,
-  total_impressions BIGINT DEFAULT 0,
-  total_conversions NUMERIC(12, 2) DEFAULT 0,
-  total_conversion_value NUMERIC(14, 4) DEFAULT 0,
-  avg_roas     NUMERIC(10, 4),
-  avg_cpa      NUMERIC(12, 4),
-  avg_ctr      NUMERIC(8, 6),
-  computed_at  TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(tenant_id, date, platform)
-);
-CREATE INDEX idx_rollups_tenant_date ON daily_rollups(tenant_id, date DESC);
-
--- AI insights history
-CREATE TABLE ai_insights (
-  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  generated_at   TIMESTAMPTZ DEFAULT NOW(),
-  trigger_type   TEXT CHECK (trigger_type IN ('manual', 'scheduled')),
-  date_range_start DATE,
-  date_range_end   DATE,
-  summary_text   TEXT,                            -- human-readable summary
-  recommendations JSONB,                          -- structured array of recommendations
-  raw_response   JSONB,                           -- full Claude response for debugging
-  token_usage    JSONB,                           -- { input_tokens, output_tokens, cache_hits }
-  created_by     UUID REFERENCES users(id)        -- NULL if triggered by N8N schedule
-);
-CREATE INDEX idx_insights_tenant ON ai_insights(tenant_id, generated_at DESC);
-
--- Sync job audit log
-CREATE TABLE sync_jobs (
-  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  ad_account_id  UUID REFERENCES ad_accounts(id),
-  platform       TEXT,
-  status         TEXT CHECK (status IN ('running', 'success', 'failed', 'partial')),
-  started_at     TIMESTAMPTZ DEFAULT NOW(),
-  completed_at   TIMESTAMPTZ,
-  rows_upserted  INT DEFAULT 0,
-  error_message  TEXT,
-  date_range_start DATE,
-  date_range_end   DATE
-);
-CREATE INDEX idx_sync_jobs_tenant ON sync_jobs(tenant_id, started_at DESC);
+ALTER TABLE public.ad_accounts
+  ADD COLUMN backfill_days INTEGER NOT NULL DEFAULT 90
+  CHECK (backfill_days BETWEEN 7 AND 365);
 ```
 
-### RLS Policies
+Default `90` preserves current behavior for every existing row with zero migration risk.
 
-```sql
--- ============================================================
--- HELPER FUNCTION (security definer + SELECT caching trick)
--- Wrapping in SELECT causes Postgres optimizer to cache per-statement
--- ============================================================
-CREATE OR REPLACE FUNCTION get_tenant_id()
-RETURNS UUID
-LANGUAGE SQL STABLE
-SECURITY DEFINER
-AS $$
-  SELECT (auth.jwt() -> 'app_metadata' ->> 'tenant_id')::UUID
-$$;
+### Flow: Settings UI → connect routes → ad_accounts → N8N
 
-CREATE OR REPLACE FUNCTION get_user_role()
-RETURNS TEXT
-LANGUAGE SQL STABLE
-SECURITY DEFINER
-AS $$
-  SELECT auth.jwt() -> 'app_metadata' ->> 'role'
-$$;
+**Google Ads** (round-trip via signed state, because the OAuth redirect leaves and re-enters the app):
+- `components/settings/google-ads-form.tsx`: add a `backfillDays` field (number input, default 90) to `GoogleAdsSchema`, include it in the query string built in `onSubmit` (`window.location.href = /api/google-ads/connect?...&backfillDays=...`).
+- `app/api/google-ads/connect/route.ts`: parse/validate `backfillDays` (Zod, `int().min(7).max(365)`, default 90 if absent) alongside the existing `customerId` parsing (step 4), pass it into `signState(tenantId, tenantSlug, customerId, backfillDays)`.
+- `lib/google-ads/oauth-state.ts`: extend `StatePayload` with `backfillDays: number` — this is the natural place since the state is already the authoritative, HMAC-verified carrier of tenant-scoped data across the Google redirect boundary (mirrors how `customerId` already travels this path — Pitfall 4 precedent).
+- `app/api/google-ads/callback/route.ts`: read `payload.backfillDays` (step 1) and include it in the `ad_accounts` upsert (step 7): `{ ..., backfill_days: payload.backfillDays }`.
 
--- ============================================================
--- TENANTS TABLE
--- ============================================================
-ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
+**Meta Ads** (single POST, no redirect round trip — simpler):
+- `components/settings/meta-ads-form.tsx`: add `backfillDays` to `MetaAdsSchema` and the POST body.
+- `app/api/meta-ads/connect/route.ts`: add `backfillDays: z.number().int().min(7).max(365).default(90)` to `BodySchema` (step 0), include it in the `ad_accounts` upsert (step 7): `{ ..., backfill_days: parsed.data.backfillDays }`.
 
--- Super admins see all tenants
-CREATE POLICY tenants_super_admin ON tenants
-  FOR SELECT TO authenticated
-  USING (get_user_role() = 'super_admin');
+**N8N (both workflows, same edit twice):**
+- `List active {Google|Meta} Ads accounts` node: add `backfill_days` to the PostgREST `select=` query string.
+- `Compute date range` Code node: replace `$('Set Constants').first().json.BACKFILL_DAYS` with `$('Loop tenants').item.json.backfill_days ?? $('Set Constants').first().json.BACKFILL_DAYS` (keep the constant as a fallback default for any row that predates the migration, and as the single source of truth for `INCREMENTAL_DAYS`, which stays global — only the *first-sync* window is meant to be tenant/channel-configurable per the requirement).
 
--- Tenant members see only their tenant
-CREATE POLICY tenants_member ON tenants
-  FOR SELECT TO authenticated
-  USING (id = get_tenant_id());
+### Consideration: editing the window after the account is already connected
 
--- ============================================================
--- AD_ACCOUNTS, CAMPAIGNS, METRICS, ROLLUPS, INSIGHTS
--- (same pattern for all tenant-scoped tables)
--- ============================================================
-ALTER TABLE ad_accounts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY ad_accounts_isolation ON ad_accounts
-  FOR ALL TO authenticated
-  USING (
-    tenant_id = (SELECT get_tenant_id())
-    OR get_user_role() = 'super_admin'
-  );
+The requirement says "ao conectar conta" (at connect time), but a tenant admin may reasonably want to change the window later without re-running the full OAuth/token flow (which would also require re-consent from Google, an unnecessary user cost just to change a number). Recommend a lightweight `updateBackfillWindow(tenantId, channel, days)` Server Action (service role, direct `UPDATE ad_accounts SET backfill_days = ...`) exposed as a small inline control next to the existing `ChannelStatusBadge` in `app/[tenant-slug]/settings/page.tsx`, independent of the connect forms — this avoids conflating "reconnect credentials" with "change sync window" as one action, and only matters for **future** first-syncs (an already-completed first sync's window is not retroactive — `is_first_sync` in the Code node is derived from `sync_jobs` history, not from the field being edited).
 
-ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
-CREATE POLICY campaigns_isolation ON campaigns
-  FOR ALL TO authenticated
-  USING (
-    tenant_id = (SELECT get_tenant_id())
-    OR get_user_role() = 'super_admin'
-  );
+### New vs Modified — Feature 3
 
-ALTER TABLE campaign_metrics ENABLE ROW LEVEL SECURITY;
-CREATE POLICY metrics_isolation ON campaign_metrics
-  FOR ALL TO authenticated
-  USING (
-    tenant_id = (SELECT get_tenant_id())
-    OR get_user_role() = 'super_admin'
-  );
-
-ALTER TABLE ai_insights ENABLE ROW LEVEL SECURITY;
--- AI insights: only super_admin can read (per project requirements)
-CREATE POLICY insights_super_admin_only ON ai_insights
-  FOR ALL TO authenticated
-  USING (get_user_role() = 'super_admin');
-
--- N8N writes via service_role key which bypasses ALL RLS policies
--- No special policy needed for N8N writes
-```
-
-### Custom Access Token Hook (PostgreSQL function)
-
-```sql
--- Fires before every JWT is issued by Supabase Auth
--- Injects tenant_id and role into app_metadata claims
-CREATE OR REPLACE FUNCTION auth.custom_access_token_hook(event JSONB)
-RETURNS JSONB
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  user_id   UUID;
-  tenant_id UUID;
-  user_role TEXT;
-  claims    JSONB;
-BEGIN
-  user_id := (event ->> 'user_id')::UUID;
-
-  -- Check if user is super_admin (stored in auth.users app_metadata)
-  IF (event -> 'claims' -> 'app_metadata' ->> 'is_super_admin') = 'true' THEN
-    user_role := 'super_admin';
-    tenant_id := NULL;
-  ELSE
-    -- Get tenant membership
-    SELECT tu.tenant_id, tu.role
-    INTO tenant_id, user_role
-    FROM tenant_users tu
-    WHERE tu.user_id = user_id
-    LIMIT 1;
-  END IF;
-
-  claims := event -> 'claims';
-  claims := jsonb_set(claims, '{app_metadata,tenant_id}',
-    COALESCE(to_jsonb(tenant_id::TEXT), 'null'));
-  claims := jsonb_set(claims, '{app_metadata,role}',
-    to_jsonb(COALESCE(user_role, 'none')));
-
-  RETURN jsonb_set(event, '{claims}', claims);
-END;
-$$;
-```
+| File | New/Modified | Change |
+|---|---|---|
+| New migration `00XX_add_backfill_days_to_ad_accounts.sql` | New | `ALTER TABLE ad_accounts ADD COLUMN backfill_days ...` |
+| `lib/google-ads/oauth-state.ts` | Modified | Extend `StatePayload` with `backfillDays` |
+| `app/api/google-ads/connect/route.ts` | Modified | Parse + sign `backfillDays` |
+| `app/api/google-ads/callback/route.ts` | Modified | Read + upsert `backfillDays` |
+| `app/api/meta-ads/connect/route.ts` | Modified | Validate + upsert `backfillDays` |
+| `components/settings/google-ads-form.tsx`, `meta-ads-form.tsx` | Modified | Add backfill window input |
+| `n8n-workflows/google-ads-sync.json`, `meta-ads-sync.json` | Modified | Select `backfill_days`; use it in `Compute date range` |
+| `lib/actions/ad-accounts.ts` (new file) or added to an existing actions file | New | `updateBackfillWindow` Server Action for post-connect edits |
 
 ---
 
-## Multi-Tenancy Decision: Shared Schema + RLS
+## Feature 4 — Visual redesign (dashboard, campanhas, insights, settings)
 
-**Recommendation: Shared schema with RLS. Not schema-per-tenant.**
+### Verified integration point: this is a pure presentation-layer change
 
-Rationale for this project:
-- v1 has 1–3 tenants. Schema-per-tenant adds migration complexity with zero benefit at this scale.
-- Supabase's Auth Hook approach makes RLS tenant injection clean and automatic.
-- The `SELECT get_tenant_id()` caching pattern eliminates the per-row function call overhead that makes naive RLS slow.
-- All queries include explicit `tenant_id` filters alongside RLS, so indexes are hit.
-- When the project evolves to true SaaS (10+ tenants), the RLS model scales fine up to hundreds of tenants before schema-per-tenant becomes worth considering.
+All four target pages are `'use client'` components that fetch data via **TanStack Query hooks calling the browser Supabase client** (`lib/supabase/client.ts`), not Server Components doing RLS-scoped fetches at the page level:
 
-**Confidence: HIGH** — This is the documented Supabase recommended pattern for multi-tenant SaaS.
+- `app/[tenant-slug]/dashboard/page.tsx` → `lib/hooks/use-dashboard-data.ts`
+- `app/[tenant-slug]/campanhas/page.tsx` → `lib/hooks/use-campaigns-data.ts`
+- `app/[tenant-slug]/insights/page.tsx` → `lib/hooks/use-ai-insights.ts`
+- `app/[tenant-slug]/settings/page.tsx` → inline `fetchTenantSettings()` using `createClient()` (browser)
 
----
+RLS is enforced by Postgres on every one of these calls regardless of client vs server origin — **redesigning these pages' JSX/markup/Tailwind classes carries zero RLS risk as long as the hook calls and the shape of data they return are left untouched.** The safe integration boundary is: restyle everything *below* the point where `data`/`isLoading`/`isError` are destructured from each hook; do not touch the hooks themselves, `lib/dashboard-kpis.ts`, `lib/campaign-aggregation.ts`, or `lib/formatters.ts`.
 
-## N8N Integration Architecture
+The **one** Server Component in this branch of the tree is `app/[tenant-slug]/layout.tsx`, which does real RLS-scoped queries (`tenants` lookup, `loadTenantsForSwitcher()`) and passes `role`/`tenants`/`tenantId` as props into `HeaderActions` and `SidebarNav` (`components/layout/header-actions.tsx`, `components/layout/sidebar-nav.tsx`). If the redesign changes header/sidebar chrome (very likely, since `prototipos/*.html` all show a shared header+sidebar shell), the props contract (`role`, `tenants: TenantOption[]`, `activeSlug`, `manageHref`, `manageLabel`) must be preserved or updated in `layout.tsx` in lockstep — this is the only place in Feature 4 that touches server-side/auth-aware code.
 
-### Authentication Credentials (stored in N8N credential store, not in code)
+### Prototype reference material
 
-**Google Ads:**
-- OAuth2 flow: Admin connects Google account in Settings UI
-- Next.js calls Google OAuth endpoint, receives `refresh_token`
-- `refresh_token` stored in `ad_accounts.refresh_token` (encrypted at rest by Supabase)
-- N8N reads refresh token from Supabase, exchanges for `access_token` per workflow run
-- Google Ads access tokens expire in 1 hour — N8N refreshes on each workflow run
+`prototipos/{dashboard,campanhas,insights}.html` + shared `prototipos/style.css` + `prototipos/nexus-dash.html` are static, pre-GSD HTML/CSS mockups (using Chart.js via CDN, not Recharts) — they encode the *target visual design* (KPI card layout, header/sidebar structure, color tokens like `--chart-1`/`--chart-2` already partially adopted in the live dashboard) but are not meant to be run as-is; they are a design reference to re-implement inside the existing shadcn/ui + Tailwind + Recharts component set already in `components/ui/*` and `components/dashboard/*`. Do not introduce Chart.js — the live app already uses Recharts via `components/ui/chart.tsx` per the project's stack decision (Recharts chosen over Nivo/Tremor/Victory).
 
-**Meta Marketing API:**
-- Use a Meta Business System User (not personal user tokens)
-- System User tokens are permanent (never expire) — ideal for server automation
-- Admin generates System User token in Meta Business Manager
-- Token stored in `ad_accounts.access_token`
-- N8N reads token from Supabase and uses directly (no refresh needed)
-- Fallback: if token becomes invalid (permissions revoked), sync_jobs records error + notifies
+### New vs Modified — Feature 4
 
-### N8N → Supabase Write Pattern
-
-```
-N8N uses Supabase node (service_role key):
-- Full table access, RLS bypassed
-- UPSERT operations using onConflict parameter
-- Batch inserts in chunks of 500 rows for campaign_metrics
-- Updates sync_jobs table at start/end of each workflow
-
-Service role key stored as N8N credential (encrypted)
-Never exposed to browser or server components
-```
-
-### N8N Workflow Structure
-
-```
-Workflow 1: Daily Google Ads Sync
-  Schedule Trigger (03:00 UTC)
-  → Supabase: Get active ad_accounts WHERE platform = 'google_ads'
-  → Loop over each account:
-    → HTTP Request: Refresh OAuth2 token
-    → HTTP Request: Google Ads API - get campaign metrics
-    → Supabase: UPSERT campaign_metrics (500-row batches)
-    → Supabase: Update ad_accounts.last_sync_at
-  → Supabase: Update sync_jobs status = 'success'
-  → Error Workflow: On any failure → update sync_jobs status = 'failed'
-    + HTTP Request to Next.js /api/webhooks/n8n (error notification)
-
-Workflow 2: Daily Meta Ads Sync
-  Schedule Trigger (03:30 UTC)  -- offset from Google to avoid DB contention
-  → Same pattern as Workflow 1 but with Meta API + System User token
-
-Workflow 3: Daily AI Analysis
-  Schedule Trigger (05:00 UTC)  -- after both syncs complete
-  → HTTP Request: POST /api/insights/generate
-    (Next.js Route Handler calls Claude, stores result)
-  → Or: Query Supabase directly for metrics, format, call Claude API
-    (depends on whether Claude API key is in Next.js env or N8N)
-    Recommendation: Keep Claude calls in Next.js Route Handler
-    for easier key management and response caching
-
-Workflow 4: On-Demand Sync Trigger (optional)
-  Webhook Trigger (receives from /api/sync/trigger)
-  → Same as Workflow 1/2 but for single tenant/account
-```
-
-### Error Handling Strategy
-
-```
-Per workflow:
-1. Wrap each API call in Try/Catch node
-2. Transient errors (429, 502, 503, 504): retry 3x with exponential backoff
-   - Delays: 10s, 30s, 90s (jitter ±20%)
-3. Auth errors (401): refresh token → retry once → fail with alert
-4. Fatal errors: update sync_jobs with error_message, trigger Error Workflow
-5. Error Workflow: write to sync_jobs, POST to N8N internal notification webhook
-
-Idempotency:
-- All metric writes use UPSERT on (campaign_id, date)
-- Rerunning a workflow is always safe
-- sync_jobs.id passed as idempotency key for deduplication
-```
+| File | New/Modified | Change |
+|---|---|---|
+| `app/[tenant-slug]/dashboard/page.tsx`, `campanhas/page.tsx`, `insights/page.tsx`, `settings/page.tsx` | Modified | Restyle JSX only; preserve hook calls and data shape |
+| `components/dashboard/*`, `components/campanhas/*`, `components/insights/*`, `components/settings/*` | Modified (some may become New if the redesign introduces new sub-components, e.g. new KPI card variants) | Visual layer |
+| `app/[tenant-slug]/layout.tsx` | Modified (only if header/sidebar chrome changes) | Preserve `role`/`tenants`/`tenantId` prop contract into `HeaderActions`/`SidebarNav` |
+| `components/layout/header-actions.tsx`, `sidebar-nav.tsx` | Modified | Visual layer, same prop contract |
+| `prototipos/*.html`, `style.css` | Reference only | Not shipped; source of design tokens/layout to port into Tailwind/shadcn |
 
 ---
 
-## Claude API Integration
+## Build Order Across the 4 Features
 
-### Prompt Structure
+**Recommended order: Feature 2 → Feature 1 → Feature 3 → Feature 4.**
 
-```
-System prompt (CACHED — static, placed first):
-  - Role: expert digital marketing analyst
-  - Output format: strict JSON schema with fields:
-    { summary, recommendations[], risk_flags[], next_actions[] }
-  - Analysis criteria: ROAS targets, CPA thresholds, CTR benchmarks
-  - 2000-3000 tokens, stays in cache for 5-min TTL
-    (use 1-hour cache for Batch API if daily scheduled analysis)
+1. **Feature 2 (viewer cleanup) first.** Zero DB coupling (already terminal since migration `0020`), zero in-flight-session risk (that window closed when Phase 5 shipped), and it shrinks the `Role` type that Feature 1's new UI (role badges, user list columns) would otherwise have to needlessly account for. Doing this after Feature 1 would mean writing user-list UI against a wider, partially-dead type and then narrowing it under the new UI — strictly more work.
 
-User message (DYNAMIC — changes per request):
-  - Tenant name + date range
-  - Compact JSON of campaign metrics (last 30 days)
-    flattened to: [{ campaign, platform, spend, roas, cpa, ctr, trend_7d, trend_30d }]
-  - Specific question or "general analysis"
-  - Target: keep dynamic portion under 8,000 tokens for 1-3 tenants
-```
+2. **Feature 1 (user management) second.** Depends on Feature 2 only for type cleanliness, not correctness — could technically run in parallel, but sequencing after avoids rework. Independent of Features 3/4. Establishes the `updateUserById`/`admin.signOut` patterns that don't exist anywhere else in the codebase today, so budget the most unit/integration test time here (mirroring the existing `tests/integration/tenant-role-migration.test.ts` and `tests/agency-rls.test.ts` style already in the repo).
 
-### Token Optimization
+3. **Feature 3 (backfill window) third.** Fully independent of Features 1/2 (different tables, different routes) — could run in parallel with either, but should land **before** Feature 4 because it adds a new input to the Settings forms (`google-ads-form.tsx`, `meta-ads-form.tsx`) that the visual redesign of the Settings page needs to account for. Doing Feature 4 first would mean redesigning Settings, then immediately having to re-touch that same redesigned layout to slot in the new backfill field — two design passes instead of one.
 
-```
-1. Prompt caching: system prompt cached at 25% write cost, 10% read cost
-   - Pays off from first read (saves 75% on system prompt tokens)
-   - Use cache_control: { type: "ephemeral" } on system message
+4. **Feature 4 (visual redesign) last.** Lowest technical risk (no RLS/auth surface touched beyond the one `layout.tsx` prop contract), but highest "surface area" (4 pages + shared chrome) — sequencing it last means it restyles the *final* shape of the user-management UI (Feature 1) and the *final* Settings form (with the backfill field from Feature 3) in one pass, rather than needing follow-up restyling after either lands.
 
-2. Data compression: send pre-aggregated metrics, not raw rows
-   - daily_rollups table serves this purpose
-   - 30 rows per tenant (daily rollups) vs 30 × N campaigns
+## Anti-Patterns to Avoid in This Milestone
 
-3. Structured output: use tool_use or JSON mode to enforce schema
-   - Avoids verbose explanatory prose in responses
-   - Easier to parse and store in ai_insights.recommendations JSONB
+### Anti-Pattern 1: Manual `tenant_users`/`agency_users` row deletion alongside `admin.deleteUser`
 
-4. Batch API for scheduled analysis:
-   - Daily N8N trigger → POST /api/insights/generate
-   - Route handler can use Batch API (50% token discount) for non-urgent analysis
-   - With 1-hour cache TTL: batch processes all tenants using same cached system prompt
-```
+**What people might do:** delete the membership row first, then call `admin.deleteUser`, "to be safe."
+**Why it's wrong:** `ON DELETE CASCADE` already guarantees this atomically inside Postgres when the `auth.users` row is deleted. A manual two-step introduces a window where the auth user exists without a membership row (or vice versa if the first step fails), which is strictly worse than trusting the FK.
+**Instead:** call `supabase.auth.admin.deleteUser(userId)` alone, exactly as the existing rollback code in `lib/actions/tenants.ts`/`agencies.ts` already does.
 
-### Storage Pattern
+### Anti-Pattern 2: Assuming a membership edit takes effect immediately because "RLS re-checks every request"
 
-```sql
--- ai_insights.recommendations stores structured array:
-[
-  {
-    "type": "budget_optimization",
-    "campaign_id": "...",
-    "campaign_name": "...",
-    "platform": "google_ads",
-    "priority": "high",
-    "finding": "ROAS dropped 23% over 7 days",
-    "action": "Reduce daily budget by 30% until CPA stabilizes",
-    "expected_impact": "Save ~$450/week while maintaining conversion volume"
-  }
-]
+**What people might do:** remove a user from `tenant_users` and assume their next API call is instantly blocked, because RLS is per-request.
+**Why it's wrong:** `get_tenant_id()`/`get_user_role()` read the JWT, not the table, at request time (D-14 performance rule — intentional, correct for perf, but has this side effect). The JWT is only re-minted at login/refresh by the Custom Access Token Hook.
+**Instead:** pair any non-delete membership mutation with `supabase.auth.admin.signOut(userId, 'global')` if immediate revocation matters for that action.
 
--- Query pattern: latest insight per tenant
-SELECT * FROM ai_insights
-WHERE tenant_id = $1
-ORDER BY generated_at DESC
-LIMIT 10;
+### Anti-Pattern 3: Making `BACKFILL_DAYS` tenant-configurable via a new N8N workflow parameter/credential instead of a DB column
 
--- Query pattern: insights for specific date range
-SELECT * FROM ai_insights
-WHERE tenant_id = $1
-  AND date_range_end BETWEEN $2 AND $3;
-```
-
----
-
-## Next.js App Router Patterns
-
-### Supabase Client Setup
-
-```typescript
-// lib/supabase/server.ts — for Server Components, Route Handlers, Server Actions
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-
-export function createClient() {
-  const cookieStore = cookies()
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll(), setAll: ... } }
-  )
-}
-
-// lib/supabase/service.ts — for N8N webhook handlers (bypasses RLS)
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-
-export function createServiceClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!  // never exposed to browser
-  )
-}
-```
-
-### Middleware
-
-```typescript
-// middleware.ts
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
-
-export async function middleware(request: NextRequest) {
-  // 1. Refresh Supabase session (required — do not skip)
-  const { supabase, response } = createServerClientInMiddleware(request)
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // 2. Extract role from JWT claims (no DB round-trip)
-  const session = await supabase.auth.getSession()
-  const role = session?.data?.session?.access_token
-    ? decodeJwt(session.data.session.access_token)?.app_metadata?.role
-    : null
-
-  // 3. Route guards
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-  if (role !== 'super_admin' && request.nextUrl.pathname.startsWith('/admin')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  return response
-}
-
-export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/api/:path*']
-}
-```
-
-### Server Component Data Fetching
-
-```typescript
-// app/dashboard/page.tsx — force-dynamic, never cached
-export const dynamic = 'force-dynamic'
-
-export default async function DashboardPage() {
-  const supabase = createClient()
-
-  // RLS automatically scopes to current tenant via JWT claims
-  const { data: rollups } = await supabase
-    .from('daily_rollups')
-    .select('*')
-    .gte('date', thirtyDaysAgo)
-    .order('date', { ascending: false })
-
-  return <DashboardClient initialData={rollups} />
-}
-```
-
-### Route Handler: N8N Webhook Receiver
-
-```typescript
-// app/api/webhooks/n8n/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { revalidateTag } from 'next/cache'
-
-export async function POST(request: NextRequest) {
-  // Validate shared secret (stored in both N8N and Vercel env)
-  const secret = request.headers.get('x-n8n-secret')
-  if (secret !== process.env.N8N_WEBHOOK_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { tenant_id, event } = await request.json()
-
-  if (event === 'sync_complete') {
-    revalidateTag(`metrics-${tenant_id}`)  // invalidate cached dashboard data
-  }
-
-  return NextResponse.json({ ok: true })
-}
-```
-
-### Caching Strategy
-
-```
-Dashboard pages:           force-dynamic (always fresh, no stale KPIs)
-Campaign list:             force-dynamic
-Insights history:          revalidate: 3600 (1 hour, changes rarely)
-Settings page:             force-dynamic
-Static UI (login, etc.):   default static caching
-
-After N8N sync completes:
-  → N8N calls POST /api/webhooks/n8n
-  → Route handler calls revalidateTag('metrics-{tenant_id}')
-  → Next.js regenerates affected pages in background
-  → Next user load gets fresh data
-```
-
----
-
-## Build Order Recommendations
-
-The dependency graph determines sequencing. Each phase must complete before the next can build on top of it.
-
-### Phase 1: Foundation (Database + Auth)
-
-Build first because everything else depends on it.
-
-```
-1.1 Supabase project setup
-    - Create tables: tenants, users, tenant_users
-    - Create Custom Access Token Hook
-    - Create helper functions: get_tenant_id(), get_user_role()
-    - Enable RLS on all tables with initial policies
-
-1.2 Next.js project scaffold
-    - App Router setup with @supabase/ssr
-    - middleware.ts with session refresh + route guards
-    - /login and /dashboard layout shells (no data yet)
-    - lib/supabase/server.ts and lib/supabase/service.ts
-
-1.3 Super Admin creates first tenant manually
-    - No UI yet: direct Supabase insert
-    - Verify RLS is working: tenant A cannot see tenant B's data
-    - Verify JWT claims flow end-to-end
-
-GATE: Auth flow works. Tenant isolation verified. JWT claims confirmed.
-```
-
-### Phase 2: Ad Platform Connections + N8N Sync
-
-Build second because metrics data depends on accounts being connected.
-
-```
-2.1 Database tables: ad_accounts, campaigns, campaign_metrics, sync_jobs
-    - Add RLS policies
-    - Create monthly partitions for campaign_metrics
-    - Add indexes
-
-2.2 Settings page: ad account connection flow
-    - Google OAuth2 flow: Next.js → Google → callback → store refresh_token
-    - Meta System User token: manual input field + validation call to Meta API
-    - ad_accounts management UI (connect/disconnect)
-
-2.3 N8N workflows
-    - Google Ads sync workflow
-    - Meta Ads sync workflow
-    - Error handling workflow
-    - Test with one real tenant account
-    - Backfill historical window on first connect
-
-2.4 Sync monitoring
-    - sync_jobs table visible in admin panel
-    - POST /api/webhooks/n8n route handler
-
-GATE: Metrics are flowing into campaign_metrics table daily.
-```
-
-### Phase 3: Dashboard + Campaigns UI
-
-Build third — can now display real data.
-
-```
-3.1 daily_rollups computation
-    - N8N workflow or pg_cron: after sync, compute daily_rollups
-    - Or: compute in Next.js Route Handler after N8N webhook
-
-3.2 Dashboard Overview page
-    - Server Component fetches daily_rollups
-    - KPI cards: ROAS, CPA, CTR, Spend
-    - Channel breakdown charts (Google vs Meta)
-    - Date range picker (client-side filter)
-
-3.3 Campaigns list page
-    - Filterable by platform, date range, status
-    - Drill-down to campaign-level metrics
-
-GATE: Super Admin can see all tenant data in one place.
-```
-
-### Phase 4: AI Insights
-
-Build last — depends on having real metrics to analyze.
-
-```
-4.1 Claude API integration
-    - /api/insights/generate route handler
-    - Prompt construction from daily_rollups data
-    - Prompt caching setup (static system prompt)
-    - Store results in ai_insights table
-
-4.2 Insights UI
-    - Manual trigger button (Super Admin only)
-    - Insights history page with recommendations list
-    - Per-recommendation action items display
-
-4.3 N8N daily scheduled insights
-    - Workflow triggers /api/insights/generate at 05:00 UTC
-    - Stores result, Super Admin sees on next login
-
-GATE: AI insights generating actionable recommendations.
-```
-
----
-
-## Suggested Phase Structure Implications
-
-| Phase | Focus | Key Risk | Mitigation |
-|-------|-------|---------|------------|
-| 1 | Auth + Multi-tenancy foundation | RLS misconfiguration leaks data | Test tenant isolation with two test tenants before any real data |
-| 2 | Ad platform connections + N8N | OAuth token expiry, Meta token revocation | Monitor sync_jobs, alert on auth failures early |
-| 3 | Dashboard + Campaigns UI | dashboard performance with large metric volumes | daily_rollups table prevents full-table scans |
-| 4 | AI Insights | Claude API cost at scale, prompt engineering | Prompt caching from day one, budget alerts on Anthropic dashboard |
-
-**Critical ordering rationale:**
-- Phase 1 must be 100% correct before any data enters the system. RLS bugs at this stage are security vulnerabilities, not features.
-- Phase 2 before Phase 3 because the UI is useless without data. Build the pipeline first, validate the data, then build display logic.
-- Phase 4 last because AI analysis is only valuable when there is meaningful historical data (at least 7–14 days of metrics).
-- daily_rollups computation (Phase 3.1) is architecturally important: it decouples dashboard query performance from the growing size of campaign_metrics. Build this before building the dashboard, not after.
-
----
-
-## Pitfall Flags
-
-| Area | Pitfall | Details |
-|------|---------|---------|
-| RLS | Missing SELECT wrapper on auth functions | Calling `auth.jwt()` or `auth.uid()` directly in policy USING clause re-evaluates per row. Always wrap: `(SELECT get_tenant_id())` |
-| RLS | Forgetting to enable RLS on new tables | Any table created without `ALTER TABLE x ENABLE ROW LEVEL SECURITY` is publicly readable via anon key |
-| campaign_metrics | Missing tenant_id denormalization | Without `tenant_id` on campaign_metrics, RLS requires a JOIN to campaigns on every query. Denormalize tenant_id directly onto the table |
-| campaign_metrics | Partitioning and RLS index | Partition indexes are local to each partition. Verify indexes exist on each partition, not just the parent table |
-| Meta tokens | System User token vs User token | User tokens expire in 60 days and will break sync. Always use System User tokens for server automation |
-| N8N → Supabase | Using anon key for writes | N8N must use service_role key, not anon key. Anon key + RLS = N8N cannot write without a user session |
-| Next.js caching | Dashboard page cached | Setting `revalidate: 60` on a dashboard means KPI data is up to 60 seconds stale after sync. Use `force-dynamic` or cache with explicit tag invalidation |
-| JWT claims | Claims stale after role change | If a user's role is changed in the DB, existing JWT tokens still carry the old claims until expiry. For role changes, force token refresh or use short JWT TTL |
-| Claude API | Sending raw campaign_metrics rows | Raw rows (one per day per campaign) inflate token usage dramatically. Always send pre-aggregated summaries from daily_rollups |
-
----
+**What people might do:** try to make N8N itself tenant-aware (e.g. per-tenant workflow copies, or an N8N "workflow static data" override).
+**Why it's wrong:** the sync workflows already loop over **all** tenants' `ad_accounts` rows in a single shared workflow (`Loop tenants` / `splitInBatches`) — introducing per-tenant workflow variants would fragment the single-workflow-per-channel model the project deliberately built (and would multiply N8N maintenance for 1-3 tenants for no benefit).
+**Instead:** the data the loop is already iterating over (`ad_accounts`) is the correct and only place a per-account setting belongs.
 
 ## Sources
 
-- [Supabase Row Level Security Docs](https://supabase.com/docs/guides/database/postgres/row-level-security) — HIGH confidence
-- [Supabase Custom Access Token Hook](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook) — HIGH confidence
-- [Supabase Custom Claims & RBAC](https://supabase.com/docs/guides/database/postgres/custom-claims-and-role-based-access-control-rbac) — HIGH confidence
-- [Supabase RLS Performance and Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv) — HIGH confidence
-- [Multi-Tenant Applications with RLS on Supabase](https://www.antstack.com/blog/multi-tenant-applications-with-rls-on-supabase-postgress/) — MEDIUM confidence
-- [Supabase RLS Best Practices (MakerKit)](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices) — MEDIUM confidence
-- [9 Postgres Partitioning Strategies for Time-Series](https://medium.com/@ThinkingLoop/9-postgres-partitioning-strategies-for-time-series-at-scale-fa644428b915) — MEDIUM confidence
-- [AWS RDS PostgreSQL Time-Series Design](https://aws.amazon.com/blogs/database/designing-high-performance-time-series-data-tables-on-amazon-rds-for-postgresql/) — HIGH confidence
-- [Materialized Views vs Rollup Tables (Citus)](https://www.citusdata.com/blog/2018/10/31/materialized-views-vs-rollup-tables/) — MEDIUM confidence
-- [N8N Google Ads Integration](https://n8n.io/integrations/google-ads/and/supabase/) — HIGH confidence
-- [N8N Error Handling Docs](https://docs.n8n.io/flow-logic/error-handling/) — HIGH confidence
-- [Advanced N8N Error Handling](https://www.wednesday.is/writing-articles/advanced-n8n-error-handling-and-recovery-strategies) — MEDIUM confidence
-- [Meta Access Token Guide](https://developers.facebook.com/docs/facebook-login/guides/access-tokens/) — HIGH confidence
-- [Meta Long-Lived Token Guide](https://developers.facebook.com/docs/facebook-login/guides/access-tokens/get-long-lived/) — HIGH confidence
-- [Claude API Prompt Caching Docs](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) — HIGH confidence
-- [Claude Batch Processing Docs](https://platform.claude.com/docs/en/build-with-claude/batch-processing) — HIGH confidence
-- [Next.js Revalidation Docs](https://nextjs.org/docs/app/getting-started/revalidating) — HIGH confidence
-- [Supabase Auth with Next.js App Router](https://supabase.com/docs/guides/auth/auth-helpers/nextjs) — HIGH confidence
-- [N8N Supabase Credentials Docs](https://docs.n8n.io/integrations/builtin/credentials/supabase/) — HIGH confidence
+- Direct repository reads (all HIGH confidence, primary source): `supabase/migrations/0002` through `0022`, `lib/actions/tenants.ts`, `lib/actions/agencies.ts`, `proxy.ts`, `lib/stores/tenant-store.tsx`, `components/tenants/tenant-switcher.tsx`, `app/[tenant-slug]/layout.tsx`, `app/[tenant-slug]/dashboard/page.tsx`, `app/api/google-ads/connect/route.ts`, `app/api/google-ads/callback/route.ts`, `app/api/meta-ads/connect/route.ts`, `lib/google-ads/oauth-state.ts`, `n8n-workflows/google-ads-sync.json`, `n8n-workflows/meta-ads-sync.json`, `.planning/PROJECT.md`.
+- Supabase Auth Admin API behavior (deleteUser cascades sessions, updateUserById, signOut scopes) — from training knowledge of the documented `supabase-js` Admin API surface (`@supabase/supabase-js` `^2.105.4` per `package.json`); **not independently re-verified against live Supabase docs in this research pass** — flag as MEDIUM confidence specifically for the exact `admin.signOut(userId, 'global')` revocation behavior and default access-token TTL; recommend a quick doc check at implementation time before relying on it as the sole mitigation for Anti-Pattern 2.
+
+---
+*Architecture research for: NEXUS-DASH v1.1 (Gestão de Usuários, Limpeza, Janela de Histórico, Redesign Visual)*
+*Researched: 2026-07-11*
