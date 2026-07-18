@@ -18,6 +18,7 @@ function buildSystem(leads: Lead[]): string {
   const quente = leads.filter(l => cat(l.status) === 'quente').length
   const negoc  = leads.filter(l => cat(l.status) === 'negoc').length
   const fim    = leads.filter(l => cat(l.status) === 'fim').length
+  const fechado = leads.filter(l => cat(l.status) === 'fechado').length
 
   const sample = leads.slice(0, 50).map(l =>
     `- ${l.nome || '?'} | ${l.empresa || '?'} | ${l.tipo_seguro || '?'} | ${CATEGORY_LABELS[cat(l.status)]} | ${l.criado_em || '?'}`
@@ -27,9 +28,10 @@ function buildSystem(leads: Lead[]): string {
 
 BASE DE LEADS ATUAL:
 - Total: ${total} leads
-- Novos: ${novo} | Quentes: ${quente} | Negociando: ${negoc} | Sem Resposta: ${fim}
+- Novos: ${novo} | Quentes: ${quente} | Negociando: ${negoc} | Fechados: ${fechado} | Sem Resposta: ${fim}
 - Taxa de aquecimento: ${total ? Math.round(quente / total * 100) : 0}%
 - Taxa de negociação: ${total ? Math.round(negoc / total * 100) : 0}%
+- Taxa de conversão (fechados): ${total ? Math.round(fechado / total * 100) : 0}%
 
 AMOSTRA DOS LEADS (primeiros 50):
 ${sample}
