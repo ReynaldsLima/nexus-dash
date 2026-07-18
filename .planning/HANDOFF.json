@@ -1,0 +1,55 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-07-18T20:46:21.913Z",
+  "phase": "11",
+  "phase_name": "janela-de-hist-rico-retroativo",
+  "phase_dir": ".planning/phases/11-janela-de-hist-rico-retroativo",
+  "context_type": "verify-work",
+  "uat_file": ".planning/phases/11-janela-de-hist-rico-retroativo/11-HUMAN-UAT.md",
+  "status": "paused",
+  "uat_progress": {
+    "total": 7,
+    "passed": 5,
+    "issues": 0,
+    "pending": 2,
+    "current_test": 6
+  },
+  "completed_tasks": [
+    {"id": 1, "name": "Cold Start Smoke Test", "status": "done", "result": "pass"},
+    {"id": 2, "name": "Google Ads Connect Form — Backfill Window Field", "status": "done", "result": "pass"},
+    {"id": 3, "name": "Meta Ads Connect Form — Backfill Window Field", "status": "done", "result": "pass"},
+    {"id": 4, "name": "Post-Connect Inline Edit (BackfillWindowControl)", "status": "done", "result": "pass"},
+    {"id": 5, "name": "Live Google Ads OAuth connect with a custom backfill window", "status": "done", "result": "pass"},
+    {"id": 6, "name": "Live Meta Ads connect with a custom backfill window", "status": "in_progress", "progress": "User is generating a Meta System User token in Business Manager 'Lukseg' — was blocked on the system user having no App installed; walked through creating/linking a Meta App and generating the token with ads_read + never-expire. Not yet confirmed connected in the app."}
+  ],
+  "remaining_tasks": [
+    {"id": 6, "name": "Live Meta Ads connect with a custom backfill window", "status": "in_progress"},
+    {"id": 7, "name": "N8N first-sync honoring per-account backfill window", "status": "not_started", "notes": "Requires re-importing/activating both google-ads-sync.json and meta-ads-sync.json on the live N8N instance. Also check 11-REVIEW.md's IN-03 note about a pre-existing (out-of-scope) Vault secret naming mismatch that could block the sync pipeline entirely."}
+  ],
+  "blockers": [
+    {"description": "Meta System User (nexusdashsync) in Business Manager 'Lukseg' had no App installed, so 'Gerar token' had nothing to attach permissions to.", "type": "human_action", "workaround": "User is creating a Meta App (developers.facebook.com, type Business) and linking it to the Business Manager, then generating the token from the System User with ads_read + never-expire."},
+    {"description": "N8N workflows (google-ads-sync.json, meta-ads-sync.json) still need manual re-import/activation on the live N8N instance for Test 7 — no CLI/code path in this repo.", "type": "human_action"}
+  ],
+  "human_actions_pending": [
+    {"action": "Finish generating the Meta System User token (ads_read permission, never-expire) and paste Account ID + token into the Meta Ads card at https://nexusdash-chi.vercel.app/<tenant>/settings", "context": "Needed to complete UAT Test 6", "blocking": true},
+    {"action": "Re-import and activate n8n-workflows/google-ads-sync.json and n8n-workflows/meta-ads-sync.json on the live N8N instance (https://evo.wrdigitalgroup.com.br)", "context": "Needed to complete UAT Test 7 — verifying N8N honors per-account backfill_days on first sync", "blocking": true}
+  ],
+  "decisions": [
+    {"decision": "Recreated the UAT test list from the 5 phase-11 SUMMARY.md files instead of resuming the old all-pending 11-HUMAN-UAT.md", "rationale": "User explicitly chose 'recriar do zero' when offered a resume/restart choice", "phase": "11"},
+    {"decision": "Inserted a temporary ad_accounts row + Vault secret + a temporary DB trigger (forcing an UPDATE failure) to exercise BackfillWindowControl's success and revert-on-failure paths, then fully cleaned all three up", "rationale": "No tenant had a connected account, so the post-connect edit control never rendered; user approved this approach when asked", "phase": "11"},
+    {"decision": "Committed and pushed 31 commits (including the pending ARCHITECTURE.md rewrite) to origin/main, triggering the Vercel production auto-deploy", "rationale": "User asked to send everything to Vercel/GitHub/Supabase after confirming all three account/project bindings were correct", "phase": "11"},
+    {"decision": "Excluded prototipos/, d05-second-reset.png, and .playwright-mcp/ from the commit", "rationale": "User chose to leave these untracked scratch/debug artifacts out", "phase": "11"},
+    {"decision": "Fixed two production blockers found while testing Google OAuth live: added GOOGLE_ADS_CLIENT_ID/SECRET/GOOGLE_OAUTH_STATE_SECRET to Vercel Production env, and switched the Google Cloud OAuth consent screen from Internal to External + added test user", "rationale": "signState() threw an unhandled exception (500) without GOOGLE_OAUTH_STATE_SECRET; Internal user type blocked the personal test Google account with org_internal", "phase": "11"}
+  ],
+  "uncommitted_files": [
+    ".planning/phases/11-janela-de-hist-rico-retroativo/11-HUMAN-UAT.md"
+  ],
+  "infrastructure_state": {
+    "local_dev_server": "Running in background (Bash task bbpw0ue49, npm run dev) on http://localhost:3000 — still up as of this handoff",
+    "production": "https://nexusdash-chi.vercel.app — deploy dpl_6KWKUhUAeiXeFyE3qBvRjvryiQ1u READY, commit 643ee4d",
+    "supabase_project": "rvkkvjitfddtbdpkupok (nexus-dash) — confirmed correct account/project; migration 0024 (backfill_days) already live; all temporary UAT test artifacts (ad_accounts row, vault secret, trigger/function) fully cleaned up",
+    "vercel_mcp_bug": "The project-scoped vercel MCP server (mcp__vercel__*) is misconfigured with slug 'nexus-dash' but the real project slug is 'nexus-dashboard' — list_deployments/get_project/get_runtime_logs/get_runtime_errors all 403/404. Account-level tools (list_teams, list_projects) and get_deployment by hostname/alias (e.g. 'nexusdash-chi.vercel.app') work fine as a workaround."
+  },
+  "next_action": "Wait for user to finish the Meta System User token, then paste Account ID + token into the Meta Ads card on https://nexusdash-chi.vercel.app/<tenant>/settings, confirm the connection succeeds, then verify ad_accounts.backfill_days in Supabase for the meta_ads row matches the chosen non-default value. Mark Test 6 pass/fail in 11-HUMAN-UAT.md accordingly, then move to Test 7 (N8N).",
+  "context_notes": "This is a /gsd-verify-work session for phase 11 (backfill window feature), not a plan-execution session — 'tasks' above map to UAT tests in 11-HUMAN-UAT.md, not PLAN.md tasks (all 5 of phase 11's plans are already complete with SUMMARY.md files). Verification has been done live against production (nexusdash-chi.vercel.app) and the live Supabase project via Playwright MCP + direct Supabase Management API calls (SUPABASE_ACCESS_TOKEN already in shell env, verified against the correct project ref before each use per this repo's known multi-account MCP risk)."
+}

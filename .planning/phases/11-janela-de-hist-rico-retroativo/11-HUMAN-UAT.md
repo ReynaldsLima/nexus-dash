@@ -9,10 +9,10 @@ updated: 2026-07-18T18:40:00.000Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 5
-name: Live Google Ads OAuth connect with a custom backfill window
+number: 6
+name: Live Meta Ads connect with a custom backfill window
 expected: |
-  `ad_accounts.backfill_days` for that tenant/channel row reflects the chosen value (e.g. 30), not the default 90 — after connecting a real Google Ads account through the actual Google OAuth consent screen with a non-default window.
+  `ad_accounts.backfill_days` for the meta_ads row reflects the chosen value — after connecting a real Meta Ads account (valid System User token + ad account) with a non-default window.
 awaiting: user response
 
 ## Tests
@@ -39,7 +39,8 @@ notes: No tenant had a connected account, so a temporary ad_accounts row (wrdigi
 
 ### 5. Live Google Ads OAuth connect with a custom backfill window
 expected: `ad_accounts.backfill_days` for that tenant/channel row reflects the chosen value (e.g. 30), not the default 90 — after connecting a real Google Ads account through the actual Google OAuth consent screen with a non-default window.
-result: [pending]
+result: pass
+notes: Connected wrdigital/google_ads via the real Google OAuth consent screen in production (nexusdash-chi.vercel.app) with backfillDays=30. Verified live in Supabase: ad_accounts.backfill_days = 30, account_id = 1234567890, active = true. Along the way, fixed two production blockers found during this test: (1) GOOGLE_ADS_CLIENT_ID/SECRET/GOOGLE_OAUTH_STATE_SECRET were missing in Vercel Production env — signState() threw unhandled, causing a 500 on /api/google-ads/connect; (2) the Google Cloud OAuth consent screen was set to "Internal" user type, blocking the personal test account with org_internal — switched to "External" + added test user.
 
 ### 6. Live Meta Ads connect with a custom backfill window
 expected: `ad_accounts.backfill_days` for the meta_ads row reflects the chosen value — after connecting a real Meta Ads account (valid System User token + ad account) with a non-default window.
@@ -52,9 +53,9 @@ result: [pending]
 ## Summary
 
 total: 7
-passed: 4
+passed: 5
 issues: 0
-pending: 3
+pending: 2
 skipped: 0
 blocked: 0
 
