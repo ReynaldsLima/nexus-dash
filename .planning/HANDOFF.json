@@ -1,12 +1,17 @@
 {
   "version": "1.0",
-  "timestamp": "2026-07-18T20:46:21.913Z",
+  "timestamp": "2026-07-19T02:20:38.502Z",
   "phase": "11",
   "phase_name": "janela-de-hist-rico-retroativo",
   "phase_dir": ".planning/phases/11-janela-de-hist-rico-retroativo",
   "context_type": "verify-work",
   "uat_file": ".planning/phases/11-janela-de-hist-rico-retroativo/11-HUMAN-UAT.md",
   "status": "paused",
+  "decision_point": "User asked what the project's next phases are; was told Phase 12 (Redesign Visual) is the only remaining v1.1 phase, not started, depends on Phase 10+11. User has NOT yet chosen between: (a) resuming Phase 11 UAT tests 6/7, or (b) starting /gsd-plan-phase 12. Ask on resume.",
+  "side_work_since_last_pause": [
+    {"what": "Quick task 260718-orc — added a 'Fechado' lead status (lib/leads.ts, leads table, Agente IA summary)", "commits": ["2e4d032", "d7903a8", "1bdd638", "a557883"], "pushed": true},
+    {"what": "Fast task — recolored the 'Fechado' status to #B5E701 (badge, KPI card, funnel bar, distribution list)", "commits": ["2959172"], "pushed": true}
+  ],
   "uat_progress": {
     "total": 7,
     "passed": 5,
@@ -45,11 +50,11 @@
     ".planning/phases/11-janela-de-hist-rico-retroativo/11-HUMAN-UAT.md"
   ],
   "infrastructure_state": {
-    "local_dev_server": "Running in background (Bash task bbpw0ue49, npm run dev) on http://localhost:3000 — still up as of this handoff",
-    "production": "https://nexusdash-chi.vercel.app — deploy dpl_6KWKUhUAeiXeFyE3qBvRjvryiQ1u READY, commit 643ee4d",
+    "local_dev_server": "STOPPED — background Bash task bbpw0ue49 (npm run dev on :3000) received a stopped-task notification with no completion record; assume it needs to be restarted before any local (non-production) testing.",
+    "production": "https://nexusdash-chi.vercel.app — latest deploy dpl_G2cHfEnENZNpPA1dY75ipkhiPRcG READY, commit 2959172 (includes the Fechado status + its color fix)",
     "supabase_project": "rvkkvjitfddtbdpkupok (nexus-dash) — confirmed correct account/project; migration 0024 (backfill_days) already live; all temporary UAT test artifacts (ad_accounts row, vault secret, trigger/function) fully cleaned up",
     "vercel_mcp_bug": "The project-scoped vercel MCP server (mcp__vercel__*) is misconfigured with slug 'nexus-dash' but the real project slug is 'nexus-dashboard' — list_deployments/get_project/get_runtime_logs/get_runtime_errors all 403/404. Account-level tools (list_teams, list_projects) and get_deployment by hostname/alias (e.g. 'nexusdash-chi.vercel.app') work fine as a workaround."
   },
-  "next_action": "Wait for user to finish the Meta System User token, then paste Account ID + token into the Meta Ads card on https://nexusdash-chi.vercel.app/<tenant>/settings, confirm the connection succeeds, then verify ad_accounts.backfill_days in Supabase for the meta_ads row matches the chosen non-default value. Mark Test 6 pass/fail in 11-HUMAN-UAT.md accordingly, then move to Test 7 (N8N).",
+  "next_action": "Ask the user which they want to do first: (a) resume Phase 11 UAT — check whether they finished the Meta System User token, paste Account ID + token into the Meta Ads card on https://nexusdash-chi.vercel.app/<tenant>/settings, verify ad_accounts.backfill_days in Supabase for the meta_ads row, then move to Test 7 (N8N workflow re-import/activation); or (b) start /gsd-plan-phase 12 (Redesign Visual) since it's the only remaining v1.1 phase and Phase 11's plans are all code-complete regardless of UAT status.",
   "context_notes": "This is a /gsd-verify-work session for phase 11 (backfill window feature), not a plan-execution session — 'tasks' above map to UAT tests in 11-HUMAN-UAT.md, not PLAN.md tasks (all 5 of phase 11's plans are already complete with SUMMARY.md files). Verification has been done live against production (nexusdash-chi.vercel.app) and the live Supabase project via Playwright MCP + direct Supabase Management API calls (SUPABASE_ACCESS_TOKEN already in shell env, verified against the correct project ref before each use per this repo's known multi-account MCP risk)."
 }
