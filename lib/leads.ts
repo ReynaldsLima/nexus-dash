@@ -35,7 +35,7 @@ export const CATEGORY_COLORS: Record<LeadCategory, string> = {
   quente: 'text-emerald-400',
   novo: 'text-blue-400',
   fim: 'text-muted-foreground',
-  fechado: 'text-violet-400',
+  fechado: 'text-[#B5E701]',
 }
 
 export const CATEGORY_BG: Record<LeadCategory, string> = {
@@ -43,5 +43,5 @@ export const CATEGORY_BG: Record<LeadCategory, string> = {
   quente: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
   novo: 'bg-blue-500/15 text-blue-400 border-blue-500/25',
   fim: 'bg-muted/40 text-muted-foreground border-border',
-  fechado: 'bg-violet-500/15 text-violet-400 border-violet-500/25',
+  fechado: 'bg-[#B5E701]/15 text-[#B5E701] border-[#B5E701]/25',
 }

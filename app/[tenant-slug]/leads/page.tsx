@@ -231,7 +231,7 @@ export default function LeadsPage() {
             <KpiCard label="Novos" value={stats.novo} icon={TrendingUp} color="bg-sky-500/15 text-sky-400" />
             <KpiCard label="Quentes" value={stats.quente} icon={Flame} color="bg-emerald-500/15 text-emerald-400" />
             <KpiCard label="Negociando" value={stats.negoc} icon={Handshake} color="bg-orange-500/15 text-orange-400" />
-            <KpiCard label="Fechados" value={stats.fechado} icon={CheckCircle2} color="bg-violet-500/15 text-violet-400" />
+            <KpiCard label="Fechados" value={stats.fechado} icon={CheckCircle2} color="bg-[#B5E701]/15 text-[#B5E701]" />
             <KpiCard label="Sem Resposta" value={stats.fim} icon={PhoneOff} color="bg-muted/60 text-muted-foreground" />
           </div>
 
@@ -326,7 +326,7 @@ export default function LeadsPage() {
               <div className="space-y-4">
                 <FunnelBar label="Leads Quentes" count={stats.quente} pct={stats.pQuente} color="bg-emerald-500" />
                 <FunnelBar label="Em Negociação" count={stats.negoc} pct={stats.pNegoc} color="bg-orange-500" />
-                <FunnelBar label="Fechados" count={stats.fechado} pct={stats.pFechado} color="bg-violet-500" />
+                <FunnelBar label="Fechados" count={stats.fechado} pct={stats.pFechado} color="bg-[#B5E701]" />
               </div>
 
               <div className="border-t border-border pt-4">
@@ -338,7 +338,7 @@ export default function LeadsPage() {
                       <div key={c} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                         <span className="text-xs text-muted-foreground">{CATEGORY_LABELS[c]}</span>
                         <span className={cn('text-xs font-semibold font-mono', {
-                          'text-violet-400': c === 'fechado',
+                          'text-[#B5E701]': c === 'fechado',
                           'text-orange-400': c === 'negoc',
                           'text-emerald-400': c === 'quente',
                           'text-blue-400': c === 'novo',
