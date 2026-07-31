@@ -19,6 +19,10 @@ function buildSystem(leads: Lead[]): string {
   const negoc  = leads.filter(l => cat(l.status) === 'negoc').length
   const fim    = leads.filter(l => cat(l.status) === 'fim').length
   const fechado = leads.filter(l => cat(l.status) === 'fechado').length
+  const desqRegiao = leads.filter(l => cat(l.status) === 'desq_regiao').length
+  const qtdVidas = leads.filter(l => cat(l.status) === 'qtd_vidas').length
+  const pessoaFisica = leads.filter(l => cat(l.status) === 'pessoa_fisica').length
+  const engano = leads.filter(l => cat(l.status) === 'engano').length
 
   const sample = leads.slice(0, 50).map(l =>
     `- ${l.nome || '?'} | ${l.empresa || '?'} | ${l.tipo_seguro || '?'} | ${CATEGORY_LABELS[cat(l.status)]} | ${l.criado_em || '?'}`
@@ -32,6 +36,7 @@ BASE DE LEADS ATUAL:
 - Taxa de aquecimento: ${total ? Math.round(quente / total * 100) : 0}%
 - Taxa de negociação: ${total ? Math.round(negoc / total * 100) : 0}%
 - Taxa de conversão (fechados): ${total ? Math.round(fechado / total * 100) : 0}%
+- Desqualificados: ${desqRegiao + qtdVidas + pessoaFisica + engano} (Região: ${desqRegiao}, Qtd. Vidas: ${qtdVidas}, Pessoa Física: ${pessoaFisica}, Engano: ${engano})
 
 AMOSTRA DOS LEADS (primeiros 50):
 ${sample}
