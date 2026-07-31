@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 Phase: 12
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-07-18 - Completed quick task 260718-orc: Adicionar um novo status de lead "Fechado" ao dropdown de Status na tabela de Gestão de Leads
+Last activity: 2026-07-31 - Completed quick task 260731-qzz: Adicionar 4 novos status de lead: Desqualificado por região, Quantidade de Vidas, Pessoa Física, Engano
 
 Progress: [██████████] 100%
 
@@ -241,6 +241,7 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 |---|-------------|------|--------|-----------|
 | 260710-lhx | Add the official Playwright MCP server to .mcp.json for driving a browser to run Phase 5 manual UAT | 2026-07-10 | 8046c41 | [260710-lhx-add-the-official-playwright-mcp-server-t](./quick/260710-lhx-add-the-official-playwright-mcp-server-t/) |
 | 260718-orc | Adicionar um novo status de lead "Fechado" ao dropdown de Status na tabela de Gestão de Leads | 2026-07-18 | 1bdd638 | [260718-orc-adicionar-um-novo-status-de-lead-fechado](./quick/260718-orc-adicionar-um-novo-status-de-lead-fechado/) |
+| 260731-qzz | Adicionar 4 novos status de lead: Desqualificado por região, Quantidade de Vidas, Pessoa Física, Engano | 2026-07-31 | f5d1581 | [260731-qzz-adicionar-4-novos-status-de-lead-desqual](./quick/260731-qzz-adicionar-4-novos-status-de-lead-desqual/) |
 
 ### Roadmap Evolution
 
