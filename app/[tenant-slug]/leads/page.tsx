@@ -181,6 +181,10 @@ export default function LeadsPage() {
     { key: 'quente', label: 'Quentes' },
     { key: 'negoc', label: 'Negociando' },
     { key: 'fechado', label: 'Fechados' },
+    { key: 'desq_regiao', label: 'Desqualificado por região' },
+    { key: 'qtd_vidas', label: 'Quantidade de Vidas' },
+    { key: 'pessoa_fisica', label: 'Pessoa Física' },
+    { key: 'engano', label: 'Engano' },
     { key: 'fim', label: 'Sem Resposta' },
   ]
 
