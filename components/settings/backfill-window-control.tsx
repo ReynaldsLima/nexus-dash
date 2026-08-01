@@ -3,7 +3,6 @@
 import { useState } from 'react'
 
 import { updateBackfillWindow } from '@/lib/actions/ad-accounts'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -18,7 +17,7 @@ interface BackfillWindowControlProps {
 // "Editar" toggle, no dialog (D-02). "Salvar" only appears when the value
 // differs from the persisted one; save is optimistic with revert-on-failure
 // (D-03), and success has no extra message — the settled value IS the
-// feedback (D-06). Functional only, Phase 12 restyles Settings.
+// feedback (D-06). Restyled in Phase 12 (DESIGN-04); behaviour unchanged.
 export function BackfillWindowControl({
   tenantId,
   tenantSlug,
@@ -50,10 +49,10 @@ export function BackfillWindowControl({
   }
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={`backfill-days-${channel}`}>
+    <div className="space-y-2">
+      <Label htmlFor={`backfill-days-${channel}`} className="t-label text-muted-foreground">
         Janela de histórico (dias)
-        <span className="ml-1 text-muted-foreground font-normal">(7–365)</span>
+        <span className="ml-1.5 normal-case tracking-normal opacity-70">(7–365)</span>
       </Label>
       <div className="flex items-center gap-2">
         <Input
@@ -64,27 +63,27 @@ export function BackfillWindowControl({
           value={value}
           aria-invalid={isInvalid}
           onChange={(e) => setValue(Number(e.target.value))}
-          className="w-28"
+          className="input-accent w-28 rounded-md bg-secondary font-mono text-sm tabular-nums"
         />
         {hasChanged && (
-          <Button
+          <button
             type="button"
-            size="sm"
             disabled={saving || isInvalid}
             onClick={onSave}
+            className="btn-accent !px-3.5 !py-1.5 !text-xs focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             Salvar
-          </Button>
+          </button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs leading-relaxed text-muted-foreground">
         Alterar a janela vale só para o próximo primeiro sync desta conta — não reprocessa dados já
         sincronizados.
       </p>
       {error && (
         <div
           role="alert"
-          className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive"
+          className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {error}
         </div>
