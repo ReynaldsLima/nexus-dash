@@ -175,7 +175,7 @@ This is a **reskin-only phase** (Out of Scope: "Mudanças de comportamento/dados
 - Account balance cards, charts row, stats row: same card/radius/hover treatment; no data or chart-library changes (Recharts stays, per D-03).
 
 ### Campanhas (`app/[tenant-slug]/campanhas/page.tsx`) — DESIGN-02
-- Filter bar (`.fb`/`.tg`/`.tab`) already exists structurally (toggle group + search input, lines ~164-207) — apply accent-tinted active-tab state (`rgba(200,255,0,.1)` bg + accent text + 600 weight) and mono `.rc` result-count styling.
+- Filter bar (`.fb`/`.tg`/`.tab`) already exists structurally (toggle group + search input, lines ~164-207) — apply accent-tinted active-tab state (`rgba(200,255,0,.1)` bg + accent text + 500 weight) and mono `.rc` result-count styling.
 - KPI strip (`grid-cols-2 lg:grid-cols-4`, line 145): same KPI token treatment as Dashboard.
 - Table (`thead`/`tbody`): apply mono uppercase tracked header labels (Label typography), `--s2` header row background, row hover background `--s2`, first/last cell padding asymmetry (22px left/right) already close to current — keep functional filters/drill-down (`ChannelSheet`) untouched, per D-03.
 
@@ -212,8 +212,8 @@ This is a **reskin-only phase** (Out of Scope: "Mudanças de comportamento/dados
 | Button active (accent) | `transform: scale(.97)` |
 | Button disabled | `opacity: .45`, `cursor: not-allowed`, no transform |
 | Input focus | `border-color: rgba(200,255,0,.3)` (no default browser outline ring beyond the existing `--ring` focus-visible pattern, keep both — accent border tint is the primary indicator) |
-| Active nav item | translucent accent wash `rgba(200,255,0,.08)` bg + accent text + 600 weight — NOT a solid fill (see Shared chrome gap above) |
-| Active filter tab | `rgba(200,255,0,.1)` bg + accent text + 600 weight, inside a `--s2` pill-track container |
+| Active nav item | translucent accent wash `rgba(200,255,0,.08)` bg + accent text + 500 weight — NOT a solid fill (see Shared chrome gap above) |
+| Active filter tab | `rgba(200,255,0,.1)` bg + accent text + 500 weight, inside a `--s2` pill-track container |
 | Table row hover | bg `--s2` (`#16161c`), no transform |
 | Status/pulse dot (sync pill, logo, active tenant indicator) | existing `pulse-glow`/`pulse` keyframe animation, already implemented in `globals.css` — reuse as-is, do not duplicate |
 
