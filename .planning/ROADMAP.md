@@ -36,7 +36,8 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
 - [x] **Phase 9: Limpeza do Papel Viewer** - Nenhuma referência ao papel "viewer" morto permanece em tipos, middleware, componentes ou testes (completed 2026-07-12)
 - [x] **Phase 10: Gestão de Usuários** - Super Admin lista, edita e remove acesso de usuários de tenants e agências direto no app
  (completed 2026-07-13)
-- [x] **Phase 11: Janela de Histórico Retroativo** - Tenant Admin configura os dias de backfill por conta conectada, com opção de ajuste posterior (completed 2026-07-17)
+- [x] **Phase 11: Janela de Histórico Retroativo** - Tenant Admin configura os dias de backfill por conta conectada, com opção de ajuste posterior
+ (completed 2026-07-17)
 - [ ] **Phase 12: Redesign Visual** - Dashboard, Campanhas, Insights, Settings e o chrome compartilhado redesenhados conforme os protótipos de referência
 
 ## Phase Details
@@ -94,7 +95,14 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
   3. A página de Insights de IA reflete o novo visual, preservando o streaming e o histórico de recomendações existentes
   4. A página de Configurações reflete o novo visual e inclui o campo de janela de histórico (SET-03/SET-05) já estilizado de acordo
   5. Header e sidebar têm aparência visual consistente nas 4 telas, mantendo o contrato de props (`role`/`tenants`/`tenantId`) de `app/[tenant-slug]/layout.tsx` para `HeaderActions`/`SidebarNav`
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 12-01-PLAN.md — Fundação: tokens --viz-*, correção --chart-2/--chart-3, 6 classes utilitárias, Card em rounded-2xl/px-6
+- [ ] 12-02-PLAN.md — Chrome compartilhado (DESIGN-05): sidebar ativo em wash lime, header translúcido, pills de switcher/date-range
+- [ ] 12-03-PLAN.md — Dashboard (DESIGN-01): KPI cards por categoria, título Display, pill de sync pulsante, cards de gráfico
+- [ ] 12-04-PLAN.md — Campanhas (DESIGN-02): filter bar em pill-track, tabela mono/uppercase, badges de canal exatos do protótipo
+- [ ] 12-05-PLAN.md — Insights (DESIGN-03): cards planos com badge mono, título Syne 700, chips de métrica, CTA lime
+- [ ] 12-06-PLAN.md — Configurações (DESIGN-04): extrapolação dos tokens + polimento do BackfillWindowControl da Fase 11
+- [ ] 12-07-PLAN.md — Varredura de conformidade cross-screen + verificação humana das 4 telas
 **UI hint**: yes
 
 ## Progress
@@ -117,8 +125,8 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
 | 10. Gestão de Usuários | v1.1 | 4/4 | Complete    | 2026-07-13 |
 | 11. Janela de Histórico Retroativo | v1.1 | 5/5 | Complete    | 2026-07-18 |
-| 12. Redesign Visual | v1.1 | 0/TBD | Not started | - |
+| 12. Redesign Visual | v1.1 | 0/7 | Planned | - |
 
 **v1.0 total: 10/10 phases, 46/46 plans complete.**
-**v1.1: 1/4 phases complete; Phase 10 (4 plans) + Phase 11 (5 plans) planned. 14/14 requirements mapped.**
+**v1.1: 3/4 phases complete; Phase 10 (4 plans) + Phase 11 (5 plans) complete, Phase 12 (7 plans) planned. 14/14 requirements mapped.**
 </content>
