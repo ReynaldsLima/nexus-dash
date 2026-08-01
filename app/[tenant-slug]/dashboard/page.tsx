@@ -54,6 +54,8 @@ const channelConfig = {
 }
 
 // ─── KPI Card ────────────────────────────────────────────────────────────────
+type KpiCategory = 'accent' | 'green' | 'blue' | 'orange'
+
 type KpiCardProps = {
   icon: React.ReactNode
   label: string
@@ -61,43 +63,54 @@ type KpiCardProps = {
   pct: number | null   // null → exibir em-dash (sem período anterior)
   positivePolarity: boolean  // true = subir é bom, false = subir é ruim
   sub?: string
+  category: KpiCategory
 }
 
-function KpiCard({ icon, label, value, pct, positivePolarity, sub }: KpiCardProps) {
+// Locked category map — first 4 transcribed from prototipos/nexus-dash.html lines 409-431,
+// last 3 assigned in 12-03-PLAN.md. `color` tints the icon glyph + numeric value,
+// `glow` feeds .kpi-glow's --kpi-glow-color, `barOpacity` matches the prototype's .kpi-bar.
+const KPI_CATEGORY: Record<KpiCategory, { color: string; glow: string; barOpacity: number }> = {
+  accent: { color: 'var(--primary)',    glow: 'rgba(200,255,0,.07)',  barOpacity: 0.25 },
+  green:  { color: 'var(--viz-green)',  glow: 'rgba(74,222,128,.08)', barOpacity: 0.3 },
+  blue:   { color: 'var(--viz-blue)',   glow: 'rgba(96,165,250,.08)', barOpacity: 0.3 },
+  orange: { color: 'var(--viz-orange)', glow: 'rgba(251,146,60,.08)', barOpacity: 0.3 },
+}
+
+function KpiCard({ icon, label, value, pct, positivePolarity, sub, category }: KpiCardProps) {
   const hasDelta = pct !== null
   const isGood = hasDelta
     ? (positivePolarity ? pct > 0 : pct < 0)
     : true  // neutro quando sem delta
   const isUp = hasDelta && pct > 0
+  const cat = KPI_CATEGORY[category]
 
   return (
-    <Card className="relative overflow-hidden">
-      <div
-        className="absolute inset-x-0 top-0 h-0.5"
-        style={{
-          background: isGood
-            ? 'linear-gradient(90deg, var(--chart-3), transparent)'
-            : 'linear-gradient(90deg, var(--chart-5), transparent)',
-        }}
-      />
-      <CardContent className="pt-5 pb-5 px-5">
+    <Card
+      className="kpi-glow lift hover:ring-primary/20 flex flex-col py-0"
+      style={{ ['--kpi-glow-color' as string]: cat.glow }}
+    >
+      <CardContent className="relative pt-4 px-6 pb-0 flex-1">
         <div className="flex items-start justify-between mb-3">
-          <div className="p-1.5 rounded-md bg-muted text-muted-foreground">
+          <div
+            className="flex size-[30px] items-center justify-center rounded-md border border-border bg-secondary"
+            style={{ color: cat.color }}
+          >
             {icon}
           </div>
           <span
-            className="inline-flex items-center gap-0.5 text-xs font-semibold rounded-full px-2 py-0.5"
+            className="t-label inline-flex items-center gap-0.5 rounded-full px-2 py-0.5"
             style={{
+              letterSpacing: '0.04em',
               background: !hasDelta
-                ? 'oklch(0.6 0 0 / 0.10)'
+                ? 'var(--secondary)'
                 : isGood
-                  ? 'oklch(0.75 0.18 155 / 0.15)'
-                  : 'oklch(0.65 0.20 15 / 0.15)',
+                  ? 'rgba(74,222,128,.12)'
+                  : 'rgba(248,113,113,.12)',
               color: !hasDelta
-                ? 'oklch(0.6 0 0)'
+                ? 'var(--muted-foreground)'
                 : isGood
-                  ? 'oklch(0.75 0.18 155)'
-                  : 'oklch(0.65 0.20 15)',
+                  ? 'var(--viz-green)'
+                  : 'var(--viz-red)',
             }}
           >
             {hasDelta ? (
@@ -113,17 +126,22 @@ function KpiCard({ icon, label, value, pct, positivePolarity, sub }: KpiCardProp
             )}
           </span>
         </div>
-        <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
+        <p className="t-label text-muted-foreground mb-1">{label}</p>
         <p
-          className="text-2xl font-bold tracking-tight tabular-nums"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
+          className="t-display tabular-nums"
+          style={{ color: cat.color, fontVariantNumeric: 'tabular-nums' }}
         >
           {value}
         </p>
         {sub && (
-          <p className="text-xs text-muted-foreground/60 mt-1">{sub}</p>
+          <p className="text-xs text-muted-foreground mt-1 mb-3">{sub}</p>
         )}
       </CardContent>
+      <div
+        className="h-[3px] w-full"
+        style={{ background: cat.color, opacity: cat.barOpacity }}
+        aria-hidden="true"
+      />
     </Card>
   )
 }
