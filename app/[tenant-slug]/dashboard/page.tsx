@@ -187,7 +187,7 @@ export default function DashboardPage() {
     return (
       <section className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="t-display">Dashboard</h1>
         </div>
         <Card>
           <CardContent className="pt-6 pb-6 text-center text-sm text-muted-foreground">
@@ -255,14 +255,15 @@ export default function DashboardPage() {
   return (
     <section className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <h1 className="t-display">Dashboard</h1>
+          <p className="t-label text-muted-foreground mt-1.5">
             Período atual&nbsp;·&nbsp;2 canais
           </p>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground border border-border rounded-full px-3 py-1.5">
+        <div className="flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1.5 font-mono text-[11px] text-primary">
+          <span className="logo-dot !size-1.5 !top-0" aria-hidden="true" />
           <RefreshCw className="size-3" aria-hidden="true" />
           Dados sincronizados
         </div>
@@ -277,6 +278,7 @@ export default function DashboardPage() {
           pct={deltaSpend.pct}
           positivePolarity={false}
           sub="vs período anterior"
+          category="accent"
         />
         <KpiCard
           icon={<TrendingUp className="size-4" />}
@@ -285,6 +287,7 @@ export default function DashboardPage() {
           pct={deltaRoas.pct}
           positivePolarity={true}
           sub="retorno sobre gasto"
+          category="green"
         />
         <KpiCard
           icon={<Target className="size-4" />}
@@ -293,6 +296,7 @@ export default function DashboardPage() {
           pct={deltaCpa.pct}
           positivePolarity={false}
           sub="custo por conversão"
+          category="blue"
         />
         <KpiCard
           icon={<MousePointerClick className="size-4" />}
@@ -301,6 +305,7 @@ export default function DashboardPage() {
           pct={deltaCtr.pct}
           positivePolarity={true}
           sub="taxa de clique"
+          category="accent"
         />
         <KpiCard
           icon={<Eye className="size-4" />}
@@ -309,6 +314,7 @@ export default function DashboardPage() {
           pct={deltaImpressions.pct}
           positivePolarity={true}
           sub="total de impressões"
+          category="orange"
         />
         <KpiCard
           icon={<MousePointerClick className="size-4" />}
@@ -317,6 +323,7 @@ export default function DashboardPage() {
           pct={deltaClicks.pct}
           positivePolarity={true}
           sub="total de cliques"
+          category="blue"
         />
         <KpiCard
           icon={<ShoppingCart className="size-4" />}
@@ -325,6 +332,7 @@ export default function DashboardPage() {
           pct={deltaConversions.pct}
           positivePolarity={true}
           sub="total de conversões"
+          category="green"
         />
       </div>
 
@@ -334,9 +342,9 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Spend over time (DASH-02) */}
-        <Card className="lg:col-span-3">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Gasto por Canal — período selecionado</CardTitle>
+        <Card className="lg:col-span-3 lift hover:ring-primary/20">
+          <CardHeader className="border-b pb-4">
+            <CardTitle className="font-heading text-[13px] font-bold">Gasto por Canal — período selecionado</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <ChartContainer config={spendConfig} className="h-56 w-full">
@@ -405,9 +413,9 @@ export default function DashboardPage() {
         </Card>
 
         {/* Channel split (DASH-03) */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold">Split por Canal</CardTitle>
+        <Card className="lg:col-span-2 lift hover:ring-primary/20">
+          <CardHeader className="border-b pb-4">
+            <CardTitle className="font-heading text-[13px] font-bold">Split por Canal</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 flex flex-col items-center gap-4">
             <ChartContainer config={channelConfig} className="h-40 w-full max-w-[180px]">
@@ -439,7 +447,7 @@ export default function DashboardPage() {
 
             <div className="w-full space-y-2">
               {channelSplitData.map((item, i) => (
-                <div key={item.name} className="flex items-center justify-between text-xs">
+                <div key={item.name} className="flex items-center justify-between border-b border-border py-2.5 text-xs last:border-b-0">
                   <div className="flex items-center gap-2">
                     <span
                       className="size-2.5 rounded-sm flex-shrink-0"
@@ -449,8 +457,8 @@ export default function DashboardPage() {
                     <span className="text-muted-foreground">{item.name}</span>
                   </div>
                   <div className="flex items-center gap-2 tabular-nums">
-                    <span className="font-medium">{brl(item.value)}</span>
-                    <span className="text-muted-foreground/60">{item.pct}%</span>
+                    <span className="font-mono text-xs font-medium">{brl(item.value)}</span>
+                    <span className="min-w-9 text-right font-mono text-[11px] text-muted-foreground">{item.pct}%</span>
                   </div>
                 </div>
               ))}
