@@ -35,7 +35,8 @@ export function TenantSwitcher({
         if (slug === '__manage__') router.push(manageHref)
         else router.push(`/${slug}/dashboard`)
       }}
-      className="h-8 rounded-md border border-border bg-background px-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
+      className="h-8 rounded-full border border-border bg-card px-3.5 text-xs font-bold text-foreground transition-colors hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-ring"
+      style={{ fontFamily: 'var(--font-syne)' }}
     >
       {tenants.map((t) => (
         <option key={t.id} value={t.slug} disabled={!t.active}>

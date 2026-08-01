@@ -14,7 +14,7 @@ type HeaderActionsProps = {
 
 export function HeaderActions({ role, tenants, activeSlug, manageHref, manageLabel }: HeaderActionsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <DateRangePicker />
       <TenantSwitcher role={role} tenants={tenants} activeSlug={activeSlug} manageHref={manageHref} manageLabel={manageLabel} />
       <LogoutButton />

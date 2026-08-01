@@ -38,7 +38,10 @@ export function DateRangePicker() {
     <Popover open={open} onOpenChange={(isOpen) => setOpen(isOpen)}>
       <PopoverTrigger
         render={
-          <Button variant="outline" className="gap-2 text-xs h-8" />
+          <Button
+            variant="outline"
+            className="gap-1.5 h-8 rounded-full border-border bg-card px-3 font-mono text-[11px] font-normal text-primary hover:border-primary/30 hover:bg-card hover:text-primary"
+          />
         }
       >
         <CalendarIcon className="size-3.5" />
