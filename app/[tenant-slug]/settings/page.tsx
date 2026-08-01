@@ -80,15 +80,22 @@ async function fetchTenantSettings(tenantSlug: string): Promise<TenantSettingsDa
 function ChannelStatusBadge({ status }: { status: ConnectionStatus }) {
   if (status === 'connected') {
     return (
-      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+      <Badge
+        className="border font-mono text-[11px] font-medium"
+        style={{
+          background: 'rgba(74,222,128,.12)',
+          borderColor: 'rgba(74,222,128,.2)',
+          color: 'var(--viz-green)',
+        }}
+      >
         Conectado
       </Badge>
     )
   }
   if (status === 'invalid') {
-    return <Badge variant="destructive">Token inválido</Badge>
+    return <Badge variant="destructive" className="font-mono text-[11px] font-medium">Token inválido</Badge>
   }
-  return <Badge variant="secondary">Não configurado</Badge>
+  return <Badge variant="secondary" className="font-mono text-[11px] font-medium">Não configurado</Badge>
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -100,8 +107,8 @@ function SettingsSkeleton() {
         <Skeleton className="h-4 w-72" />
       </div>
       <div className="space-y-4">
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
+        <Skeleton className="h-48 w-full rounded-2xl" />
+        <Skeleton className="h-32 w-full rounded-2xl" />
       </div>
     </div>
   )
@@ -130,7 +137,7 @@ export default function SettingsPage() {
   if (isError) {
     return (
       <div className="max-w-2xl">
-        <h1 className="text-xl font-semibold mb-2">Configurações</h1>
+        <h1 className="t-heading mb-2">Configurações</h1>
         <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
           {(error as Error)?.message ?? 'Erro ao carregar configurações.'}
         </div>
@@ -151,19 +158,19 @@ export default function SettingsPage() {
     <div className="max-w-2xl space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-xl font-semibold">Configurações</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <h1 className="t-heading">Configurações</h1>
+        <p className="t-label text-muted-foreground mt-1.5">
           Gerencie as conexões com as plataformas de anúncios do tenant.
         </p>
       </div>
 
       {/* ── Meta Ads section (SET-02) ───────────────────────────────────── */}
-      <Card>
-        <CardHeader className="border-b">
+      <Card className="lift hover:ring-primary/20">
+        <CardHeader className="border-b pb-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <CardTitle>Meta Ads</CardTitle>
-              <CardDescription className="mt-0.5">
+              <CardTitle className="font-heading text-[13px] font-bold">Meta Ads</CardTitle>
+              <CardDescription className="mt-1 text-[13px]">
                 Conecte via System User token para sincronização automática das campanhas.
               </CardDescription>
             </div>
@@ -173,7 +180,7 @@ export default function SettingsPage() {
         <CardContent className="pt-4">
           <MetaAdsForm tenantId={tenantId} initialStatus={metaStatus} />
           {metaStatus !== 'not_configured' && (
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-5 border-t pt-5">
               <BackfillWindowControl
                 tenantId={tenantId}
                 tenantSlug={tenantSlug}
@@ -186,12 +193,12 @@ export default function SettingsPage() {
       </Card>
 
       {/* ── Google Ads section (SET-01) ─────────────────────────────────── */}
-      <Card>
-        <CardHeader className="border-b">
+      <Card className="lift hover:ring-primary/20">
+        <CardHeader className="border-b pb-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <CardTitle>Google Ads</CardTitle>
-              <CardDescription className="mt-0.5">
+              <CardTitle className="font-heading text-[13px] font-bold">Google Ads</CardTitle>
+              <CardDescription className="mt-1 text-[13px]">
                 Conecte via OAuth2 para sincronização automática das campanhas.
               </CardDescription>
             </div>
@@ -206,7 +213,7 @@ export default function SettingsPage() {
             initialCustomerId={googleAccountId}
           />
           {googleStatus !== 'not_configured' && (
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-5 border-t pt-5">
               <BackfillWindowControl
                 tenantId={tenantId}
                 tenantSlug={tenantSlug}
