@@ -96,7 +96,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
   4. A página de Configurações reflete o novo visual e inclui o campo de janela de histórico (SET-03/SET-05) já estilizado de acordo
   5. Header e sidebar têm aparência visual consistente nas 4 telas, mantendo o contrato de props (`role`/`tenants`/`tenantId`) de `app/[tenant-slug]/layout.tsx` para `HeaderActions`/`SidebarNav`
 **Plans**: 7 plans
-- [ ] 12-01-PLAN.md — Fundação: tokens --viz-*, correção --chart-2/--chart-3, 6 classes utilitárias, Card em rounded-2xl/px-6
+- [x] 12-01-PLAN.md — Fundação: tokens --viz-*, correção --chart-2/--chart-3, 6 classes utilitárias, Card em rounded-2xl/px-6
 - [ ] 12-02-PLAN.md — Chrome compartilhado (DESIGN-05): sidebar ativo em wash lime, header translúcido, pills de switcher/date-range
 - [ ] 12-03-PLAN.md — Dashboard (DESIGN-01): KPI cards por categoria, título Display, pill de sync pulsante, cards de gráfico
 - [ ] 12-04-PLAN.md — Campanhas (DESIGN-02): filter bar em pill-track, tabela mono/uppercase, badges de canal exatos do protótipo
@@ -125,7 +125,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
 | 10. Gestão de Usuários | v1.1 | 4/4 | Complete    | 2026-07-13 |
 | 11. Janela de Histórico Retroativo | v1.1 | 5/5 | Complete    | 2026-07-18 |
-| 12. Redesign Visual | v1.1 | 0/7 | Planned | - |
+| 12. Redesign Visual | v1.1 | 1/7 | In Progress|  |
 
 **v1.0 total: 10/10 phases, 46/46 plans complete.**
 **v1.1: 3/4 phases complete; Phase 10 (4 plans) + Phase 11 (5 plans) complete, Phase 12 (7 plans) planned. 14/14 requirements mapped.**

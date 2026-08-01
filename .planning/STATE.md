@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
-status: verifying
-stopped_at: Phase 12 context gathered
-last_updated: "2026-08-01T01:07:29.444Z"
-last_activity: "2026-07-31 - Completed quick task 260731-qzz: Adicionar 4 novos status de lead: Desqualificado por região, Quantidade de Vidas, Pessoa Física, Engano"
+status: executing
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-08-01T22:26:36.497Z"
+last_activity: 2026-08-01
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
-  percent: 100
+  total_plans: 17
+  completed_plans: 11
+  percent: 65
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-07-12)
 **Core value:** Super Admin sees and optimizes campaigns for all clients in one place, with actionable AI recommendations — without logging into multiple ad platforms.
-**Current focus:** Phase 11 — janela-de-hist-rico-retroativo
+**Current focus:** Phase 12 — redesign-visual
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-07-31 - Completed quick task 260731-qzz: Adicionar 4 novos status de lead: Desqualificado por região, Quantidade de Vidas, Pessoa Física, Engano
+Phase: 12 (redesign-visual) — EXECUTING
+Plan: 2 of 7
+Status: Ready to execute
+Last activity: 2026-08-01
 
 Progress: [██████████] 100%
 
@@ -118,6 +118,7 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 | Phase 11-janela-de-hist-rico-retroativo P03 | 5min | 2 tasks | 3 files |
 | Phase 11-janela-de-hist-rico-retroativo P04 | 6min | 3 tasks | 4 files |
 | Phase 11 P05 | 4min | 2 tasks | 2 files |
+| Phase 12-redesign-visual P01 | 10min | 3 tasks | 2 files |
 
 ### Per-Plan Execution Log
 
@@ -201,6 +202,7 @@ Phase 12: Redesign Visual (not started — DESIGN-01..05)
 - **Phase 10-gest-o-de-usu-rios Plan 02 (USER-03/04/05, Server Actions):** `lib/actions/tenants.ts` gained `editTenantUserEmail`/`resetTenantUserPassword`/`removeTenantUserAccess`; `lib/actions/agencies.ts` mirrors with `agencyId`, importing `UserActionResult`/`ResetPasswordResult` from the tenant file (single source of truth) rather than redeclaring. Both remove-access actions delete the join row scoped by BOTH foreign keys (never a single-key delete — `tenant_users` has no `UNIQUE(user_id)`, a user can belong to more than one tenant) before calling `revoke_user_sessions`, and surface an `{ error }` if the RPC itself fails rather than reporting a false `{ ok: true }`. `types/database.types.ts` regenerated to pick up Plan 01's live-pushed `revoke_user_sessions` RPC signature (Rule 3 auto-fix, blocking `tsc --noEmit`). Both action files' unit tests converted from `it.todo()` to 8/8 passing each. Commits: `719352d` (tenant actions), `a813903` (agency actions).
 - **Phase 11-janela-de-hist-rico-retroativo Plan 01 (SET-03/SET-04 foundation, 1/5 plans):** `supabase/migrations/0024_add_backfill_days_to_ad_accounts.sql` pushed live to `rvkkvjitfddtbdpkupok` — `ad_accounts.backfill_days INTEGER NOT NULL DEFAULT 90 CHECK (BETWEEN 7 AND 365)`, confirmed via `information_schema.columns`; `types/database.types.ts` regenerated (diff-clean, 3 additions). **Neither the Supabase CLI nor an MCP Supabase tool were available in this execution session** (despite both being referenced in the task prompt and this repo's `.mcp.json`) — pushed the migration and regenerated types via direct calls to the Supabase Management API (`POST /v1/projects/{ref}/database/query`, `GET /v1/projects/{ref}/types/typescript`), authenticated with `SUPABASE_ACCESS_TOKEN` already present in the shell environment; verified the token resolved to the correct project (`nexus-dash`, `rvkkvjitfddtbdpkupok`) before writing anything, per the project's known multi-account MCP-connector-mismatch risk (see `mcp-connector-account-mismatch` memory). **Any future plan needing to push a migration or regenerate types in an environment without the CLI/MCP tool can reuse this same Management API pattern.** `lib/google-ads/oauth-state.ts`'s `signState` extended to a 4-arg signature (`tenantId, tenantSlug, customerId, backfillDays`) carrying the window through the HMAC-signed OAuth state; `StatePayload` gained `backfillDays: number`; `verifyState` unchanged (JSON round-trip flows it through automatically). `tests/unit/oauth-state.test.ts` taken through a real RED→GREEN TDD cycle (2/6 failing, then 6/6 passing). **This intentionally breaks `app/api/google-ads/connect/route.ts`'s existing 3-arg call site and `tests/unit/google-ads-callback-route.test.ts`'s fixtures** (`npx tsc --noEmit` now shows 8 new `Expected 4 arguments, but got 3` errors beyond the 2 pre-existing unrelated `vault-rpc.test.ts` errors) — both files are explicitly in Plan 11-02's `files_modified` (`depends_on: [01]`), confirming this is the intended interface-first Wave 1→Wave 2 boundary, not a regression. Zero other deviations. Commits: `b35919e` (migration), `88cbfd3` (types), `bbd66da` (RED test), `721461a` (GREEN implementation).
 - **Phase 10-gest-o-de-usu-rios Plan 03 (USER-01/USER-02, user-management UI):** Consolidated 10-RESEARCH.md's sketched parallel `components/tenants/*`/`components/agencies/*` dialog sets into one scope-parameterized `components/users/*` set — `UserScope` discriminated union (`{type:'tenant',tenantId,label}` | `{type:'agency',agencyId,label}`) dispatches every dialog/action to the correct Server Action, since the route already knows its context. `UserRowActions` is `components/ui/dropdown-menu.tsx`'s first real production usage (installed early in the project, never rendered before this plan) — three independent `useState` open-flags avoid nesting `DialogTrigger`/`AlertDialogTrigger` inside a `DropdownMenuItem` (10-RESEARCH.md Pattern 3, Base UI's documented focus/portal-conflict warning). `UsersTable` is deliberately email + actions only (D-03) — no "último login"/"data de vinculação" (would require an extra admin call per user, out of scope). `lib/users.ts`'s read path joins `tenant_users`/`agency_users` (public client) then calls `service.auth.admin.getUserById()` per row (service-role — `auth.users` is unreachable via PostgREST), N+1 accepted at 1-3 tenant scale (T-10-10, accepted disposition); `ManagedUser` is single-sourced from `components/users/user-scope.ts`, re-exported by `lib/users.ts`. Both `/tenants/[slug]` and `/agencies/[id]` render `<UsersTable>` in place of the "gerenciado via Supabase Dashboard" placeholder; `Toaster` mounted in both `app/tenants/layout.tsx` and `app/agencies/layout.tsx` for the first time (neither had one), needed for D-09's "Acesso removido e sessão encerrada" toast. Zero deviations. `npx tsc --noEmit`/`npm run build` clean (same 2 pre-existing unrelated `vault-rpc.test.ts` errors); both `/tenants/[slug]` and `/agencies/[id]` compile in the route list. Full suite: 32 test files, 249 passed/1 skipped/5 todo, zero regressions. USER-01/USER-02 now marked complete in `.planning/REQUIREMENTS.md`. Commits: `7433b91` (scope + dialogs), `761f4bb` (table + row-actions), `0e793e3` (read path + page/layout wiring).
+- **Phase 12-redesign-visual Plan 01 (DESIGN-01..05, design-token foundation, 1/7 plans):** `app/globals.css` gained a semantic `--viz-blue/green/orange/red/purple` palette in both `.dark`/`:root`, mirrored as `--color-viz-*` in `@theme inline`; `--chart-2` corrected `#00d4ff`→`#a78bfa` and `--chart-3` `#ff6b00`→`#fb923c` to match `prototipos/nexus-dash.html`'s Meta Ads series and warning color. Six utility classes (`.t-label`/`.t-heading`/`.t-display`/`.lift`/`.btn-accent`/`.kpi-glow`) plus `.input-accent` added — the interface contract Wave 2 plans (12-02..06) apply verbatim, never redefine. D-04's 4-weight/3-family typography exception documented inline as a comment header. `components/ui/card.tsx`'s `Card`/`CardHeader`/`CardContent`/`CardFooter` moved `rounded-xl`/`px-4`→`rounded-2xl`/`px-6` (18px/24px), propagating to all ~20 `<Card>` call sites app-wide including out-of-scope `/tenants`/`/agencies`/`/leads` (accepted blast radius per 12-CONTEXT.md). One deviation (Rule 1): Task 3's own automated verify grep (`! grep -q 'px-4'`) contradicted its own action instructions (which explicitly require adding `group-data-[size=sm]/card:px-4`) — implemented the action as literally written, verified via word-boundary grep that zero *standalone* `px-4` tokens remain (matching the acceptance criteria's stated intent), left the plan file unmodified. `npx tsc --noEmit`/`npm run build` clean (same 2 pre-existing unrelated `vault-rpc.test.ts` errors); full suite 285 passed/1 skipped/5 todo/1 failed — the failure is the pre-existing `anomaly_alerts` realtime websocket cold-start flake (documented since Phase 4 Plan 02), unrelated to this CSS/component-class-only plan. Commits: `dfe6fc2` (Task 1, viz palette), `a8884da` (Task 2, utility classes), `2651dab` (Task 3, Card fix).
 
 ### Pending Todos
 
@@ -265,9 +267,9 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 
 **Last updated:** 2026-07-17 - Sessão retomada via /gsd-resume-work; handoff de 2026-07-14 (HANDOFF.json + .continue-here.md) consumido e limpo.
 **Last action:** Phase 11 (Janela de Histórico Retroativo) planejada de ponta a ponta em 2026-07-14: research e UI-SPEC pulados por escolha do usuário (ARCHITECTURE.md §Feature 3 e CONTEXT.md já cobriam o design), 5 PLAN.md criados pelo gsd-planner, verificados pelo gsd-plan-checker com 0 blockers/0 warnings de primeira. Nenhuma task foi executada ainda. Usuário escolheu retomar direto para execução.
-**Stopped at:** Phase 12 context gathered
+**Stopped at:** Completed 12-01-PLAN.md
 **Next action:** Execute Phase 11 — 5 plans em 2 waves (11-01 fundação/migration bloqueante; 11-02..11-05 em paralelo). Confirmar antes que a conta Supabase MCP conectada é a correta (Supabase CLI não está disponível neste shell).
-**Resume file:** .planning/phases/12-redesign-visual/12-CONTEXT.md
+**Resume file:** None
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
 </content>
