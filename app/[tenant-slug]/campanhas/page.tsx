@@ -19,11 +19,11 @@ type SortKey = 'spend' | 'roas' | 'cpa' | 'ctr' | 'conversions'
 function ChannelBadge({ channel }: { channel: Channel }) {
   return (
     <span
-      className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium whitespace-nowrap"
+      className="inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium whitespace-nowrap"
       style={
         channel === 'google_ads'
-          ? { background: 'oklch(0.60 0.22 258 / 0.15)', color: 'oklch(0.72 0.16 258)' }
-          : { background: 'oklch(0.68 0.20 305 / 0.15)', color: 'oklch(0.75 0.16 305)' }
+          ? { background: 'rgba(96,165,250,.1)', color: 'var(--viz-blue)' }
+          : { background: 'rgba(167,139,250,.1)', color: 'var(--viz-purple)' }
       }
     >
       {channel === 'google_ads' ? 'Google Ads' : 'Meta Ads'}
@@ -36,7 +36,7 @@ function StatusDot({ status }: { status: AggregatedCampaign['status'] }) {
     <span className="flex items-center gap-1.5 text-xs">
       <span
         className="size-1.5 rounded-full"
-        style={{ background: status === 'active' ? 'oklch(0.75 0.18 155)' : 'oklch(0.556 0 0)' }}
+        style={{ background: status === 'active' ? 'var(--viz-green)' : 'var(--muted-foreground)' }}
         aria-hidden="true"
       />
       <span className="text-muted-foreground capitalize">
@@ -49,12 +49,12 @@ function StatusDot({ status }: { status: AggregatedCampaign['status'] }) {
 function RoasValue({ value }: { value: number }) {
   const color =
     value >= 4.0
-      ? 'oklch(0.75 0.18 155)'
+      ? 'var(--primary)'
       : value >= 2.5
-        ? 'oklch(0.72 0.19 47)'
-        : 'oklch(0.65 0.20 15)'
+        ? 'var(--viz-orange)'
+        : 'var(--viz-red)'
   return (
-    <span className="font-semibold tabular-nums" style={{ color }}>
+    <span className="font-mono text-xs font-medium tabular-nums" style={{ color }}>
       {value.toFixed(2)}×
     </span>
   )
@@ -131,8 +131,8 @@ export default function CampanhasPage() {
     <section className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Campanhas</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <h1 className="t-display">Campanhas</h1>
+        <p className="t-label text-muted-foreground mt-1.5">
           {isLoading
             ? 'Carregando…'
             : isError
@@ -151,10 +151,10 @@ export default function CampanhasPage() {
         ].map(({ label, value }) => (
           <div
             key={label}
-            className="rounded-lg border border-border bg-card px-4 py-3"
+            className="lift hover:border-primary/20 rounded-2xl border border-border bg-card px-5 py-4"
           >
-            <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="text-lg font-bold tabular-nums mt-0.5">{value}</p>
+            <p className="t-label text-muted-foreground mb-1.5">{label}</p>
+            <p className="t-display tabular-nums">{value}</p>
           </div>
         ))}
       </div>
