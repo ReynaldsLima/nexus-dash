@@ -242,8 +242,8 @@ export default function InsightsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">AI Insights</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <h1 className="t-display">AI Insights</h1>
+          <p className="t-label text-muted-foreground mt-1.5">
             Recomendações geradas por Claude&nbsp;·&nbsp;{insights?.length ?? 0} análises
           </p>
         </div>
@@ -251,11 +251,7 @@ export default function InsightsPage() {
           type="button"
           onClick={handleGenerate}
           disabled={streamState !== 'idle'}
-          className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-150 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
-          style={{
-            background: 'var(--sidebar-primary)',
-            color: 'var(--sidebar-primary-foreground)',
-          }}
+          className="btn-accent flex-shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           aria-live="polite"
         >
           {streamState !== 'idle' ? (
@@ -285,7 +281,7 @@ export default function InsightsPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Carregando…</p>
       ) : isError ? (
-        <Card>
+        <Card className="lift hover:ring-primary/20">
           <CardContent className="pt-6 pb-6 text-center text-sm text-muted-foreground">
             Erro ao carregar insights. Tente recarregar a página.
           </CardContent>
@@ -293,7 +289,7 @@ export default function InsightsPage() {
       ) : insights && insights.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 gap-2 text-center">
           <Sparkles className="size-8 text-muted-foreground/40" aria-hidden="true" />
-          <p className="text-sm font-semibold">Nenhuma análise ainda</p>
+          <p className="t-heading">Nenhuma análise ainda</p>
           <p className="text-sm text-muted-foreground">
             Clique em &quot;Analisar agora&quot; para gerar a primeira recomendação de IA para este tenant.
           </p>
@@ -307,7 +303,7 @@ export default function InsightsPage() {
       )}
 
       {/* Footer note */}
-      <p className="text-xs text-muted-foreground/50 text-center pb-2">
+      <p className="pb-2 text-center font-mono text-[11px] text-muted-foreground">
         Análises geradas por claude-sonnet-4-6 com base em dados sincronizados via N8N.
         Recomendações são sugestivas — valide antes de aplicar.
       </p>
