@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Gestão de Usuários, Limpeza e Redesign Visual
 status: verifying
-stopped_at: Completed 11-05-PLAN.md
-last_updated: "2026-07-18T16:53:25.705Z"
-last_activity: 2026-07-18
+stopped_at: Phase 12 context gathered
+last_updated: "2026-08-01T01:07:29.444Z"
+last_activity: "2026-07-31 - Completed quick task 260731-qzz: Adicionar 4 novos status de lead: Desqualificado por região, Quantidade de Vidas, Pessoa Física, Engano"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -265,9 +265,9 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 
 **Last updated:** 2026-07-17 - Sessão retomada via /gsd-resume-work; handoff de 2026-07-14 (HANDOFF.json + .continue-here.md) consumido e limpo.
 **Last action:** Phase 11 (Janela de Histórico Retroativo) planejada de ponta a ponta em 2026-07-14: research e UI-SPEC pulados por escolha do usuário (ARCHITECTURE.md §Feature 3 e CONTEXT.md já cobriam o design), 5 PLAN.md criados pelo gsd-planner, verificados pelo gsd-plan-checker com 0 blockers/0 warnings de primeira. Nenhuma task foi executada ainda. Usuário escolheu retomar direto para execução.
-**Stopped at:** Completed 11-05-PLAN.md
+**Stopped at:** Phase 12 context gathered
 **Next action:** Execute Phase 11 — 5 plans em 2 waves (11-01 fundação/migration bloqueante; 11-02..11-05 em paralelo). Confirmar antes que a conta Supabase MCP conectada é a correta (Supabase CLI não está disponível neste shell).
-**Resume file:** None
+**Resume file:** .planning/phases/12-redesign-visual/12-CONTEXT.md
 **Roadmap:** .planning/ROADMAP.md
 **Requirements:** .planning/REQUIREMENTS.md
 </content>
