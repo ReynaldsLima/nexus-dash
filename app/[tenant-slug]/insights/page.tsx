@@ -12,37 +12,36 @@ import { useUserRole } from '@/lib/hooks/use-user-role'
 import { StreamingInsightCard } from '@/components/insights/streaming-insight-card'
 
 // ─── Type helpers ─────────────────────────────────────────────────────────────
+// Colours transcribed from prototipos/nexus-dash.html .bdg-accent / .bdg-red / .bdg-amber
+// (lines 148-155) and the rendered mapping at lines 495 / 505 / 515.
 const TYPE_CONFIG = {
   opportunity: {
     icon: TrendingUp,
     label: 'Oportunidade',
-    borderColor: 'var(--chart-1)',
-    bgColor: 'oklch(0.60 0.22 258 / 0.08)',
-    badgeBg: 'oklch(0.60 0.22 258 / 0.15)',
-    badgeColor: 'oklch(0.72 0.16 258)',
+    badgeBg: 'rgba(200,255,0,.1)',
+    badgeBorder: 'rgba(200,255,0,.2)',
+    badgeColor: 'var(--primary)',
   },
   alert: {
     icon: AlertTriangle,
     label: 'Alerta',
-    borderColor: 'var(--chart-5)',
-    bgColor: 'oklch(0.65 0.20 15 / 0.06)',
-    badgeBg: 'oklch(0.65 0.20 15 / 0.15)',
-    badgeColor: 'oklch(0.65 0.20 15)',
+    badgeBg: 'rgba(248,113,113,.12)',
+    badgeBorder: 'rgba(248,113,113,.2)',
+    badgeColor: 'var(--viz-red)',
   },
   optimization: {
     icon: Lightbulb,
     label: 'Otimização',
-    borderColor: 'var(--chart-3)',
-    bgColor: 'oklch(0.75 0.18 155 / 0.06)',
-    badgeBg: 'oklch(0.75 0.18 155 / 0.15)',
-    badgeColor: 'oklch(0.75 0.18 155)',
+    badgeBg: 'rgba(251,191,36,.1)',
+    badgeBorder: 'rgba(251,191,36,.2)',
+    badgeColor: '#fbbf24',
   },
 } as const
 
 const IMPACT_CONFIG = {
-  high:   { label: 'Alto impacto',  color: 'oklch(0.65 0.20 15)' },
-  medium: { label: 'Médio impacto', color: 'oklch(0.72 0.19 47)' },
-  low:    { label: 'Baixo impacto', color: 'oklch(0.556 0 0)' },
+  high:   { label: 'Alto impacto',  color: 'var(--viz-red)' },
+  medium: { label: 'Médio impacto', color: 'var(--viz-orange)' },
+  low:    { label: 'Baixo impacto', color: 'var(--muted-foreground)' },
 } as const
 
 function formatDate(iso: string) {
@@ -62,62 +61,52 @@ function InsightCard({ insight }: { insight: AiInsight }) {
   const Icon = cfg.icon
 
   return (
-    <div
-      className="rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md"
-      style={{
-        borderColor: cfg.borderColor,
-        background: cfg.bgColor,
-        borderLeftWidth: '3px',
-      }}
-    >
-      <div className="p-5">
+    <div className="lift overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/20">
+      <div className="p-[22px]">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="mb-3.5 flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
-              style={{ background: cfg.badgeBg, color: cfg.badgeColor }}
+              className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[11px]"
+              style={{ background: cfg.badgeBg, borderColor: cfg.badgeBorder, color: cfg.badgeColor }}
             >
               <Icon className="size-3" aria-hidden="true" />
               {cfg.label}
             </span>
-            <span
-              className="text-xs font-medium"
-              style={{ color: impactCfg.color }}
-            >
+            <span className="font-mono text-[11px]" style={{ color: impactCfg.color }}>
               · {impactCfg.label}
             </span>
           </div>
           <time
             dateTime={insight.createdAt}
-            className="text-xs text-muted-foreground/60 whitespace-nowrap flex-shrink-0"
+            className="flex-shrink-0 font-mono text-[11px] whitespace-nowrap text-muted-foreground"
           >
             {formatDate(insight.createdAt)}
           </time>
         </div>
 
         {/* Title */}
-        <h2 className="text-sm font-semibold leading-snug mb-2 text-balance">
+        <h2 className="t-heading mb-2.5 text-balance">
           {insight.title}
         </h2>
 
         {/* Summary */}
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+        <p className="mb-[18px] text-sm leading-relaxed text-muted-foreground">
           {insight.summary}
         </p>
 
         {/* Metrics chips */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="mb-[18px] flex flex-wrap gap-2.5">
           {insight.metrics.map((m) => (
             <div
               key={m.label}
-              className="rounded-md border border-border/60 bg-card px-3 py-1.5"
+              className="min-w-[110px] rounded-md border border-border bg-secondary px-3.5 py-2.5"
             >
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{m.label}</p>
-              <p className="text-sm font-semibold tabular-nums mt-0.5">
+              <p className="t-label mb-1 text-muted-foreground">{m.label}</p>
+              <p className="font-heading text-[15px] font-extrabold tabular-nums">
                 <span>{m.value}</span>
                 {m.delta && (
-                  <span className="text-xs font-normal text-muted-foreground ml-1.5">{m.delta}</span>
+                  <span className="ml-1.5 text-[11px] font-normal text-muted-foreground">{m.delta}</span>
                 )}
               </p>
             </div>
@@ -126,14 +115,14 @@ function InsightCard({ insight }: { insight: AiInsight }) {
 
         {/* Recommendations */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          <p className="t-label mb-2.5 text-muted-foreground">
             Recomendações
           </p>
           <ul className="space-y-1.5">
             {insight.recommendations.map((rec, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm">
+              <li key={i} className="flex items-start gap-2.5 text-[13px]">
                 <CheckCircle2
-                  className="size-3.5 flex-shrink-0 mt-0.5"
+                  className="mt-0.5 size-3.5 flex-shrink-0"
                   style={{ color: cfg.badgeColor }}
                   aria-hidden="true"
                 />
