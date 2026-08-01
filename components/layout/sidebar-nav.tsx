@@ -23,17 +23,17 @@ function NavLink({ href, icon: Icon, label, isActive, badgeCount }: { href: stri
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-150',
+        'flex items-center gap-2.5 mx-2 px-3.5 py-2 rounded-md text-[13px] font-medium transition-all duration-150',
         isActive
-          ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-          : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+          ? 'bg-primary/10 text-primary font-medium'
+          : 'text-muted-foreground hover:text-foreground hover:bg-secondary',
       )}
     >
-      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <Icon className={cn('size-4 shrink-0', isActive ? 'opacity-100' : 'opacity-60')} aria-hidden="true" />
       {label}
       {!!badgeCount && badgeCount > 0 && (
         <span
-          className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+          className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-medium"
           style={{ background: 'var(--chart-5)', color: 'white' }}
           aria-label={`${badgeCount} alertas de anomalia não visualizados`}
         >
@@ -57,7 +57,7 @@ export function SidebarNav({ slug, role }: { slug: string; role?: string | null 
   return (
     <div className="flex flex-col h-full py-4 gap-4">
       <div>
-        <p className="px-4 mb-2 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/60">
+        <p className="t-label px-5 pb-2 text-muted-foreground">
           Marketing
         </p>
         <nav className="flex flex-col gap-0.5 px-2">
@@ -75,7 +75,7 @@ export function SidebarNav({ slug, role }: { slug: string; role?: string | null 
       </div>
 
       <div className="border-t border-border/50 pt-4">
-        <p className="px-4 mb-2 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/60">
+        <p className="t-label px-5 pb-2 text-muted-foreground">
           Leads
         </p>
         <nav className="flex flex-col gap-0.5 px-2">
@@ -94,7 +94,7 @@ export function SidebarNav({ slug, role }: { slug: string; role?: string | null 
 
       {role !== 'agency' && (
         <div className="border-t border-border/50 pt-4 mt-auto">
-          <p className="px-4 mb-2 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground/60">
+          <p className="t-label px-5 pb-2 text-muted-foreground">
             Conta
           </p>
           <nav className="flex flex-col gap-0.5 px-2">
