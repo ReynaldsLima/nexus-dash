@@ -63,7 +63,7 @@ Project standard (8-point scale, already the convention in the codebase via Tail
 
 ## Typography
 
-The prototype deliberately uses 3 font families across weight tiers rather than a single-family 2-weight system. This is an intentional, already-partially-shipped identity choice (not a new decision for this phase). The size scale below is capped at exactly **4 distinct sizes**; the weight system is declared as a **Locked Exception** (see below) rather than forced into the generic 2-weight default, because it is pre-existing and already shipped in production.
+The prototype deliberately uses 3 font families across weight tiers rather than a single-family 2-weight system. This is an intentional, already-partially-shipped identity choice (not a new decision for this phase). The size scale below is capped at exactly **4 distinct sizes**; the weight system is declared as a **Locked Exception, ratified by the user in `12-CONTEXT.md` decision D-04** (see below) rather than forced into the generic 2-weight default, because it is pre-existing and already shipped in production.
 
 | Role | Size | Weight | Line Height | Family |
 |------|------|--------|-------------|--------|
@@ -80,12 +80,17 @@ The prototype deliberately uses 3 font families across weight tiers rather than 
 
 **Total distinct sizes in this contract: 4** (11, 14, 18, 22px). No other sizes are permitted in the 4 target screens without an explicit new exception.
 
-### Locked Exception: 4-weight / 3-family system
+### Locked Exception: 4-weight / 3-family system (ratified in `12-CONTEXT.md` D-04)
 
-The generic project default caps weights at 2. This contract locks a **4-weight, 3-family exception** instead, because:
+The generic project default caps weights at 2 (per `gsd-ui-checker` Dimension 4). During UI-SPEC verification, the checker flagged this phase's 4-weight system as exceeding that cap and required the exception to be an explicit, user-made decision recorded via `/gsd-discuss-phase` rather than a researcher default. **This has been done.** `12-CONTEXT.md` now records the following decision:
+
+> **D-04 (`12-CONTEXT.md` → `<decisions>` → "Tipografia — sistema de pesos"):** O sistema de 4 pesos de fonte (400/500/700/800, distribuídos entre as 3 famílias Bricolage Grotesque/Syne/DM Mono) já está em produção em `app/globals.css` e não é exclusivo das 4 telas desta fase — é usado em outras rotas do app também. É uma exceção travada ao teto padrão de 2 pesos do UI checker: manter os 4 pesos como estão, documentados como decisão intencional, em vez de reduzir a hierarquia tipográfica já shipped. Reduzir para 2 pesos extrapolaria o escopo de reskin da Fase 12 (D-03 — reskin incremental, preservar o que já existe) para uma mudança de sistema tipográfico que afeta rotas fora do escopo (`/tenants`, `/agencies`, Leads, etc.).
+
+This UI-SPEC locks a **4-weight, 3-family exception**, on the authority of `12-CONTEXT.md` D-04, because:
 1. It is not a new decision introduced by this phase — `app/globals.css` already ships `--font-syne`, `--font-bricolage`, `--font-dm-mono` with this exact weight split, and the prototype (source of truth for DESIGN-01..05) uses the identical system.
 2. Collapsing to 2 weights globally would erase the distinction between mono-label emphasis (labels vs. numeric emphasis inside mono contexts) and heading emphasis (card titles vs. page title/KPI values) — both of which are load-bearing parts of the editorial identity that this redesign phase exists to deliver.
 3. The exception is scoped and finite: exactly these 4 weight values, exactly these 3 families, exactly these 6 (family, weight) pairs — not an open door to introduce arbitrary new weights.
+4. Per D-04, reducing to 2 weights would extend beyond the reskin scope of Phase 12 into a typography-system change affecting routes outside this phase's boundary (`/tenants`, `/agencies`, Leads, etc.) — something D-03 (incremental reskin, preserve existing behavior) explicitly rules out.
 
 Declared (family, weight) pairs — do not introduce 600, 800 outside Syne, or any weight not listed here:
 - Bricolage Grotesque: 400 (body default) + 500 (nav items, filter tabs only)
@@ -234,3 +239,4 @@ No third-party registries declared or needed for this phase — it modifies toke
 - [ ] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending
+</content>
