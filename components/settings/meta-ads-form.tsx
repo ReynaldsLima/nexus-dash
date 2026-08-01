@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod/v4'
 
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -50,24 +49,21 @@ function StatusBadge({ status }: { status: 'connected' | 'not_configured' | 'inv
   if (status === 'connected') {
     return (
       <Badge
-        className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+        className="border font-mono text-[11px] font-medium"
+        style={{
+          background: 'rgba(74,222,128,.12)',
+          borderColor: 'rgba(74,222,128,.2)',
+          color: 'var(--viz-green)',
+        }}
       >
         Conectado
       </Badge>
     )
   }
   if (status === 'invalid') {
-    return (
-      <Badge variant="destructive">
-        Token inválido
-      </Badge>
-    )
+    return <Badge variant="destructive" className="font-mono text-[11px] font-medium">Token inválido</Badge>
   }
-  return (
-    <Badge variant="secondary">
-      Não configurado
-    </Badge>
-  )
+  return <Badge variant="secondary" className="font-mono text-[11px] font-medium">Não configurado</Badge>
 }
 
 // ─── MetaAdsForm ─────────────────────────────────────────────────────────────
@@ -124,16 +120,16 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
     <div className="space-y-4">
       {/* Connection status badge */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Status:</span>
+        <span className="t-label text-muted-foreground">Status</span>
         <StatusBadge status={connectionStatus} />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* Account ID */}
         <div className="space-y-1.5">
-          <Label htmlFor="meta-account-id">
+          <Label htmlFor="meta-account-id" className="t-label text-muted-foreground">
             Account ID
-            <span className="ml-1 text-muted-foreground font-normal">(ex: act_123456789)</span>
+            <span className="ml-1.5 normal-case tracking-normal opacity-70">(ex: act_123456789)</span>
           </Label>
           <Input
             id="meta-account-id"
@@ -141,6 +137,7 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
             placeholder="123456789"
             autoComplete="off"
             aria-invalid={!!errors.accountId}
+            className="input-accent rounded-md bg-secondary"
             {...register('accountId')}
           />
           {errors.accountId && (
@@ -150,7 +147,7 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
 
         {/* System User Token (textarea for long tokens) */}
         <div className="space-y-1.5">
-          <Label htmlFor="meta-token">
+          <Label htmlFor="meta-token" className="t-label text-muted-foreground">
             System User Token
           </Label>
           <textarea
@@ -165,6 +162,9 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
               'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50',
               'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
               errors.token ? 'border-destructive ring-2 ring-destructive/20' : '',
+              'input-accent',
+              'rounded-md',
+              'bg-secondary',
             ].join(' ')}
             aria-invalid={!!errors.token}
             {...register('token')}
@@ -179,9 +179,9 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
 
         {/* Backfill window (SET-03, D-01/D-05) */}
         <div className="space-y-1.5">
-          <Label htmlFor="meta-backfill-days">
+          <Label htmlFor="meta-backfill-days" className="t-label text-muted-foreground">
             Janela de histórico (dias)
-            <span className="ml-1 text-muted-foreground font-normal">(7–365, padrão 90)</span>
+            <span className="ml-1.5 normal-case tracking-normal opacity-70">(7–365, padrão 90)</span>
           </Label>
           <Input
             id="meta-backfill-days"
@@ -189,6 +189,7 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
             min={7}
             max={365}
             aria-invalid={!!errors.backfillDays}
+            className="input-accent rounded-md bg-secondary font-mono tabular-nums"
             {...register('backfillDays')}
           />
           {errors.backfillDays && (
@@ -203,15 +204,19 @@ export function MetaAdsForm({ tenantId, initialStatus }: MetaAdsFormProps) {
         {serverError && (
           <div
             role="alert"
-            className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive"
+            className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive"
           >
             {serverError}
           </div>
         )}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="btn-accent w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        >
           {isSubmitting ? 'Validando...' : 'Conectar Meta Ads'}
-        </Button>
+        </button>
       </form>
     </div>
   )
