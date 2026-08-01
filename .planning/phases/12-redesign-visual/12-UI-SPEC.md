@@ -55,29 +55,42 @@ Project standard (8-point scale, already the convention in the codebase via Tail
 
 **Exceptions:** The prototype's raw CSS uses a few off-grid values (`18px 22px 14px` card header, `14px 22px 0` KPI padding, `9px 14px` nav item). Per D-03 (token swap, not pixel-perfect structural rewrite), **round these to the nearest 8-point value** rather than copying literally:
 - Card header (`CardHeader`): `py-4 px-6` (16px/24px) — not 18px/22px
-- Card body (`CardContent`): `py-4 px-6` or `py-5 px-6` (16-20px/24px) — not 20px/22px
-- KPI card body: `pt-4 px-6 pb-0` (16px/24px) — current `pt-5 pb-5 px-5` (20px/20px) is close; align horizontal padding to 24px to match card family
+- Card body (`CardContent`): `py-4 px-6` (16px/24px) only — not 20px/22px. The prototype's raw `20px 22px` value is being **replaced**, not offered as an equally-valid alternative; standardize on 16px/24px across every `CardContent` instance, with no `py-5` variant.
+- KPI card body: target is `pt-4 px-6 pb-0` (16px/24px), unambiguously. The current `pt-5 pb-5 px-5` (20px/20px) is **the value being replaced**, not an accepted alternative — both vertical padding (20px → 16px top, `pb-5` dropped entirely in favor of `pb-0`) and horizontal padding (20px → 24px) change.
 - Sidebar nav item: keep current `px-3 py-2` (12px/8px, already close to prototype's 14px/9px and already implemented) — **no change needed**, this is a spacing detail, not a token gap
 
 ---
 
 ## Typography
 
-The prototype deliberately uses 3 font families across 3-ish weight tiers rather than a single-family 2-weight system. This is an intentional, already-partially-shipped identity choice (not a new decision for this phase) — declaring it explicitly here as the locked contract, in place of the generic single-family default:
+The prototype deliberately uses 3 font families across weight tiers rather than a single-family 2-weight system. This is an intentional, already-partially-shipped identity choice (not a new decision for this phase). The size scale below is capped at exactly **4 distinct sizes**; the weight system is declared as a **Locked Exception** (see below) rather than forced into the generic 2-weight default, because it is pre-existing and already shipped in production.
 
 | Role | Size | Weight | Line Height | Family |
 |------|------|--------|-------------|--------|
-| Body | 13px (`text-[13px]`, close to existing `text-sm`=14px — keep `text-sm` where already used, don't force 13px) | 400 regular | 1.5 | Bricolage Grotesque |
 | Label (mono, uppercase, tracked) | 11px | 500 medium | 1.3 | DM Mono, `letter-spacing: 0.12em`, `text-transform: uppercase` |
-| Heading | 15px | 700 bold | 1.3 | Syne |
-| Display | 22px (page title) / 20px (KPI numeric values) | 800 extrabold | 1.1, `letter-spacing: -0.02em` | Syne |
+| Body | 14px (`text-sm`, existing Tailwind scale) | 400 regular | 1.5 | Bricolage Grotesque |
+| Heading | 18px | 700 bold | 1.3 | Syne |
+| Display | 22px (page title **and** KPI numeric values — single merged value) | 800 extrabold | 1.1, `letter-spacing: -0.02em` | Syne |
 
-**Weight discipline (exactly 2 weights per family, matching prototype usage):**
+**Body collapsed to a single value:** drop the 13px option entirely. Use `text-sm` (14px, Tailwind's existing scale value) everywhere Body typography applies — zero migration cost, since `text-sm` is already the value used across the current codebase.
+
+**Display merged to a single value:** the prototype uses 22px for the page `<h1>` and 20px separately for `.kpi-val` numbers. To stay within the 4-distinct-size cap and because both roles serve the same "biggest, boldest number/word on the screen" function, this contract merges them onto one 22px Display value. KPI numeric values render at 22px/800/Syne, same as page titles — this is a 2px increase from the prototype's literal `.kpi-val` size, consistent with the "round, don't copy literally" principle already applied to spacing in this phase.
+
+**Heading widened away from Body:** the previous draft placed Heading at 15px, only 1-2px from Body's 13-14px — too close to read as a distinct tier. Heading now sits at 18px, a clear 4px jump above the 14px Body size.
+
+**Total distinct sizes in this contract: 4** (11, 14, 18, 22px). No other sizes are permitted in the 4 target screens without an explicit new exception.
+
+### Locked Exception: 4-weight / 3-family system
+
+The generic project default caps weights at 2. This contract locks a **4-weight, 3-family exception** instead, because:
+1. It is not a new decision introduced by this phase — `app/globals.css` already ships `--font-syne`, `--font-bricolage`, `--font-dm-mono` with this exact weight split, and the prototype (source of truth for DESIGN-01..05) uses the identical system.
+2. Collapsing to 2 weights globally would erase the distinction between mono-label emphasis (labels vs. numeric emphasis inside mono contexts) and heading emphasis (card titles vs. page title/KPI values) — both of which are load-bearing parts of the editorial identity that this redesign phase exists to deliver.
+3. The exception is scoped and finite: exactly these 4 weight values, exactly these 3 families, exactly these 6 (family, weight) pairs — not an open door to introduce arbitrary new weights.
+
+Declared (family, weight) pairs — do not introduce 600, 800 outside Syne, or any weight not listed here:
 - Bricolage Grotesque: 400 (body default) + 500 (nav items, filter tabs only)
 - Syne: 700 (card/section titles, buttons) + 800 (page title, KPI/numeric display values, logo)
 - DM Mono: 400 (default mono/data) + 500 (numeric emphasis inside mono contexts — e.g. filter counts)
-
-Do not introduce 600 or other in-between weights — the prototype's entire type system is built on these 6 declared (family, weight) pairs.
 
 ---
 
@@ -150,9 +163,10 @@ This is a **reskin-only phase** (Out of Scope: "Mudanças de comportamento/dados
 ## Per-Screen Notes
 
 ### Dashboard (`app/[tenant-slug]/dashboard/page.tsx`) — DESIGN-01
+- **Primary visual anchor:** KPI numeric values (`kpi-val`) are the primary visual anchor on this screen — Display typography (22px/800/Syne) plus the accent color on "Gasto Total"/"CTR" should draw the eye first, ahead of the page title.
 - Page header (`.ph`/`.pt`/`.ps`/`.status-pill` prototype pattern) is already structurally present (`h1` + subtitle + sync pill) — apply Display typography (22px/800/Syne) to `h1`, Label typography (mono, uppercase, tracked) to the subtitle, and the accent pulse-dot + mono font to the sync pill.
 - `KpiCard` (lines 66-~130): apply per-category accent color (`k-accent`/`k-blue`/`k-green`/`k-orange` from the prototype) to icon + value color instead of the current uniform `bg-muted text-muted-foreground` icon chip; replace the `isGood/isBad` gradient top-bar logic with the prototype's fixed per-category top-bar color; switch `Card` radius gap (auto-inherited once `card.tsx` is fixed, see above); add the radial-glow `::before` pseudo-element and `translateY(-2px)` hover lift.
-- KPI numeric value (`kpi-val`): Display typography (20px/800/Syne, `letter-spacing:-0.02em`), label (`kpi-lbl`): Label typography (9-11px mono uppercase).
+- KPI numeric value (`kpi-val`): Display typography (22px/800/Syne, `letter-spacing:-0.02em` — merged with the page-title size, see Typography section), label (`kpi-lbl`): Label typography (11px mono uppercase).
 - Account balance cards, charts row, stats row: same card/radius/hover treatment; no data or chart-library changes (Recharts stays, per D-03).
 
 ### Campanhas (`app/[tenant-slug]/campanhas/page.tsx`) — DESIGN-02
@@ -161,13 +175,13 @@ This is a **reskin-only phase** (Out of Scope: "Mudanças de comportamento/dados
 - Table (`thead`/`tbody`): apply mono uppercase tracked header labels (Label typography), `--s2` header row background, row hover background `--s2`, first/last cell padding asymmetry (22px left/right) already close to current — keep functional filters/drill-down (`ChannelSheet`) untouched, per D-03.
 
 ### Insights (`app/[tenant-slug]/insights/page.tsx`) — DESIGN-03
-- Insight cards (`.ic`/`.ib`/`.itop`/`.ititle`/`.isum`) already structurally present (line 66, `rounded-xl` → fix to `rounded-2xl` via the Card primitive change above) — apply Heading typography to `ititle`, Body to `isum`, metric-chip (`.mc`) styling to any inline metric callouts, hover lift `translateY(-2px)`.
+- Insight cards (`.ic`/`.ib`/`.itop`/`.ititle`/`.isum`) already structurally present (line 66, `rounded-xl` → fix to `rounded-2xl` via the Card primitive change above) — apply Heading typography (18px/700/Syne) to `ititle`, Body typography (14px/400/Bricolage) to `isum`, metric-chip (`.mc`) styling to any inline metric callouts, hover lift `translateY(-2px)`.
 - `StreamingInsightCard`: preserve the streaming fetch/reader loop entirely (D-03) — only restyle the container/cursor/CTA button to match `.btn-accent` treatment (Syne 700, `rounded-md`/8px, `#000` text on `#c8ff00` bg, hover `#d9ff33` + `translateY(-1px)`).
 - History list empty/error/loading states: apply Body/Label typography, no structural change.
 
 ### Configurações (`app/[tenant-slug]/settings/page.tsx`) — DESIGN-04 (no prototype coverage, D-02 — extrapolated)
 - No `nexus-dash.html` screen exists for Settings. Apply the same tokens established above by extrapolation:
-  - Page header: same Display/Label pattern as other 3 screens (`h1` "Configurações" → Display-lite treatment; consider 18-20px rather than full 22px since this is a denser, form-heavy screen — Claude's Discretion within the established Heading/Display range, planner may pick either consistently)
+  - Page header: same Display/Label pattern as other 3 screens, with one adjustment — since this is a denser, form-heavy screen, use **Heading typography (18px/700/Syne)** for the `h1` "Configurações" rather than the full Display (22px/800), matching the same Heading tier already used for card titles. This is a locked choice (not a range), consistent with the capped 4-size scale above.
   - `Card` (Meta Ads / Google Ads connection cards, lines 161-219): once `card.tsx`'s radius is fixed, these inherit correctly automatically. `CardHeader` with `border-b` already matches the prototype's `.card-h` bottom-border pattern — keep.
   - `ChannelStatusBadge` (lines 80-92): map "Conectado" → green/success token, "Token inválido" → destructive, "Não configurado" → `--s2`/muted (`bdg-dim` prototype equivalent) — already close, verify green matches the semantic palette above rather than the current ad-hoc `emerald-500` Tailwind literal.
   - `BackfillWindowControl` (Phase 11 component, inside each connection card, `border-t pt-4`): apply Body typography to labels, mono typography to the numeric day count/slider value, keep the inline optimistic-update interaction entirely untouched (D-03 — behavior preserved).
