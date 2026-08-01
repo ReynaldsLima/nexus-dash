@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { ArrowUpDown, Search } from 'lucide-react'
 
+import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CampaignSheet } from '@/components/campanhas/campaign-sheet'
@@ -161,21 +162,21 @@ export default function CampanhasPage() {
 
       {/* Filters + Table */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="border-b pb-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             {/* Channel tabs (CAMP-02) */}
-            <div className="flex rounded-md border border-border overflow-hidden">
+            <div className="flex gap-0.5 rounded-md border border-border bg-secondary p-[3px]">
               {tabs.map((tab) => (
                 <button
                   key={tab.value}
                   type="button"
                   onClick={() => setChannelFilter(tab.value)}
-                  className="px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                  style={
+                  className={cn(
+                    'rounded px-3 py-1 text-xs transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                     channelFilter === tab.value
-                      ? { background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' }
-                      : { background: 'transparent', color: 'var(--muted-foreground)' }
-                  }
+                      ? 'bg-primary/10 font-medium text-primary'
+                      : 'font-medium text-muted-foreground hover:bg-border hover:text-foreground',
+                  )}
                   aria-pressed={channelFilter === tab.value}
                 >
                   {tab.label}
@@ -194,13 +195,13 @@ export default function CampanhasPage() {
                 placeholder="Buscar campanha…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-md border border-input bg-transparent pl-8 pr-3 py-1.5 text-xs placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                className="input-accent w-full rounded-md border border-input bg-secondary pl-8 pr-3 py-1.5 text-xs transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 spellCheck={false}
                 autoComplete="off"
               />
             </div>
 
-            <span className="text-xs text-muted-foreground ml-auto">
+            <span className="ml-auto font-mono text-[11px] whitespace-nowrap text-muted-foreground">
               {isLoading ? '…' : `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`}
             </span>
           </div>
