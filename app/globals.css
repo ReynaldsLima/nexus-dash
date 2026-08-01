@@ -23,6 +23,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-viz-blue: var(--viz-blue);
+  --color-viz-green: var(--viz-green);
+  --color-viz-orange: var(--viz-orange);
+  --color-viz-red: var(--viz-red);
+  --color-viz-purple: var(--viz-purple);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -81,6 +86,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Phase 12 — semantic data-viz palette (light-mode variants from prototype body.light) */
+  --viz-blue: #3b82f6;
+  --viz-green: #16a34a;
+  --viz-orange: #ea580c;
+  --viz-red: #dc2626;
+  --viz-purple: #7c5cf5;
 }
 
 .dark {
@@ -103,8 +114,8 @@
   --input: #222230;
   --ring: #c8ff00;
   --chart-1: #c8ff00;
-  --chart-2: #00d4ff;
-  --chart-3: #ff6b00;
+  --chart-2: #a78bfa;
+  --chart-3: #fb923c;
   --chart-4: #a855f7;
   --chart-5: #ff4757;
   --sidebar: #0e0e12;
@@ -115,6 +126,12 @@
   --sidebar-accent-foreground: #f0f0f8;
   --sidebar-border: #222230;
   --sidebar-ring: #c8ff00;
+  /* Phase 12 — semantic data-viz palette, verbatim from prototipos/nexus-dash.html :root */
+  --viz-blue: #60a5fa;
+  --viz-green: #4ade80;
+  --viz-orange: #fb923c;
+  --viz-red: #f87171;
+  --viz-purple: #c4b0fd;
 }
 
 @keyframes pulse-glow {
