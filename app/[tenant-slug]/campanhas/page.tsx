@@ -207,7 +207,7 @@ export default function CampanhasPage() {
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0 overflow-x-auto">
+        <CardContent className="overflow-x-auto px-0 pt-0">
           {isLoading ? (
             <TableSkeleton />
           ) : isError ? (
@@ -217,11 +217,15 @@ export default function CampanhasPage() {
           ) : (
             <table className="w-full text-sm min-w-[720px]">
               <thead>
-                <tr className="border-b border-border">
+                <tr className="border-b border-border bg-secondary">
                   {cols.map((col) => (
                     <th
                       key={col.label}
-                      className={`pb-2.5 text-xs font-medium text-muted-foreground first:pl-0 last:pr-0 px-3 ${col.align === 'right' ? 'text-right' : 'text-left'}`}
+                      className={cn(
+                        't-label px-4 py-2.5 whitespace-nowrap text-muted-foreground first:pl-[22px] last:pr-[22px]',
+                        col.align === 'right' ? 'text-right' : 'text-left',
+                        sortKey === col.key && 'text-primary',
+                      )}
                     >
                       {col.key ? (
                         <button
@@ -247,7 +251,7 @@ export default function CampanhasPage() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={cols.length} className="py-10 text-center text-sm text-muted-foreground">
+                    <td colSpan={cols.length} className="px-[22px] py-10 text-center text-sm text-muted-foreground">
                       Nenhuma campanha no período selecionado.
                     </td>
                   </tr>
@@ -256,22 +260,22 @@ export default function CampanhasPage() {
                     <tr
                       key={c.id}
                       onClick={() => setSelected(c)}
-                      className="border-b border-border/50 last:border-0 hover:bg-accent/30 transition-colors cursor-pointer"
+                      className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-secondary"
                     >
-                      <td className="py-3 pl-0 pr-3">
-                        <span className="font-medium truncate max-w-[160px] block">
+                      <td className="py-3 pr-4 pl-[22px]">
+                        <span className="block max-w-[180px] truncate text-[13px] font-medium">
                           {c.name}
                         </span>
                       </td>
-                      <td className="py-3 px-3"><ChannelBadge channel={c.channel} /></td>
-                      <td className="py-3 px-3"><StatusDot status={c.status} /></td>
-                      <td className="py-3 px-3 text-right tabular-nums text-muted-foreground">{num(c.impressions)}</td>
-                      <td className="py-3 px-3 text-right tabular-nums">{num(c.clicks)}</td>
-                      <td className="py-3 px-3 text-right tabular-nums">{c.ctr.toFixed(2)}%</td>
-                      <td className="py-3 px-3 text-right tabular-nums font-medium">{brl(c.spend)}</td>
-                      <td className="py-3 px-3 text-right tabular-nums">{num(c.conversions)}</td>
-                      <td className="py-3 px-3 text-right tabular-nums text-muted-foreground">{brl(c.cpa)}</td>
-                      <td className="py-3 pr-0 pl-3 text-right"><RoasValue value={c.roas} /></td>
+                      <td className="px-4 py-3"><ChannelBadge channel={c.channel} /></td>
+                      <td className="px-4 py-3"><StatusDot status={c.status} /></td>
+                      <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-muted-foreground">{num(c.impressions)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs tabular-nums">{num(c.clicks)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs tabular-nums">{c.ctr.toFixed(2)}%</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs font-medium tabular-nums">{brl(c.spend)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs tabular-nums">{num(c.conversions)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-xs tabular-nums text-muted-foreground">{brl(c.cpa)}</td>
+                      <td className="py-3 pr-[22px] pl-4 text-right"><RoasValue value={c.roas} /></td>
                     </tr>
                   ))
                 )}
