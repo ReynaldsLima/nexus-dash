@@ -72,8 +72,12 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="h-14 w-full bg-card border-b border-border flex-shrink-0 flex items-center justify-between px-6 z-40">
-        <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight" style={{ fontFamily: 'var(--font-syne)' }}>
+      <header className="h-14 w-full bg-background/95 backdrop-blur-md border-b border-border flex-shrink-0 flex items-center justify-between px-6 z-40">
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-[17px] font-extrabold tracking-tight text-foreground"
+          style={{ fontFamily: 'var(--font-syne)' }}
+        >
           NEXUS<span className="logo-dot" />DASH
         </Link>
         <HeaderActions role={role} tenants={tenants} activeSlug={urlSlug} manageHref={manageHref} manageLabel={manageLabel} />
