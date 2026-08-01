@@ -31,7 +31,7 @@ Requirements para o milestone v1.1 (Gestão de Usuários, Limpeza e Redesign Vis
 - [ ] **DESIGN-02**: Página de Campanhas redesenhada visualmente, preservando filtros e drill-down existentes
 - [ ] **DESIGN-03**: Página de Insights de IA redesenhada visualmente, preservando streaming e histórico existentes
 - [ ] **DESIGN-04**: Página de Configurações redesenhada visualmente, incluindo o novo campo de janela de histórico (SET-03)
-- [ ] **DESIGN-05**: Header/sidebar (chrome compartilhado) redesenhado de forma consistente nas 4 telas, preservando o contrato de props (`role`/`tenants`/`tenantId`) de `app/[tenant-slug]/layout.tsx` para `HeaderActions`/`SidebarNav`
+- [x] **DESIGN-05**: Header/sidebar (chrome compartilhado) redesenhado de forma consistente nas 4 telas, preservando o contrato de props (`role`/`tenants`/`tenantId`) de `app/[tenant-slug]/layout.tsx` para `HeaderActions`/`SidebarNav`
 
 ## Future Requirements
 
@@ -69,7 +69,7 @@ Explicitamente excluído do v1.1. Documentado para prevenir scope creep.
 | DESIGN-02 | Phase 12 | Pending |
 | DESIGN-03 | Phase 12 | Pending |
 | DESIGN-04 | Phase 12 | Pending |
-| DESIGN-05 | Phase 12 | Pending |
+| DESIGN-05 | Phase 12 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 14 total
