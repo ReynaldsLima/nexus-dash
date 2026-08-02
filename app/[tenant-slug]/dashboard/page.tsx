@@ -160,13 +160,13 @@ function DashboardSkeleton() {
       {/* KPI grid skeletons */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 7 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-xl" />
+          <Skeleton key={i} className="h-28 rounded-2xl" />
         ))}
       </div>
       {/* Charts skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <Skeleton className="lg:col-span-3 h-72 rounded-xl" />
-        <Skeleton className="lg:col-span-2 h-72 rounded-xl" />
+        <Skeleton className="lg:col-span-3 h-72 rounded-2xl" />
+        <Skeleton className="lg:col-span-2 h-72 rounded-2xl" />
       </div>
     </section>
   )
