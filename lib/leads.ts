@@ -102,13 +102,25 @@ export function parseLeadDate(s: string): number | null {
 
 // Compara dois leads pela data de criação (cronologicamente, não alfabeticamente).
 // Leads sem data parseável (null) sempre vão para o FIM, independente de `asc`.
+//
+// Desempate: a coluna "Criado em" da planilha é somente-data (sem hora), então todos
+// os leads do mesmo dia parseiam para o MESMO timestamp. Sem desempate, o sort estável
+// do V8 preservava a ordem original do array — que é `id` ascendente (ordem de inserção
+// das linhas do Sheet, mais ANTIGO primeiro), o inverso do esperado em desc.
+// Como `id` é o índice 0-based da linha (id maior = linha mais abaixo = adicionado
+// depois), desempatamos por `id` seguindo a MESMA direção de `asc`, para que o
+// comparador continue coerente nos dois sentidos (default desc da rota e toggle da
+// tabela). O desempate só entra quando as datas são exatamente iguais — nunca sobrepõe
+// a comparação cronológica.
 export function compareByCriadoEm(a: Lead, b: Lead, asc: boolean): number {
   const ta = parseLeadDate(a.criado_em)
   const tb = parseLeadDate(b.criado_em)
-  if (ta === null && tb === null) return 0
+  const desempate = asc ? a.id - b.id : b.id - a.id
+  if (ta === null && tb === null) return desempate
   if (ta === null) return 1
   if (tb === null) return -1
-  return asc ? ta - tb : tb - ta
+  if (ta !== tb) return asc ? ta - tb : tb - ta
+  return desempate
 }
 
 // Ordena leads do mais novo para o mais antigo. NÃO reatribui `id` — `id` é o índice
