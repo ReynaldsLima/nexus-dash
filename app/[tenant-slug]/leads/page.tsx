@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, Bot, CheckCircle2, MapPinOff, Users2, IdCard, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { type Lead, type LeadCategory, cat, CATEGORY_LABELS, CATEGORY_BG } from '@/lib/leads'
+import { type Lead, type LeadCategory, cat, CATEGORY_LABELS, CATEGORY_BG, compareByCriadoEm } from '@/lib/leads'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -132,6 +132,9 @@ export default function LeadsPage() {
       .filter(l => (filter === 'all' || cat(l.status) === filter) &&
         (l.nome.toLowerCase().includes(q) || l.empresa.toLowerCase().includes(q) || l.email.toLowerCase().includes(q)))
       .sort((a, b) => {
+        // 'criado_em' é uma data em string pt-BR — comparar alfabeticamente ordena
+        // pelo dia do mês (31/07 > 02/08), então usa comparação cronológica real.
+        if (sortKey === 'criado_em') return compareByCriadoEm(a, b, sortAsc)
         const av = a[sortKey] ?? ''
         const bv = b[sortKey] ?? ''
         return sortAsc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av))
