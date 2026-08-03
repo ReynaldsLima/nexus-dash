@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 Phase: 12 (redesign-visual) — EXECUTING
 Plan: 7 of 7
 Status: Ready to execute
-Last activity: 2026-08-03 - Completed quick task 260802-w2g: Sempre ordenar a lista de leads por "criados em" do mais novo para o mais antigo (ordem padrão de exibição)
+Last activity: 2026-08-03 - Completed quick task 260802-wde: Corrigir desempate na ordenação de leads por criado_em usando id decrescente quando as datas empatam
 
 Progress: [██████████] 100%
 
@@ -251,6 +251,7 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 | 260718-orc | Adicionar um novo status de lead "Fechado" ao dropdown de Status na tabela de Gestão de Leads | 2026-07-18 | 1bdd638 | [260718-orc-adicionar-um-novo-status-de-lead-fechado](./quick/260718-orc-adicionar-um-novo-status-de-lead-fechado/) |
 | 260731-qzz | Adicionar 4 novos status de lead: Desqualificado por região, Quantidade de Vidas, Pessoa Física, Engano | 2026-07-31 | f5d1581 | [260731-qzz-adicionar-4-novos-status-de-lead-desqual](./quick/260731-qzz-adicionar-4-novos-status-de-lead-desqual/) |
 | 260802-w2g | Sempre ordenar a lista de leads por "criados em" do mais novo para o mais antigo (ordem padrão de exibição) | 2026-08-03 | 7e4613b | [260802-w2g-sempre-ordenar-a-lista-de-leads-por-cria](./quick/260802-w2g-sempre-ordenar-a-lista-de-leads-por-cria/) |
+| 260802-wde | Corrigir desempate na ordenação de leads por criado_em usando id decrescente quando as datas empatam (mesmo dia) | 2026-08-03 | e08ae3a | [260802-wde-corrigir-desempate-na-ordenacao-de-leads](./quick/260802-wde-corrigir-desempate-na-ordenacao-de-leads/) |
 
 ### Roadmap Evolution
 
