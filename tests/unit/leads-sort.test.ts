@@ -79,7 +79,9 @@ describe('sortLeadsByCriadoEmDesc', () => {
     expect(sorted.map(l => l.nome)).toEqual(['Bruno', 'Ana', 'Carla'])
   })
 
-  it('puts leads with null date at the end, preserving relative order (stable)', () => {
+  // Leads sem data seguem a mesma regra de desempate por id dos leads com data
+  // (ver <decision_note> do plano 260802-wde): mais recentemente adicionado primeiro.
+  it('puts leads with null date at the end, desempatando entre eles por id desc', () => {
     const leads = [
       makeLead({ id: 0, nome: 'SemData1', criado_em: '' }),
       makeLead({ id: 1, nome: 'Bruno', criado_em: '02/08/2026' }),
@@ -87,7 +89,31 @@ describe('sortLeadsByCriadoEmDesc', () => {
       makeLead({ id: 3, nome: 'Ana', criado_em: '31/07/2026' }),
     ]
     const sorted = sortLeadsByCriadoEmDesc(leads)
-    expect(sorted.map(l => l.nome)).toEqual(['Bruno', 'Ana', 'SemData1', 'SemData2'])
+    expect(sorted.map(l => l.nome)).toEqual(['Bruno', 'Ana', 'SemData2', 'SemData1'])
+  })
+
+  it('dentro do mesmo dia, ordena do mais recentemente adicionado para o mais antigo', () => {
+    const leads = [
+      makeLead({ id: 0, nome: 'Ana', criado_em: '02/08/2026' }),
+      makeLead({ id: 1, nome: 'Bruno', criado_em: '02/08/2026' }),
+      makeLead({ id: 2, nome: 'Carla', criado_em: '02/08/2026' }),
+    ]
+    const sorted = sortLeadsByCriadoEmDesc(leads)
+    expect(sorted.map(l => l.nome)).toEqual(['Carla', 'Bruno', 'Ana'])
+    expect(sorted.map(l => l.id)).toEqual([2, 1, 0])
+  })
+
+  it('cruza dias diferentes cronologicamente e desempata dentro de cada dia', () => {
+    const leads = [
+      makeLead({ id: 0, nome: 'Ana', criado_em: '31/07/2026' }),
+      makeLead({ id: 1, nome: 'Bruno', criado_em: '02/08/2026' }),
+      makeLead({ id: 2, nome: 'Carla', criado_em: '31/07/2026' }),
+      makeLead({ id: 3, nome: 'Diego', criado_em: '02/08/2026' }),
+      makeLead({ id: 4, nome: 'Elza', criado_em: '15/06/2026' }),
+    ]
+    const sorted = sortLeadsByCriadoEmDesc(leads)
+    expect(sorted.map(l => l.nome)).toEqual(['Diego', 'Bruno', 'Carla', 'Ana', 'Elza'])
+    expect(sorted.map(l => l.id)).toEqual([3, 1, 2, 0, 4])
   })
 
   it('does not change lead.id — same ids present, only reordered', () => {
@@ -127,5 +153,32 @@ describe('compareByCriadoEm', () => {
     expect(compareByCriadoEm(withoutDate, withDate, true)).toBe(1)
     expect(compareByCriadoEm(withDate, withoutDate, false)).toBe(-1)
     expect(compareByCriadoEm(withDate, withoutDate, true)).toBe(-1)
+  })
+
+  it('desempata datas iguais por id decrescente quando desc', () => {
+    const a = makeLead({ id: 1, criado_em: '02/08/2026' })
+    const b = makeLead({ id: 5, criado_em: '02/08/2026' })
+    expect(compareByCriadoEm(a, b, false)).toBeGreaterThan(0)
+    expect(compareByCriadoEm(b, a, false)).toBeLessThan(0)
+  })
+
+  it('desempata datas iguais por id crescente quando asc', () => {
+    const a = makeLead({ id: 1, criado_em: '02/08/2026' })
+    const b = makeLead({ id: 5, criado_em: '02/08/2026' })
+    expect(compareByCriadoEm(a, b, true)).toBeLessThan(0)
+    expect(compareByCriadoEm(b, a, true)).toBeGreaterThan(0)
+  })
+
+  it('a data tem precedência sobre o id', () => {
+    const a = makeLead({ id: 0, criado_em: '03/08/2026' })
+    const b = makeLead({ id: 9, criado_em: '02/08/2026' })
+    expect(compareByCriadoEm(a, b, false)).toBeLessThan(0)
+  })
+
+  it('desempata por id também quando ambas as datas são null', () => {
+    const a = makeLead({ id: 1, criado_em: '' })
+    const b = makeLead({ id: 4, criado_em: 'lixo' })
+    expect(compareByCriadoEm(a, b, false)).toBeGreaterThan(0)
+    expect(compareByCriadoEm(a, b, true)).toBeLessThan(0)
   })
 })
