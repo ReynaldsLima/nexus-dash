@@ -61,3 +61,59 @@ export const CATEGORY_BG: Record<LeadCategory, string> = {
   pessoa_fisica: 'bg-rose-500/15 text-rose-400 border-rose-500/25',
   engano: 'bg-rose-500/15 text-rose-400 border-rose-500/25',
 }
+
+// A coluna E ("Criado em") da planilha do Google Sheets chega como string crua no
+// formato pt-BR (DD/MM/YYYY, com ou sem hora). O `Date.parse` nativo do JS interpreta
+// esse formato como US (MM/DD/YYYY) — "02/08/2026" viraria 8 de fevereiro em vez de
+// 2 de agosto. Por isso usamos um parser explícito em vez de `new Date(string)`.
+export function parseLeadDate(s: string): number | null {
+  if (!s) return null
+  const v = s.trim()
+  if (!v) return null
+
+  // ISO (YYYY-MM-DD ou YYYY-MM-DDTHH:MM:SS) — Date.parse lida corretamente com isso.
+  if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
+    const t = Date.parse(v)
+    return Number.isNaN(t) ? null : t
+  }
+
+  // pt-BR: DD/MM/YYYY ou DD-MM-YYYY, com hora opcional HH:MM ou HH:MM:SS.
+  const m = v.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/)
+  if (!m) return null
+
+  const dia = Number(m[1])
+  const mes = Number(m[2])
+  const ano = Number(m[3])
+  const hora = m[4] ? Number(m[4]) : 0
+  const min = m[5] ? Number(m[5]) : 0
+  const seg = m[6] ? Number(m[6]) : 0
+
+  if (mes < 1 || mes > 12) return null
+  if (dia < 1 || dia > 31) return null
+  if (hora > 23 || min > 59 || seg > 59) return null
+
+  const d = new Date(ano, mes - 1, dia, hora, min, seg)
+  // Rejeita datas que "transbordaram" (ex.: 31/02 vira 3 de março) — Date normaliza
+  // silenciosamente em vez de lançar, então validamos o round-trip.
+  if (d.getDate() !== dia || d.getMonth() !== mes - 1) return null
+
+  return d.getTime()
+}
+
+// Compara dois leads pela data de criação (cronologicamente, não alfabeticamente).
+// Leads sem data parseável (null) sempre vão para o FIM, independente de `asc`.
+export function compareByCriadoEm(a: Lead, b: Lead, asc: boolean): number {
+  const ta = parseLeadDate(a.criado_em)
+  const tb = parseLeadDate(b.criado_em)
+  if (ta === null && tb === null) return 0
+  if (ta === null) return 1
+  if (tb === null) return -1
+  return asc ? ta - tb : tb - ta
+}
+
+// Ordena leads do mais novo para o mais antigo. NÃO reatribui `id` — `id` é o índice
+// 0-based da linha da planilha (ver lib/sheets.ts, Leads!F{id + 2}); ordenar aqui move
+// os objetos, não os índices.
+export function sortLeadsByCriadoEmDesc(leads: Lead[]): Lead[] {
+  return [...leads].sort((a, b) => compareByCriadoEm(a, b, false))
+}
