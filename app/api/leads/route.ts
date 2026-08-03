@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import type { Lead } from '@/lib/leads'
+import { type Lead, sortLeadsByCriadoEmDesc } from '@/lib/leads'
 
 export const runtime = 'nodejs' // getClaims() usa RS256 (módulo crypto do Node) — não roda no Edge
 
@@ -84,5 +84,10 @@ export async function GET(req: NextRequest) {
     tipo_seguro: r[7] ?? '',
   }))
 
-  return NextResponse.json({ leads, configured: true })
+  // Ordem de exibição padrão: mais novo primeiro. Aplicada aqui (e não só na página)
+  // para que TODO consumidor da rota — tabela e Agente IA — receba a mesma ordem.
+  // O map acima já atribuiu `id` a partir do índice da linha da planilha, então
+  // reordenar aqui é seguro: os objetos se movem, os ids acompanham.
+  const sorted = sortLeadsByCriadoEmDesc(leads)
+  return NextResponse.json({ leads: sorted, configured: true })
 }

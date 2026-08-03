@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { NextRequest } from 'next/server'
 
 vi.mock('server-only', () => ({}))
@@ -125,5 +125,30 @@ describe('GET /api/leads — auth/role/scope gate (AGENCY-08)', () => {
     const { GET } = await import('@/app/api/leads/route')
     const res = await GET(makeRequest('acme'))
     expect(res.status).toBe(200)
+  })
+})
+
+describe('GET /api/leads — ordem padrão (mais novo primeiro)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('retorna os leads ordenados do mais novo para o mais antigo, preservando id', async () => {
+    mockState.tenant = { sheet_id: 'sheet-123', sheets_api_key: 'key-abc' }
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        values: [
+          ['Ana', '11...', 'a@x.com', 'ACME', '31/07/2026', 'Novo Lead', '', 'Vida'],
+          ['Bruno', '11...', 'b@x.com', 'Beta', '02/08/2026', 'Quente', '', 'Saúde'],
+          ['Carla', '11...', 'c@x.com', 'Ceta', '15/06/2026', 'Novo Lead', '', 'Vida'],
+        ],
+      }),
+    })))
+    const { GET } = await import('@/app/api/leads/route')
+    const res = await GET(makeRequest('acme'))
+    const body = await res.json()
+    expect(body.leads.map((l: { nome: string }) => l.nome)).toEqual(['Bruno', 'Ana', 'Carla'])
+    expect(body.leads.map((l: { id: number }) => l.id)).toEqual([1, 0, 2])
   })
 })
