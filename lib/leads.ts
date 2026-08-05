@@ -129,3 +129,23 @@ export function compareByCriadoEm(a: Lead, b: Lead, asc: boolean): number {
 export function sortLeadsByCriadoEmDesc(leads: Lead[]): Lead[] {
   return [...leads].sort((a, b) => compareByCriadoEm(a, b, false))
 }
+
+// Filtra leads por intervalo de datas (inclusive nas duas pontas).
+//
+// O store de date range (lib/stores/date-range.ts) sempre entrega dias à MEIA-NOITE
+// local — tanto os presets (`new Date(y, m, d)`) quanto o Calendar do picker. Se
+// comparássemos direto contra `to`, um lead criado hoje às 14:30 cairia FORA de um
+// range que termina "hoje". Por isso normalizamos: `from` para o início do dia e
+// `to` para o último milissegundo do dia — filtro inclusivo nas duas pontas.
+export function filterLeadsByDateRange(leads: Lead[], from: Date, to: Date): Lead[] {
+  const inicio = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime()
+  const fim = new Date(to.getFullYear(), to.getMonth(), to.getDate(), 23, 59, 59, 999).getTime()
+
+  return leads.filter(l => {
+    const t = parseLeadDate(l.criado_em)
+    // Sem data parseável não há como comparar com o intervalo. Numa visão filtrada por
+    // período, esses leads ficam de fora (coerente com o sort, que já os joga para o fim).
+    if (t === null) return false
+    return t >= inicio && t <= fim
+  })
+}
