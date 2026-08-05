@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, Bot, CheckCircle2, MapPinOff, Users2, IdCard, AlertTriangle } from 'lucide-react'
+import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, Bot, CheckCircle2, MapPinOff, Users2, IdCard, AlertTriangle, Download } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { type Lead, type LeadCategory, cat, CATEGORY_LABELS, CATEGORY_BG, compareByCriadoEm } from '@/lib/leads'
+import { leadsToCsv, buildLeadsCsvFilename } from '@/lib/leads-csv'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -144,6 +145,20 @@ export default function LeadsPage() {
   function toggleSort(key: keyof Lead) {
     if (key === sortKey) setSortAsc(a => !a)
     else { setSortKey(key); setSortAsc(false) }
+  }
+
+  function handleExport() {
+    if (filtered.length === 0) return
+    const csv = leadsToCsv(filtered)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = buildLeadsCsvFilename(slug, new Date())
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   async function changeStatus(lead: Lead, nextCat: LeadCategory) {
@@ -290,6 +305,17 @@ export default function LeadsPage() {
                     className="bg-transparent text-sm outline-none placeholder:text-muted-foreground/60 w-40"
                   />
                   <span className="text-xs text-muted-foreground shrink-0">{filtered.length} result.</span>
+                  <button
+                    type="button"
+                    onClick={handleExport}
+                    disabled={filtered.length === 0}
+                    title="Baixar os leads visíveis em CSV"
+                    aria-label="Exportar leads filtrados em CSV"
+                    className="flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-secondary px-2.5 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-secondary disabled:hover:text-muted-foreground"
+                  >
+                    <Download className="size-3.5" aria-hidden="true" />
+                    Exportar CSV
+                  </button>
                 </div>
               </div>
 
