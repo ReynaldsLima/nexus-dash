@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 Phase: 12
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-05 - Completed quick task 260804-wnx: Na tela de Gestão de Leads, adicionar um botão de download/exportação de todos os leads
+Last activity: 2026-08-05 - Completed quick task 260805-0jj: Remover completamente o módulo Agente IA (chat de leads)
 
 Progress: [██████████] 100%
 
@@ -253,6 +253,7 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 | 260802-w2g | Sempre ordenar a lista de leads por "criados em" do mais novo para o mais antigo (ordem padrão de exibição) | 2026-08-03 | 7e4613b | [260802-w2g-sempre-ordenar-a-lista-de-leads-por-cria](./quick/260802-w2g-sempre-ordenar-a-lista-de-leads-por-cria/) |
 | 260802-wde | Corrigir desempate na ordenação de leads por criado_em usando id decrescente quando as datas empatam (mesmo dia) | 2026-08-03 | e08ae3a | [260802-wde-corrigir-desempate-na-ordenacao-de-leads](./quick/260802-wde-corrigir-desempate-na-ordenacao-de-leads/) |
 | 260804-wnx | Na tela de Gestão de Leads, adicionar um botão de download/exportação de todos os leads | 2026-08-05 | 7ca9009 | [260804-wnx-na-tela-de-gestao-de-leads-adicionar-um-](./quick/260804-wnx-na-tela-de-gestao-de-leads-adicionar-um-/) |
+| 260805-0jj | Remover completamente o módulo "Agente IA" (chat de leads) — feature descontinuada, endpoint proxy Anthropic eliminado | 2026-08-05 | b24e9ce | [260805-0jj-remover-completamente-o-modulo-agente-ia](./quick/260805-0jj-remover-completamente-o-modulo-agente-ia/) |
 
 ### Roadmap Evolution
 
