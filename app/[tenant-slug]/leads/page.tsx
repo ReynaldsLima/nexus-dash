@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, CheckCircle2, MapPinOff, Users2, IdCard, AlertTriangle, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { type Lead, type LeadCategory, cat, CATEGORY_LABELS, CATEGORY_BG, compareByCriadoEm } from '@/lib/leads'
+import { type Lead, type LeadCategory, cat, CATEGORY_LABELS, CATEGORY_BG, compareByCriadoEm, filterLeadsByDateRange } from '@/lib/leads'
 import { leadsToCsv, buildLeadsCsvFilename } from '@/lib/leads-csv'
+import { useDateRangeStore } from '@/lib/stores/date-range'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -88,6 +89,7 @@ export default function LeadsPage() {
   const [sortAsc, setSortAsc] = useState(false)
   const [statusError, setStatusError] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<number | null>(null)
+  const { from, to } = useDateRangeStore()
 
   useEffect(() => {
     fetch(`/api/leads?tenant=${slug}`)
@@ -101,17 +103,22 @@ export default function LeadsPage() {
       .finally(() => setLoading(false))
   }, [slug])
 
+  // Fonte única de verdade da tela: tudo abaixo (KPIs, funil, distribuição, tabela,
+  // contador e export CSV) deriva daqui, para que o range do header valha para a
+  // página inteira — e não só para a tabela.
+  const dateFiltered = useMemo(() => filterLeadsByDateRange(leads, from, to), [leads, from, to])
+
   const stats = useMemo(() => {
-    const total = leads.length
-    const novo  = leads.filter(l => cat(l.status) === 'novo').length
-    const quente = leads.filter(l => cat(l.status) === 'quente').length
-    const negoc  = leads.filter(l => cat(l.status) === 'negoc').length
-    const fim    = leads.filter(l => cat(l.status) === 'fim').length
-    const fechado = leads.filter(l => cat(l.status) === 'fechado').length
-    const desqRegiao = leads.filter(l => cat(l.status) === 'desq_regiao').length
-    const qtdVidas = leads.filter(l => cat(l.status) === 'qtd_vidas').length
-    const pessoaFisica = leads.filter(l => cat(l.status) === 'pessoa_fisica').length
-    const engano = leads.filter(l => cat(l.status) === 'engano').length
+    const total = dateFiltered.length
+    const novo  = dateFiltered.filter(l => cat(l.status) === 'novo').length
+    const quente = dateFiltered.filter(l => cat(l.status) === 'quente').length
+    const negoc  = dateFiltered.filter(l => cat(l.status) === 'negoc').length
+    const fim    = dateFiltered.filter(l => cat(l.status) === 'fim').length
+    const fechado = dateFiltered.filter(l => cat(l.status) === 'fechado').length
+    const desqRegiao = dateFiltered.filter(l => cat(l.status) === 'desq_regiao').length
+    const qtdVidas = dateFiltered.filter(l => cat(l.status) === 'qtd_vidas').length
+    const pessoaFisica = dateFiltered.filter(l => cat(l.status) === 'pessoa_fisica').length
+    const engano = dateFiltered.filter(l => cat(l.status) === 'engano').length
     const pQuente = total ? Math.round(quente / total * 100) : 0
     const pNegoc  = total ? Math.round(negoc / total * 100) : 0
     const pFechado = total ? Math.round(fechado / total * 100) : 0
@@ -124,11 +131,11 @@ export default function LeadsPage() {
       desqRegiao, qtdVidas, pessoaFisica, engano,
       pDesqRegiao, pQtdVidas, pPessoaFisica, pEngano,
     }
-  }, [leads])
+  }, [dateFiltered])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
-    return leads
+    return dateFiltered
       .filter(l => (filter === 'all' || cat(l.status) === filter) &&
         (l.nome.toLowerCase().includes(q) || l.empresa.toLowerCase().includes(q) || l.email.toLowerCase().includes(q)))
       .sort((a, b) => {
@@ -139,7 +146,7 @@ export default function LeadsPage() {
         const bv = b[sortKey] ?? ''
         return sortAsc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av))
       })
-  }, [leads, search, filter, sortKey, sortAsc])
+  }, [dateFiltered, search, filter, sortKey, sortAsc])
 
   function toggleSort(key: keyof Lead) {
     if (key === sortKey) setSortAsc(a => !a)
@@ -220,7 +227,7 @@ export default function LeadsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Gestão de Leads</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {loading ? 'Carregando…' : `${leads.length} leads · últimas 500 entradas da planilha`}
+          {loading ? 'Carregando…' : `${dateFiltered.length} leads no período · últimas 500 entradas da planilha`}
         </p>
       </div>
 
@@ -376,7 +383,7 @@ export default function LeadsPage() {
                 <h3 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Distribuição</h3>
                 <div className="space-y-0.5">
                   {(['fechado', 'negoc', 'quente', 'novo', 'desq_regiao', 'qtd_vidas', 'pessoa_fisica', 'engano', 'fim'] as LeadCategory[]).map(c => {
-                    const count = leads.filter(l => cat(l.status) === c).length
+                    const count = dateFiltered.filter(l => cat(l.status) === c).length
                     return (
                       <div key={c} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
                         <span className="text-xs text-muted-foreground">{CATEGORY_LABELS[c]}</span>
