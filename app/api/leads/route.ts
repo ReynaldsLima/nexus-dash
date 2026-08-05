@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
   }))
 
   // Ordem de exibição padrão: mais novo primeiro. Aplicada aqui (e não só na página)
-  // para que TODO consumidor da rota — tabela e Agente IA — receba a mesma ordem.
+  // para que todo consumidor da rota receba a mesma ordem.
   // O map acima já atribuiu `id` a partir do índice da linha da planilha, então
   // reordenar aqui é seguro: os objetos se movem, os ids acompanham.
   const sorted = sortLeadsByCriadoEmDesc(leads)

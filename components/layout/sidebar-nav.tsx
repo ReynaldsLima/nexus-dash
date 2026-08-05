@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Megaphone, Sparkles, Users2, Bot, Settings } from 'lucide-react'
+import { LayoutDashboard, Megaphone, Sparkles, Users2, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAnomalyAlertsStore } from '@/lib/stores/anomaly-alerts'
 
@@ -15,7 +15,6 @@ const MARKETING_ITEMS = [
 
 const LEADS_ITEMS = [
   { icon: Users2, label: 'Gestão de Leads', key: 'leads' },
-  { icon: Bot, label: 'Agente IA', key: 'leads/agente' },
 ]
 
 function NavLink({ href, icon: Icon, label, isActive, badgeCount }: { href: string; icon: React.ElementType; label: string; isActive: boolean; badgeCount?: number }) {
@@ -81,12 +80,8 @@ export function SidebarNav({ slug, role }: { slug: string; role?: string | null 
         <nav className="flex flex-col gap-0.5 px-2">
           {LEADS_ITEMS.map(({ icon, label, key }) => {
             const href = `/${slug}/${key}`
-            // "leads/agente" should only be active on exact match; "leads" active on /leads but not /leads/agente
-            const isActive = key === 'leads/agente'
-              ? pathname === href || pathname.startsWith(href + '/')
-              : pathname === href
             return (
-              <NavLink key={key} href={href} icon={icon} label={label} isActive={isActive} />
+              <NavLink key={key} href={href} icon={icon} label={label} isActive={pathname === href} />
             )
           })}
         </nav>

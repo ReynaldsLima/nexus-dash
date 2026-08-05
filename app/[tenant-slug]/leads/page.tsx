@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, Bot, CheckCircle2, MapPinOff, Users2, IdCard, AlertTriangle, Download } from 'lucide-react'
-import Link from 'next/link'
+import { Search, Users, Flame, Handshake, PhoneOff, TrendingUp, CheckCircle2, MapPinOff, Users2, IdCard, AlertTriangle, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type Lead, type LeadCategory, cat, CATEGORY_LABELS, CATEGORY_BG, compareByCriadoEm } from '@/lib/leads'
 import { leadsToCsv, buildLeadsCsvFilename } from '@/lib/leads-csv'
@@ -218,20 +217,11 @@ export default function LeadsPage() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Gestão de Leads</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {loading ? 'Carregando…' : `${leads.length} leads · últimas 500 entradas da planilha`}
-          </p>
-        </div>
-        <Link
-          href={`/${slug}/leads/agente`}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Bot className="size-4" />
-          Agente IA
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Gestão de Leads</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {loading ? 'Carregando…' : `${leads.length} leads · últimas 500 entradas da planilha`}
+        </p>
       </div>
 
       {/* Error / not configured states */}
