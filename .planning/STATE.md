@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-12)
 Phase: 12
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-08-05 - Completed quick task 260805-0jj: Remover completamente o módulo Agente IA (chat de leads)
+Last activity: 2026-08-05 - Completed quick task 260805-17a: Corrigir filtro de período não aplicado na tela de Gestão de Leads
 
 Progress: [██████████] 100%
 
@@ -254,6 +254,7 @@ None new for v1.1 planning. Ops-only blockers carried from v1.0 (not code gates,
 | 260802-wde | Corrigir desempate na ordenação de leads por criado_em usando id decrescente quando as datas empatam (mesmo dia) | 2026-08-03 | e08ae3a | [260802-wde-corrigir-desempate-na-ordenacao-de-leads](./quick/260802-wde-corrigir-desempate-na-ordenacao-de-leads/) |
 | 260804-wnx | Na tela de Gestão de Leads, adicionar um botão de download/exportação de todos os leads | 2026-08-05 | 7ca9009 | [260804-wnx-na-tela-de-gestao-de-leads-adicionar-um-](./quick/260804-wnx-na-tela-de-gestao-de-leads-adicionar-um-/) |
 | 260805-0jj | Remover completamente o módulo "Agente IA" (chat de leads) — feature descontinuada, endpoint proxy Anthropic eliminado | 2026-08-05 | b24e9ce | [260805-0jj-remover-completamente-o-modulo-agente-ia](./quick/260805-0jj-remover-completamente-o-modulo-agente-ia/) |
+| 260805-17a | Corrigir: tela de Gestão de Leads não respeitava o filtro de período (date range) do header — KPIs, funil, tabela e export agora filtram por criado_em dentro do range | 2026-08-05 | 665d0a7 | [260805-17a-fazer-a-tela-de-gestao-de-leads-respeita](./quick/260805-17a-fazer-a-tela-de-gestao-de-leads-respeita/) |
 
 ### Roadmap Evolution
 
