@@ -38,7 +38,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
  (completed 2026-07-13)
 - [x] **Phase 11: Janela de Histórico Retroativo** - Tenant Admin configura os dias de backfill por conta conectada, com opção de ajuste posterior
  (completed 2026-07-17)
-- [ ] **Phase 12: Redesign Visual** - Dashboard, Campanhas, Insights, Settings e o chrome compartilhado redesenhados conforme os protótipos de referência
+- [x] **Phase 12: Redesign Visual** - Dashboard, Campanhas, Insights, Settings e o chrome compartilhado redesenhados conforme os protótipos de referência (completed 2026-08-04)
 
 ## Phase Details
 
@@ -102,7 +102,7 @@ Full phase details, success criteria, and coverage validation: `.planning/milest
 - [x] 12-04-PLAN.md — Campanhas (DESIGN-02): filter bar em pill-track, tabela mono/uppercase, badges de canal exatos do protótipo
 - [x] 12-05-PLAN.md — Insights (DESIGN-03): cards planos com badge mono, título Syne 700, chips de métrica, CTA lime
 - [x] 12-06-PLAN.md — Configurações (DESIGN-04): extrapolação dos tokens + polimento do BackfillWindowControl da Fase 11
-- [ ] 12-07-PLAN.md — Varredura de conformidade cross-screen + verificação humana das 4 telas
+- [x] 12-07-PLAN.md — Varredura de conformidade cross-screen + verificação humana das 4 telas
 **UI hint**: yes
 
 ## Progress
@@ -125,8 +125,8 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 → 12
 | 9. Limpeza do Papel Viewer | v1.1 | 1/1 | Complete   | 2026-07-12 |
 | 10. Gestão de Usuários | v1.1 | 4/4 | Complete    | 2026-07-13 |
 | 11. Janela de Histórico Retroativo | v1.1 | 5/5 | Complete    | 2026-07-18 |
-| 12. Redesign Visual | v1.1 | 6/7 | In Progress|  |
+| 12. Redesign Visual | v1.1 | 7/7 | Complete | 2026-08-04 |
 
 **v1.0 total: 10/10 phases, 46/46 plans complete.**
-**v1.1: 3/4 phases complete; Phase 10 (4 plans) + Phase 11 (5 plans) complete, Phase 12 (7 plans) planned. 14/14 requirements mapped.**
+**v1.1: 4/4 phases complete; Phase 10 (4 plans) + Phase 11 (5 plans) + Phase 12 (7 plans) complete. 14/14 requirements satisfied.**
 </content>
